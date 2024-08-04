@@ -1,5 +1,7 @@
 # iron stream frontend
 
+// https://codesandbox.io/embed/excalidraw-ehlz3?codemirror=1
+
 - [x] basic setup
 
 - [ ] login 

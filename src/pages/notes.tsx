@@ -1,37 +1,103 @@
-import { Excalidraw, MainMenu } from "@excalidraw/excalidraw";
-import { useEffect } from "react";
+import React, { useState } from "react";
+import { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types/types";
+import { Excalidraw } from "@excalidraw/excalidraw";
 
-export default function Notes() {
+export default function App() {
+  const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI | null>(null);
+  const [jsonData, setJsonData] = useState<string>("");
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const buttonToHide = document.querySelector(
-        "#root > div:nth-child(2) > div > div.layer-ui__wrapper > div > div > div.layer-ui__wrapper__top-right.zen-mode-transition > label"
-      ) as HTMLElement;
+  const exportToJSON = () => {
+    if (!excalidrawAPI) {
+      console.log("Excalidraw API no está disponible");
+      return;
+    }
 
-      if (buttonToHide) {
-        buttonToHide.style.display = 'none';
-        observer.disconnect(); 
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => {
-      observer.disconnect();
+    const elements = excalidrawAPI.getSceneElements();
+    const appState = excalidrawAPI.getAppState();
+
+    // Eliminar la propiedad 'collaborators' del estado de la aplicación
+    const { collaborators, ...appStateWithoutCollaborators } = appState;
+
+    const exportData = {
+      type: "excalidraw",
+      version: 2,
+      source: "http://localhost:1420",
+      elements: elements,
+      appState: appStateWithoutCollaborators
     };
-  }, []); 
+
+    const jsonString = JSON.stringify(exportData, null, 2);
+
+    // Crear un blob con el JSON
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    console.log(jsonString); // Mostrar en la consola
+
+    // Guardar en localStorage
+    localStorage.setItem('excalidrawData', jsonString);
+
+    // Crear un enlace de descarga
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "excalidraw-data.json";
+
+    // Simular clic en el enlace para iniciar la descarga
+    document.body.appendChild(link);
+    link.click();
+
+    // Limpiar
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const json = reader.result as string;
+        setJsonData(json);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const importFromJSON = () => {
+    if (!excalidrawAPI || !jsonData) {
+      console.log("Excalidraw API o JSON data no están disponibles");
+      return;
+    }
+
+    try {
+      // Parse the JSON data
+      const data = JSON.parse(jsonData);
+
+      // Asegurarse de que la propiedad 'collaborators' no esté presente
+      if (data.appState && data.appState.collaborators) {
+        delete data.appState.collaborators;
+      }
+
+      // Actualizar la escena de Excalidraw con los datos parseados
+      excalidrawAPI.updateScene(data);
+
+      console.log("Datos importados correctamente");
+    } catch (error) {
+      console.error("Error al importar los datos JSON:", error);
+    }
+  };
 
   return (
-    <>
-    <div style={{ height: "1000px" }}>
-      <Excalidraw langCode="es-ES" theme="dark">
-        <MainMenu>
-          <MainMenu.Group>
-            <MainMenu.DefaultItems.Export />
-            <MainMenu.DefaultItems.LoadScene />
-          </MainMenu.Group>
-        </MainMenu>
-      </Excalidraw>
+    <div className="App">
+      <h1>Excalidraw JSON Export/Import Example</h1>
+      <div style={{ height: "500px", width: "800px" }}>
+        <Excalidraw
+          excalidrawAPI={(api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api)}
+        />
+      </div>
+      <button onClick={exportToJSON}>Exportar a JSON</button>
+      <input type="file" accept=".json" onChange={handleFileChange} />
+      <button onClick={importFromJSON}>Importar desde JSON</button>
     </div>
-    </>
   );
 }
