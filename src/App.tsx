@@ -7,18 +7,25 @@ import Home from "./pages/home";
 import AdminUsers from "./pages/admin/users";
 import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
+import Video from "./pages/video";
+import Notes from "./pages/notes";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
           <Route index element={<Landing />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
 
+          <Route path="/" element={<Layout />}>
+          <Route path="home" element={<Home />} />  
+          <Route path="video" element={<Video />} />  
+          </Route>
+          <Route path="notes" element={<Notes />} />  
+          
+          <Route path="/" element={<Layout />}>
           <Route element={<PrivateRoute />}>
-            <Route path="home" element={<Home />} />  
           </Route>
         </Route>
 

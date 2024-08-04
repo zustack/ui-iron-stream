@@ -7,14 +7,48 @@
   },
   "package": {
     "productName": "ui-iron-stream",
-    "version": "0.0.0"
+    "version": "0.0.1"
   },
   "tauri": {
     "allowlist": {
-      "all": false,
+      "all": true,
       "shell": {
-        "all": false,
-        "open": true
+        "all": true,
+        "execute": true, 
+        "sidecar": true,
+        "open": true,
+        "scope": [
+          {
+            "name": "serial-mac",
+            "cmd": "system_profiler",
+            "args": ["SPHardwareDataType"]
+          },
+          {
+            "name": "serial-linux",
+            "cmd": "echo",
+            "args": [""]
+          },
+          {
+            "name": "serial-win",
+            "cmd": "wmic",
+            "args": ["bios", "get", "serialnumber"] 
+          },
+          {
+            "name": "apps-win",
+            "cmd": "tasklist",
+            "args": ["bios", "get", "serialnumber"] 
+          },
+          {
+            "name": "apps-mac",
+            "cmd": "ps",
+            "args": ["-eo", "comm"] 
+          },
+          {
+            "name": "apps-linux",
+            "cmd": "ps",
+            "args": ["-eo", "comm"] 
+          }
+        ]
       }
     },
     "windows": [
@@ -30,7 +64,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "ui.iron.stream",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",

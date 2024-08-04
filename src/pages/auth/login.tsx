@@ -1,9 +1,80 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Command } from "@tauri-apps/api/shell";
+import { platform } from "@tauri-apps/api/os";
+import toast from "react-hot-toast";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "@/api/users";
+import { useAuthStore } from "@/store/auth";
 
 export default function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+
+  const { setAuthState } = useAuthStore()
+
+  useEffect(() => {
+    async function getSerialNumber() {
+      const platformName = await platform();
+      let commandName: string = "";
+
+      if (platformName === "darwin") {
+        commandName = "serial-mac";
+      } else if (platformName === "win32") {
+        commandName = "serial-win";
+      } else if (platformName === "linux") {
+        commandName = "serial-linux";
+      } else {
+        toast.error("Ocurrio un error");
+        return;
+      }
+
+      const command = new Command(commandName);
+      const output = await command.execute();
+      const data = output.stdout;
+
+      if (data && platformName == "darwin") {
+        const match = data.match(/Serial Number \(system\): (\w+)/);
+        if (match) {
+          const serial_number = match[1];
+          setSerialNumber(serial_number);
+        }
+      }
+
+      if (data && platformName == "win32") {
+        const trimOutput = data.trim().replace(/[\r\n]+/g, "");
+        const serial_number = trimOutput.replace(/^SerialNumber\s+/i, "");
+        setSerialNumber(serial_number);
+      }
+
+      if (data && platformName == "linux") {
+        setSerialNumber(data);
+      }
+    }
+    getSerialNumber();
+  }, []);
+
+  const loginMutation = useMutation({
+    mutationFn: () => login(username, password, serialNumber),
+    onSuccess: (response) => {
+      // setAuthState: (access: string, user_id: number, is_admin: boolean, exp: number) => void;
+      setAuthState(response.data.token);
+      navigate("/home");
+    },
+    onError: (response) => {
+      toast.error(response.message)
+    },
+  });
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    loginMutation.mutate();
+  };
+
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
       <div className="flex items-center justify-center py-12">

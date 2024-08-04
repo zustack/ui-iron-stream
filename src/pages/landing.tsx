@@ -21,7 +21,7 @@ export default function Landing() {
             comprender y aplicar el conocimiento.
           </p>
           <div className="flex gap-4">
-          <Link to="/login">
+          <Link to="/home">
             <Button className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500">Iniciar sesión</Button>
             </Link>
 
