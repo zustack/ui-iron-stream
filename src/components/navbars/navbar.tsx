@@ -48,7 +48,7 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <p className="text-sm text-muted-foreground">Version 1.0.0</p>
+          <p className="text-sm text-muted-foreground">Version 4.2.0</p>
         </div>
       </div>
     </header>

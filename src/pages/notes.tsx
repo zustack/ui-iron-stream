@@ -1,10 +1,22 @@
 import React, { useState } from "react";
 import { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types/types";
 import { Excalidraw } from "@excalidraw/excalidraw";
+import { appWindow } from "@tauri-apps/api/window";
 
 export default function App() {
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI | null>(null);
   const [jsonData, setJsonData] = useState<string>("");
+
+  function bye() {
+    console.log("Cerrando ventana!!!!");
+    appWindow.listen("tauri://close-requested", async function () {
+      console.log("Cerrando ventana!!!!");
+    // appWindow.hide()
+    setTimeout(function () {
+      appWindow.close()
+    }, 10000);
+    });
+  }
 
   const exportToJSON = () => {
     if (!excalidrawAPI) {
@@ -98,6 +110,7 @@ export default function App() {
       <button onClick={exportToJSON}>Exportar a JSON</button>
       <input type="file" accept=".json" onChange={handleFileChange} />
       <button onClick={importFromJSON}>Importar desde JSON</button>
+      <button onClick={bye}>|||| bye </button>
     </div>
   );
 }

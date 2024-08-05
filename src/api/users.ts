@@ -1,14 +1,30 @@
 import { noAuthAxios } from "@/lib/axiosInstances";
 
-export const login = async (
-  username: string,
+export const register = async (
+  email: string,
+  fullName: string,
   password: string,
-  serialNumber: string
+  pc: string
+) => {
+  const response = await noAuthAxios.post("/register", {
+    email,
+    fullName,
+    password,
+    pc
+  });
+  return response.data;
+};
+
+export const login = async (
+  email: string,
+  password: string,
+  pc: string
 ) => {
   const response = await noAuthAxios.post("/login", {
-    username,
+    email,
     password,
-    pc: serialNumber,
+    pc
   });
-  return response;
+  return response.data;
 };
+

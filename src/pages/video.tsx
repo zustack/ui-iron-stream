@@ -31,7 +31,7 @@ function viewFiles() {
           Ver archivos 
         </Button>
         <Button>
-          Deja una resena del curso
+          Abrir notas
         </Button>
       </div>
       </div>

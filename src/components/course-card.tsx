@@ -6,7 +6,7 @@ import StarIcon from "@mui/icons-material/Star";
 
 export default function CourseCard() {
   return (
-    <div className="bg-zinc-950 rounded-[0.75rem] grid grid-cols-2 min-h-[300px] border">
+    <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-2 min-h-[300px] border">
       <img src={Image} alt="" className="p-1 rounded-[0.75rem]" />
       <div className="flex flex-col justify-between p-4">
         <div>

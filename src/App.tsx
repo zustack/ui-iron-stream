@@ -9,6 +9,7 @@ import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
 import Video from "./pages/video";
 import Notes from "./pages/notes";
+import ResetPassword from "./pages/auth/reset-password";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route index element={<Landing />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="reset-password" element={<ResetPassword />} />
 
           <Route path="/" element={<Layout />}>
           <Route path="home" element={<Home />} />  

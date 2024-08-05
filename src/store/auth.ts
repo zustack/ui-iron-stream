@@ -10,7 +10,7 @@ type State = {
 };
 
 type Actions = {
-  setAuthState: (access: string, user_id: number, is_admin: boolean, exp: number) => void;
+  setAuthState: (access: string, userId: number, isAdmin: boolean, exp: number) => void;
   logout: () => void;
 };
 
@@ -22,15 +22,15 @@ export const useAuthStore = create(
       isAdmin: false,
       exp: 0,
       isAuth: false,
-      setAuthState: (access: string, user_id: number, is_admin: boolean, exp: number) =>
+      setAuthState: (access: string, userId: number, isAdmin: boolean, exp: number) =>
         set(() => ({
           access,
-          user_id,
-          is_admin,
+          userId,
+          isAdmin,
           exp,
           isAuth: !!access 
         })),
-      logout: () => set(() => ({ access: "", user_id: 0, isAdmin: false, isAuth: false })),
+      logout: () => set(() => ({ access: "", userId: 0, isAdmin: false, isAuth: false })),
     }),
     {
       name: "auth",

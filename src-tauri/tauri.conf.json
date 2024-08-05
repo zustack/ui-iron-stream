@@ -25,7 +25,7 @@
           },
           {
             "name": "serial-linux",
-            "cmd": "echo",
+            "cmd": "echo 42069",
             "args": [""]
           },
           {

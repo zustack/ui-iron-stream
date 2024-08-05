@@ -2,20 +2,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Command } from "@tauri-apps/api/shell";
 import { platform } from "@tauri-apps/api/os";
 import toast from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "@/api/users";
 import { useAuthStore } from "@/store/auth";
+import { ErrorResponse } from "@/types";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [serialNumber, setSerialNumber] = useState("");
+  const [pc, setPc] = useState("");
 
-  const { setAuthState } = useAuthStore()
+  const { setAuthState } = useAuthStore();
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function getSerialNumber() {
@@ -41,32 +43,34 @@ export default function Login() {
         const match = data.match(/Serial Number \(system\): (\w+)/);
         if (match) {
           const serial_number = match[1];
-          setSerialNumber(serial_number);
+          setPc(serial_number);
         }
       }
 
       if (data && platformName == "win32") {
         const trimOutput = data.trim().replace(/[\r\n]+/g, "");
         const serial_number = trimOutput.replace(/^SerialNumber\s+/i, "");
-        setSerialNumber(serial_number);
+        setPc(serial_number);
       }
 
       if (data && platformName == "linux") {
-        setSerialNumber(data);
+        setPc(data);
       }
     }
     getSerialNumber();
   }, []);
 
   const loginMutation = useMutation({
-    mutationFn: () => login(username, password, serialNumber),
+    mutationFn: () => login(email, password, pc),
     onSuccess: (response) => {
-      // setAuthState: (access: string, user_id: number, is_admin: boolean, exp: number) => void;
-      setAuthState(response.data.token);
+      setAuthState(response.token, response.user_id, response.is_admin, response.exp);
       navigate("/home");
     },
-    onError: (response) => {
-      toast.error(response.message)
+    onError: (error: ErrorResponse) => {
+      if (error.response.data.error === "") {
+        toast.error("Ocurrio un error inesperado");
+      }
+      toast.error(error.response.data.error);
     },
   });
 
@@ -85,10 +89,13 @@ export default function Login() {
               Ingresa tu correo electrónico para iniciar sesión.
             </p>
           </div>
-          <div className="grid gap-4">
+
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2 mb-4">
               <Label htmlFor="email">Correo electrónico</Label>
               <Input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 id="email"
                 type="email"
                 placeholder="Ingresa tu correo electrónico"
@@ -99,13 +106,15 @@ export default function Login() {
               <div className="flex items-center">
                 <Label htmlFor="password">Contraseña</Label>
                 <Link
-                  to="/forgot-password"
+                  to="/reset-password"
                   className="ml-auto inline-block text-sm underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
               <Input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Usa al menos 6 caracteres"
                 id="password"
                 type="password"
@@ -115,7 +124,8 @@ export default function Login() {
             <Button className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500">
               Iniciar sesión
             </Button>
-          </div>
+          </form>
+
           <div className="text-center text-sm">
             ¿No tienes una cuenta?{" "}
             <Link to="/register" className="underline">
