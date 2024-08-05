@@ -22,7 +22,7 @@ function App() {
 
           <Route path="/" element={<Layout />}>
           <Route path="home" element={<Home />} />  
-          <Route path="video" element={<Video />} />  
+          <Route path="video/:courseId" element={<Video />} />  
           </Route>
           <Route path="notes" element={<Notes />} />  
           

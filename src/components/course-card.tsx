@@ -47,9 +47,9 @@ export default function CourseCard() {
           </p>
         </div>
         <div className="flex gap-2 mt-auto">
-          <Link to="/video">
+          <Link to={`/video/1`}>
           <Button className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500">
-            Ver curso
+            Ver curso 1
           </Button>
           </Link>
           <Button className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500">

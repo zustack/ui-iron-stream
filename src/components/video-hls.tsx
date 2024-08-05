@@ -1,12 +1,19 @@
 import Plyr from "plyr";
 import Hls from "hls.js";
 import { useEffect, useRef } from "react";
+import { Button } from "@mui/material";
 
-const VideoHls = () => {
+type Props = {
+  src: string;
+  resume: string;
+  setResume: (num: number) => void;
+};
+
+const VideoHls = ({ src, resume, setResume }: Props) => {
   const videoRef = useRef<HTMLMediaElement | null>(null);
 
   useEffect(() => {
-    let videoSrc = `https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8`;
+    let videoSrc = `${import.meta.env.VITE_BACKEND_URL}${src}`;
     const video = document.getElementById("video") as HTMLMediaElement;
     videoRef.current = video;
 
@@ -92,6 +99,7 @@ const VideoHls = () => {
         const availableQualities = hls.levels.map((level) => level.height);
         defaultOptions.quality!.options = availableQualities;
 
+        // Find the index of the 1080p quality
         const index1080p = hls.levels.findIndex(
           (level) => level.height === 1080
         );
@@ -106,6 +114,7 @@ const VideoHls = () => {
       });
       (window as any).hls = hls;
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // For browsers that support HLS natively (e.g. Safari)
       video.src = videoSrc;
       new Plyr(video, defaultOptions);
     } else {
@@ -122,9 +131,22 @@ const VideoHls = () => {
         }
       }
     }
-  }, []);
+
+    if (videoRef.current) {
+      videoRef.current.currentTime = Number(resume);
+    }
+  }, [resume, src]);
+
+const handleResume = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = Number(resume);
+    }
+  };
+
+  setResume(videoRef.current?.currentTime || 0);
 
   return (
+    <>
       <div className="relative">
         <video
           className="player"
@@ -132,7 +154,11 @@ const VideoHls = () => {
           id="video"
           preload="auto"
         ></video>
+ {videoRef.current?.currentTime}
+      <Button onClick={handleResume}>Resume video</Button>
       </div>
+      <div></div>
+    </>
   );
 };
 
