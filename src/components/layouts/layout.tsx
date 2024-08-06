@@ -4,10 +4,10 @@ import Navbar from "../navbars/navbar";
 export default function Layout() {
   return (
     <>
-    <Navbar />
+      <Navbar />
       <div className="container mx-auto mt-[50px]">
         <Outlet />
       </div>
-      </>
+    </>
   );
 }

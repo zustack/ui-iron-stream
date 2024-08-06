@@ -40,6 +40,11 @@ export default function Navbar() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Hola, Agustin Fricke</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <Link to="/admin/courses">
+                <DropdownMenuItem>
+                  Cursos 
+                </DropdownMenuItem>
+                </Link>
                 <DropdownMenuItem>Historial</DropdownMenuItem>
                 <DropdownMenuItem>Configuraciones</DropdownMenuItem>
                 <DropdownMenuItem>Feedback</DropdownMenuItem>

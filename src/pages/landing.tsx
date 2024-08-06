@@ -2,13 +2,21 @@ import { Button } from "@/components/ui/button";
 import Logo from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
+import { useEffect } from "react";
 
 export default function Landing() {
-  const { isAuth } = useAuthStore()
+  const { isAuth, isAdmin } = useAuthStore()
   const navigate = useNavigate();
-  if (isAuth) {
-    navigate("/home");
-  }
+  useEffect(() => {
+    if (isAuth) {
+      if (isAdmin) {
+        navigate("/admin/users");
+        return
+      }
+      navigate("/home");
+    }
+  },[])
+
   return (
     <section className="">
       <div

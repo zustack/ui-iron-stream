@@ -10,6 +10,7 @@ import Register from "./pages/auth/register";
 import Video from "./pages/video";
 import Notes from "./pages/notes";
 import ResetPassword from "./pages/auth/reset-password";
+import AdminCourses from "./pages/admin/courses";
 
 function App() {
   return (
@@ -32,8 +33,12 @@ function App() {
         </Route>
 
         <Route path="admin" element={<AdminLayout />}>
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="courses" element={<AdminCourses />} />
+        </Route>
+
+        <Route path="latter-admin" element={<AdminLayout />}>
           <Route element={<AdminRoute />}>
-            <Route path="users" element={<AdminUsers />} />
           </Route>
         </Route>
       </Routes>

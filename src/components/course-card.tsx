@@ -52,9 +52,11 @@ export default function CourseCard() {
             Ver curso 1
           </Button>
           </Link>
+          <Link to={`/admin/users`}>
           <Button className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500">
             Ver preview gratuita
           </Button>
+          </Link>
         </div>
       </div>
     </div>
