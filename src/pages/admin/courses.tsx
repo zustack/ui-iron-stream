@@ -22,8 +22,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+import CreateCourse from "@/components/admin/courses/create-course";
 
 export default function AdminCourses() {
+  const [openCreateCourse, setOpenCreateCourse] = useState(false);
+
+  if (openCreateCourse) {
+    return <CreateCourse />;
+  }
+
   return (
     <>
       <div className="bg-muted/40 flex justify-between pt-2 pb-[10px] px-2 border border-b">
@@ -69,7 +77,9 @@ export default function AdminCourses() {
           </Button>
           <Button size="sm" className="h-8 gap-1">
             <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            <span 
+            onClick={() => setOpenCreateCourse(true)}
+            className="sr-only sm:not-sr-only sm:whitespace-nowrap">
               Crear curso
             </span>
           </Button>

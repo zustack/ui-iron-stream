@@ -79,6 +79,7 @@ export default function Register() {
       setSuccess(true);
     },
     onError: (error: ErrorResponse) => {
+      console.log(error)
       if (error.response.data.error === "") {
         toast.error("Ocurrio un error inesperado");
       }

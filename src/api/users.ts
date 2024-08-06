@@ -8,7 +8,9 @@ export const register = async (
 ) => {
   const response = await noAuthAxios.post("/register", {
     email,
-    fullName,
+    username: fullName,
+    name: fullName,
+    surname: fullName,
     password,
     pc
   });

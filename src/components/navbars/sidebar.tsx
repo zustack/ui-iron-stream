@@ -1,4 +1,4 @@
-import { Home as H, Package, Package2, Pickaxe } from "lucide-react";
+import { Home as H, Package, Pickaxe } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
@@ -24,26 +24,20 @@ export default function Sidebar() {
         </div>
         <div className="flex-1">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4 gap-y-2">
-            <Link to="/home" className={getLinkClass("/generate-image")}>
-              <Pickaxe className="h-4 w-4" />
-              Cursos
-            </Link>
             <Link to="/admin/users" className={getLinkClass("/admin/users")}>
               <Package className="h-4 w-4" />
               Usuarios
             </Link>
 
-            <Link to="/" className={getLinkClass("/")}>
+            <Link to="/admin/apps" className={getLinkClass("/admin/apps")}>
               <H className="h-4 w-4" />
               Apps
             </Link>
 
-            <Link to="/" className={getLinkClass("/")}>
-              <H className="h-4 w-4" />
-              Historial
-            </Link>
-
-            <Link to="/" className={getLinkClass("/")}>
+            <Link
+              to="/admin/reviews"
+              className={getLinkClass("/admin/reviews")}
+            >
               <H className="h-4 w-4" />
               <span className="font-semibold text-xs text-indigo-400">
                 Reseñas
@@ -52,23 +46,42 @@ export default function Sidebar() {
                 2
               </span>
             </Link>
+
+            <Link
+              to="/admin/courses"
+              className={getLinkClass("/admin/courses")}
+            >
+              <Pickaxe className="h-4 w-4" />
+              Cursos
+            </Link>
+
+            <Link
+              to="/admin/historial"
+              className={getLinkClass("/admin/historial")}
+            >
+              <H className="h-4 w-4" />
+              Historial
+            </Link>
           </nav>
         </div>
 
         <div className="p-4 grid items-start px-2 text-sm font-medium lg:px-4 gap-y-2">
-            <Link to="/" className={getLinkClass("/")}>
-              <H className="h-4 w-4" />
-                Configuraciones 
-            </Link>
+          <Link to="/" className={getLinkClass("/")}>
+            <H className="h-4 w-4" />
+            Configuraciones
+          </Link>
 
-            <Link to="/" className={getLinkClass("/")}>
-              <H className="h-4 w-4" />
-                Logout
-            </Link>
-          <p className="text-sm text-muted-foreground flex items-center 
-          gap-3 rounded-lg px-3 py-2">Version 4.2.0</p>
+          <Link to="/" className={getLinkClass("/")}>
+            <H className="h-4 w-4" />
+            Logout
+          </Link>
+          <p
+            className="text-sm text-muted-foreground flex items-center 
+          gap-3 rounded-lg px-3 py-2"
+          >
+            Version 4.2.0
+          </p>
         </div>
-
       </div>
     </div>
   );
