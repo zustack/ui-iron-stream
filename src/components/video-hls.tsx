@@ -1,7 +1,6 @@
 import Plyr from "plyr";
 import Hls from "hls.js";
 import { useEffect, useRef } from "react";
-import { Button } from "@mui/material";
 
 type Props = {
   src: string;
@@ -137,16 +136,9 @@ const VideoHls = ({ src, resume, setResume }: Props) => {
     }
   }, [resume, src]);
 
-const handleResume = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = Number(resume);
-    }
-  };
-
   setResume(videoRef.current?.currentTime || 0);
 
   return (
-    <>
       <div className="relative">
         <video
           className="player"
@@ -154,11 +146,7 @@ const handleResume = () => {
           id="video"
           preload="auto"
         ></video>
- {videoRef.current?.currentTime}
-      <Button onClick={handleResume}>Resume video</Button>
       </div>
-      <div></div>
-    </>
   );
 };
 

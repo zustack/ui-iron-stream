@@ -47,10 +47,6 @@ export default function Video() {
     return <div>Loading...</div>;
   }
 
-  // obtener el course_id de la url
-  // obtener el current_video para el video-hls
-  // obtener todos los videos para el feed
-
   return (
     <div className="grid grid-cols-6 lg:grid-cols-12 gap-4">
       <div className="col-span-6 lg:col-span-8">
@@ -60,13 +56,9 @@ export default function Video() {
             src={video && video.video.video_hls}
         />
         <h1 className="text-zinc-200 mt-4 text-xl font-semibold">
-              {video && video.video.title}
-          resume state ::::: {resumeState}
+          {video && video.video.title}
         </h1>
 
-        <h1 className="text-red-200 mt-4 text-xl font-semibold">
-          resume state {resumeState}
-        </h1>
         <p className="text-zinc-400 mt-2">
             {video && video.video.description}
         </p>

@@ -1,8 +1,14 @@
 import { Button } from "@/components/ui/button";
 import Logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/auth";
 
 export default function Landing() {
+  const { isAuth } = useAuthStore()
+  const navigate = useNavigate();
+  if (isAuth) {
+    navigate("/home");
+  }
   return (
     <section className="">
       <div
