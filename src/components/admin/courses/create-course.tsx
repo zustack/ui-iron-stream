@@ -7,6 +7,7 @@ import { Rating } from "@mui/material";
 import {
   ArrowLeft,
   ChevronLeft,
+  Loader,
   Paperclip,
   StarIcon,
   VideoIcon,
@@ -14,8 +15,13 @@ import {
 import { Link } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useState, ChangeEvent } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { createCourse, uploadChunk } from "@/api/courses";
+import toast from "react-hot-toast";
+import { ErrorResponse } from "@/types";
+import { CHUNK_SIZE } from "@/api/courses";
 
-export default function CreateCourse() {
+export default function CreateCourse({ close }: { close: () => void }) {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("Creado por ");
   const [description, setDescription] = useState("");
@@ -23,7 +29,7 @@ export default function CreateCourse() {
   const [active, setActive] = useState(false);
   const [thumbnail, setThumbnail] = useState<File>();
   const [filePreview, setFilePreview] = useState("");
-  const [video, setVideo] = useState<File | undefined>();
+  const [video, setVideo] = useState<File>();
   const [videoPreview, setVideoPreview] = useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
@@ -49,12 +55,76 @@ export default function CreateCourse() {
     }
   };
 
+  type CourseData = {
+    title: string;
+    description: string;
+    author: string;
+    duration: string;
+    is_active: boolean;
+    thumbnail: File;
+    preview_tmp: string;
+  };
+
+  const createCourseMutation = useMutation({
+    mutationFn: (courseData: CourseData) => createCourse(courseData),
+    onSuccess: () => {
+      close();
+      toast.success("Curso creado con exito.");
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+    },
+  });
+
+  const uploadChunkMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+      let finalResponse;
+      const uuid = crypto.randomUUID();
+      for (let chunkNumber = 0; chunkNumber < totalChunks; chunkNumber++) {
+        finalResponse = await uploadChunk({
+          file,
+          chunkNumber,
+          totalChunks,
+          uuid,
+        });
+      }
+      return finalResponse;
+    },
+    onSuccess: (response) => {
+      if (thumbnail) {
+        createCourseMutation.mutate({
+          title,
+          description,
+          author,
+          duration,
+          is_active: active,
+          thumbnail,
+          preview_tmp: response,
+        });
+      }
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+    },
+  });
+
+  function detonateChain() {
+    if (video) {
+      uploadChunkMutation.mutate(video);
+    } else {
+      toast.error("Por favor, selecciona un video");
+    }
+  }
+
   return (
     <div className="container mx-auto">
       <div className="grid grid-cols-2 gap-9">
         <div className="flex items-center justify-center py-9">
           <div className="mx-auto grid w-full max-w-2xl gap-6">
-            <p className="underline cursor-pointer flex text-zinc-200 mb-6">
+            <p 
+            onClick={close}
+            className="underline cursor-pointer flex text-zinc-200 mb-6">
               <ChevronLeft />
               <span>Volver atras</span>
             </p>
@@ -164,8 +234,21 @@ export default function CreateCourse() {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
-                Crear curso
+              <Button
+                disabled={
+                  createCourseMutation.isPending ||
+                  uploadChunkMutation.isPending
+                }
+                onClick={detonateChain}
+                type="submit"
+                className="w-full"
+              >
+                {createCourseMutation.isPending ||
+                uploadChunkMutation.isPending ? (
+                  <Loader className="ml-2 h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
+                ) : (
+                  <span>Crear curso</span>
+                )}
               </Button>
             </div>
           </div>

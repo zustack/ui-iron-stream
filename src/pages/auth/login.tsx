@@ -60,8 +60,6 @@ export default function Login() {
     getSerialNumber();
   }, []);
 
-  console.log("pc", pc)
-
   const loginMutation = useMutation({
     mutationFn: () => login(email, password, pc),
     onSuccess: (response) => {
