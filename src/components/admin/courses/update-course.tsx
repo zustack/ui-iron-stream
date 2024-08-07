@@ -13,25 +13,61 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState, ChangeEvent } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { createCourse, uploadChunk } from "@/api/courses";
+import React, { useState, ChangeEvent, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createCourse, getSoloCourse, updateCourse, uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { CHUNK_SIZE } from "@/api/courses";
+import CurrentVideoHls from "./current-video-hls";
 
-export default function CreateCourse({ close, invalidate }: { close: () => void, invalidate: () => void }) {
+export default function UpdateCourse({
+  close,
+  invalidate,
+  id,
+}: {
+  close: () => void;
+  invalidate: () => void;
+  id: number;
+}) {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("Creado por ");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [active, setActive] = useState(false);
+
   const [thumbnail, setThumbnail] = useState<File>();
   const [filePreview, setFilePreview] = useState("");
+  const [currentThumbnail, setCurrentThumbnail] = useState("");
+
   const [video, setVideo] = useState<File>();
   const [videoPreview, setVideoPreview] = useState("");
+  const [currentPreview, setCurrentPreview] = useState("");
+
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
+
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ["solo-course"],
+    queryFn: () => getSoloCourse(id),
+  });
+
+  console.log(data);
+  console.log(currentPreview);
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      setTitle(data.title);
+      setDescription(data.description);
+      setAuthor(data.author);
+      setDuration(data.duration);
+      setActive(data.is_active);
+      setCurrentThumbnail(
+        `${import.meta.env.VITE_BACKEND_URL}${data.thumbnail}`
+      );
+      setCurrentPreview(`${import.meta.env.VITE_BACKEND_URL}${data.preview}`);
+    }
+  }, [data, isLoading]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -55,6 +91,7 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
   };
 
   type CourseData = {
+    id: number
     title: string;
     description: string;
     author: string;
@@ -64,12 +101,12 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
     preview_tmp: string;
   };
 
-  const createCourseMutation = useMutation({
-    mutationFn: (courseData: CourseData) => createCourse(courseData),
+  const updateCourseMutation = useMutation({
+    mutationFn: (courseData: CourseData) => updateCourse(courseData),
     onSuccess: () => {
       close();
-      invalidate()
-      toast.success("Curso creado con exito.");
+      invalidate();
+      toast.success("Curso actualizado");
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -93,7 +130,8 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
     },
     onSuccess: (response) => {
       if (thumbnail) {
-        createCourseMutation.mutate({
+        updateCourseMutation.mutate({
+          id: data.id,
           title,
           description,
           author,
@@ -117,18 +155,23 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
     }
   }
 
+  if (isLoading) return <>...</>;
+
   return (
     <div className="container mx-auto">
-      <h1 className="text-3xl font-bold text-center mt-4">Crear nuevo curso</h1>
+      <h1 className="text-3xl font-bold text-center mt-4">Actualizar curso</h1>
       <div className="grid grid-cols-2 gap-9">
         <div className="flex items-center justify-center py-9">
           <div className="mx-auto grid w-full max-w-2xl gap-6">
-            <p 
-            onClick={close}
-            className="underline cursor-pointer flex text-zinc-200 mb-6">
+            {currentPreview}
+            <p
+              onClick={close}
+              className="underline cursor-pointer flex text-zinc-200 mb-6"
+            >
               <ChevronLeft />
               <span>Volver atras</span>
             </p>
+
             <div className="grid gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -153,6 +196,7 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
                   />
                 </div>
               </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="email">Descripción</Label>
                 <Textarea
@@ -215,7 +259,7 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="video">Video</Label>
+                <Label htmlFor="video-f">Video</Label>
                 <Button
                   variant="outline"
                   className="flex justify-start gap-4"
@@ -228,7 +272,7 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
                   ref={videoRef}
                   required
                   onChange={handleVideoChange}
-                  id="video"
+                  id="video-f"
                   type="file"
                   accept="video/mp4"
                   className="hidden"
@@ -237,18 +281,18 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
 
               <Button
                 disabled={
-                  createCourseMutation.isPending ||
+                  updateCourseMutation.isPending ||
                   uploadChunkMutation.isPending
                 }
                 onClick={detonateChain}
                 type="submit"
                 className="w-full"
               >
-                {createCourseMutation.isPending ||
+                {updateCourseMutation.isPending ||
                 uploadChunkMutation.isPending ? (
                   <Loader className="ml-2 h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
                 ) : (
-                  <span>Crear curso</span>
+                  <span>Actualizar curso</span>
                 )}
               </Button>
             </div>
@@ -262,9 +306,11 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
               Your browser does not support the video tag.
             </video>
           ) : (
-            <div className="w-full h-full flex justify-center items-center border rounded-[0.75rem]">
-              <VideoIcon />
-              <p className="text-zinc-200 text-center pl-2">video preview</p>
+            <div>
+              <p className="text-zinc-200 font-normal">Video actual</p>
+              <div className="flex justify-center pt-[30px]">
+                <CurrentVideoHls src={currentPreview} />
+              </div>
             </div>
           )}
         </div>
@@ -275,7 +321,11 @@ export default function CreateCourse({ close, invalidate }: { close: () => void,
           {thumbnail ? (
             <img src={filePreview} alt="" className="p-1 rounded-[0.75rem]" />
           ) : (
-            <img src={Image} alt="" className="p-1 rounded-[0.75rem]" />
+            <img
+              src={currentThumbnail}
+              alt=""
+              className="p-1 rounded-[0.75rem]"
+            />
           )}
           <div className="flex flex-col justify-between p-4">
             <div>

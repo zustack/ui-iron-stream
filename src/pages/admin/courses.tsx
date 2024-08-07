@@ -30,8 +30,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import React, { useEffect, useState, ChangeEvent } from "react";
 import CreateCourse from "@/components/admin/courses/create-course";
 import { useInView } from "react-intersection-observer";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { adminCourses } from "@/api/courses";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { adminCourses, deleteCourse } from "@/api/courses";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -49,9 +49,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
+import toast from "react-hot-toast";
+import { ErrorResponse } from "@/types";
+import UpdateCourse from "@/components/admin/courses/update-course";
 
 export default function AdminCourses() {
   const [openCreateCourse, setOpenCreateCourse] = useState(false);
+  const [openUpdateCourse, setOpenUpdateCourse] = useState(false);
+  const [activeId, setActiveId] = useState(0);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -88,6 +94,17 @@ export default function AdminCourses() {
     initialPageParam: 0,
   });
 
+  const deleteCourseMutation = useMutation({
+    mutationFn: (id:number) => deleteCourse(id),
+    onSuccess: () => {
+      close();
+      invalidateQuery()
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+    },
+  });
+
   useEffect(() => {
     if (!isFetching && showSkeleton) {
       setShowSkeleton(false);
@@ -120,6 +137,16 @@ export default function AdminCourses() {
       <CreateCourse
         invalidate={invalidateQuery}
         close={() => setOpenCreateCourse(false)}
+      />
+    );
+  }
+
+  if (openUpdateCourse) {
+    return (
+      <UpdateCourse
+        id={activeId}
+        invalidate={invalidateQuery}
+        close={() => setOpenUpdateCourse(false)}
       />
     );
   }
@@ -195,7 +222,7 @@ export default function AdminCourses() {
         <Table>
           <TableCaption>
             {status === "pending" ? (
-              <div className="h-[calc(40vh-4rem)] flex justify-center items-center">
+              <div className="h-[100px] flex justify-center items-center">
                 <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
               </div>
             ) : null}
@@ -204,7 +231,7 @@ export default function AdminCourses() {
 
             <div ref={ref} onClick={() => fetchNextPage()}>
               {isFetchingNextPage ? (
-                <div className="h-[calc(40vh-4rem)] flex justify-center items-center">
+                <div className="h-[100px] flex justify-center items-center">
                   <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
                 </div>
               ) : hasNextPage ? (
@@ -297,7 +324,11 @@ export default function AdminCourses() {
                           </AlertDialog>
                         </TableCell>
                         <TableCell>{course.created_at}</TableCell>
+
                         <TableCell className="text-right">
+
+                          <AlertDialog>
+                            <AlertDialogTrigger>
                           <Button
                             variant="outline"
                             size="icon"
@@ -305,8 +336,37 @@ export default function AdminCourses() {
                           >
                             <Trash className="h-5 w-5 text-red-500" />
                           </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Estas seguro de eliminar el curso {course.title}?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  <p>
+                                    Esta operación no se puede deshacer. 
+                                    Procede con cuidado
+                                  </p>
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cerrar</AlertDialogCancel>
+                                <AlertDialogAction>
+                                <Button 
+                                onClick={() => deleteCourseMutation.mutate(course.id)}
+                                variant={"destructive"}>
+                                Eliminar
+                                </Button>
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
 
                           <Button
+                            onClick={() => {
+                              setActiveId(course.id)
+                              setOpenUpdateCourse(true)
+                            }}
                             variant="outline"
                             size="icon"
                             className="h-8 gap-1 mx-1"
