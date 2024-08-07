@@ -15,13 +15,13 @@ import {
 import { Link } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useState, ChangeEvent } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCourse, uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { CHUNK_SIZE } from "@/api/courses";
 
-export default function CreateCourse({ close }: { close: () => void }) {
+export default function CreateCourse({ close, invalidate }: { close: () => void, invalidate: () => void }) {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("Creado por ");
   const [description, setDescription] = useState("");
@@ -33,6 +33,8 @@ export default function CreateCourse({ close }: { close: () => void }) {
   const [videoPreview, setVideoPreview] = useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
+
+  const queryClient = useQueryClient();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -69,6 +71,8 @@ export default function CreateCourse({ close }: { close: () => void }) {
     mutationFn: (courseData: CourseData) => createCourse(courseData),
     onSuccess: () => {
       close();
+      invalidate()
+      // queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
       toast.success("Curso creado con exito.");
     },
     onError: (error: ErrorResponse) => {

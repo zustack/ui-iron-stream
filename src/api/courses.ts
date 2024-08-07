@@ -19,6 +19,7 @@ type Course = {
 
 type CourseResponse = {
   data: Course[];
+  totalCount: number;
   previousId: number | null;
   nextId: number | null;
 }
