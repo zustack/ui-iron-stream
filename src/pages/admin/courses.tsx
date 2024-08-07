@@ -30,7 +30,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import React, { useEffect, useState, ChangeEvent } from "react";
 import CreateCourse from "@/components/admin/courses/create-course";
 import { useInView } from "react-intersection-observer";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { adminCourses, deleteCourse } from "@/api/courses";
 import {
   AlertDialog,
@@ -58,10 +62,11 @@ export default function AdminCourses() {
   const [openCreateCourse, setOpenCreateCourse] = useState(false);
   const [openUpdateCourse, setOpenUpdateCourse] = useState(false);
   const [activeId, setActiveId] = useState(0);
+  const [activeDeleteId, setActiveDeleteId] = useState(0);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [active, setActive] = useState<number | string>(1);
+  const [active, setActive] = useState<number | string>("");
   const [showSkeleton, setShowSkeleton] = useState(false);
 
   const queryClient = useQueryClient();
@@ -95,10 +100,10 @@ export default function AdminCourses() {
   });
 
   const deleteCourseMutation = useMutation({
-    mutationFn: (id:number) => deleteCourse(id),
+    mutationFn: (id: number) => deleteCourse(id),
     onSuccess: () => {
       close();
-      invalidateQuery()
+      invalidateQuery();
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -270,8 +275,11 @@ export default function AdminCourses() {
                 <React.Fragment key={page.nextId}>
                   {page.data != null &&
                     page.data.map((course) => (
-                      <TableRow>
+                      <TableRow
+                        className={course.id === activeDeleteId ? "hidden" : ""}
+                      >
                         <TableCell>
+                          {course.id} === {activeDeleteId}
                           <Checkbox checked={course.is_active} />
                         </TableCell>
                         <TableCell>{course.title}</TableCell>
@@ -326,37 +334,41 @@ export default function AdminCourses() {
                         <TableCell>{course.created_at}</TableCell>
 
                         <TableCell className="text-right">
-
                           <AlertDialog>
                             <AlertDialogTrigger>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 gap-1 mx-1"
-                          >
-                            <Trash className="h-5 w-5 text-red-500" />
-                          </Button>
+                              <Button
+                                onClick={() => setActiveDeleteId(course.id)}
+                                variant="outline"
+                                size="icon"
+                                className="h-8 gap-1 mx-1"
+                              >
+                                <Trash className="h-5 w-5 text-red-500" />
+                              </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                  Estas seguro de eliminar el curso {course.title}?
+                                  Estas seguro de eliminar el curso{" "}
+                                  {course.title}?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
                                   <p>
-                                    Esta operación no se puede deshacer. 
-                                    Procede con cuidado
+                                    Esta operación no se puede deshacer. Procede
+                                    con cuidado
                                   </p>
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cerrar</AlertDialogCancel>
                                 <AlertDialogAction>
-                                <Button 
-                                onClick={() => deleteCourseMutation.mutate(course.id)}
-                                variant={"destructive"}>
-                                Eliminar
-                                </Button>
+                                  <Button
+                                    onClick={() =>
+                                      deleteCourseMutation.mutate(course.id)
+                                    }
+                                    variant={"destructive"}
+                                  >
+                                    Eliminar
+                                  </Button>
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -364,8 +376,8 @@ export default function AdminCourses() {
 
                           <Button
                             onClick={() => {
-                              setActiveId(course.id)
-                              setOpenUpdateCourse(true)
+                              setActiveId(course.id);
+                              setOpenUpdateCourse(true);
                             }}
                             variant="outline"
                             size="icon"

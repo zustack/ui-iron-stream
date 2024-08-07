@@ -163,7 +163,6 @@ export default function UpdateCourse({
       <div className="grid grid-cols-2 gap-9">
         <div className="flex items-center justify-center py-9">
           <div className="mx-auto grid w-full max-w-2xl gap-6">
-            {currentPreview}
             <p
               onClick={close}
               className="underline cursor-pointer flex text-zinc-200 mb-6"
