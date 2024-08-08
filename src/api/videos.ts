@@ -1,5 +1,39 @@
 import { authAxios } from "@/lib/axiosInstances";
 
+type Video = {
+  id: number;
+  title: string;
+  description: string;
+  views: number;
+  thumbnail: string;
+  duration: string;
+  created_at: string;
+};
+
+type VideoResponse = {
+  data: Video[];
+  totalCount: number;
+  previousId: number | null;
+  nextId: number | null;
+}
+
+type SearchParam = {
+  searchParam: string;
+  pageParam: number;
+  active: number | string;
+}
+
+export const adminVideos = async ({
+  pageParam = 0,
+  searchParam,
+  active,
+}: SearchParam): Promise<VideoResponse> => {
+  const response = await authAxios.get<VideoResponse>(
+    `/videos/admin?cursor=${pageParam}&q=${searchParam}&a=${active}`
+  );
+  return response.data;
+};
+
 export const getVideosByCourseId = async (courseId: string) => {
   const response = await authAxios.get(`/videos/${courseId}`);
   return response.data;

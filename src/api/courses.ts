@@ -53,11 +53,12 @@ type Course = {
   description: string;
   author: string;
   thumbnail: string;
+  preview: string;
   rating: number;
   num_reviews: number;
   duration: string;
   is_active: boolean;
-  order_: number;
+  sort_order: number;
   on: boolean;
   created_at: string;
 };
@@ -74,15 +75,12 @@ type SearchParam = {
   pageParam: number;
   active: number | string;
 }
-/*
-curl -X GET "http://localhost:8081/courses/admin?cursor=0&q=&a="  \
-*/
+
 export const adminCourses = async ({
   pageParam = 0,
   searchParam,
   active,
 }: SearchParam): Promise<CourseResponse> => {
-  console.log("active", active)
   const response = await authAxios.get<CourseResponse>(
     `/courses/admin?cursor=${pageParam}&q=${searchParam}&a=${active}`
   );

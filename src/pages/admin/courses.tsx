@@ -15,6 +15,7 @@ import {
   PlusCircle,
   Search,
   Trash,
+  VideoIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -57,12 +58,14 @@ import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import UpdateCourse from "@/components/admin/courses/update-course";
+import { Link } from "react-router-dom";
 
 export default function AdminCourses() {
   const [openCreateCourse, setOpenCreateCourse] = useState(false);
   const [openUpdateCourse, setOpenUpdateCourse] = useState(false);
   const [activeId, setActiveId] = useState(0);
   const [activeDeleteId, setActiveDeleteId] = useState(0);
+  const [activeUpdateId, setActiveUpdateId] = useState(0);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -75,6 +78,16 @@ export default function AdminCourses() {
     setShowSkeleton(true);
     queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
   };
+
+const invalidateQueryUpdate = (id: number) => {
+  setActiveUpdateId(id);
+  queryClient.invalidateQueries({ queryKey: ["admin-courses"] }).then(() => {
+    // Espera un poco antes de quitar el skeleton para asegurar que los datos se han actualizado
+    setTimeout(() => {
+      setActiveUpdateId(0);
+    }, 500);
+  });
+};
 
   const { ref, inView } = useInView();
 
@@ -103,9 +116,11 @@ export default function AdminCourses() {
     mutationFn: (id: number) => deleteCourse(id),
     onSuccess: () => {
       close();
-      invalidateQuery();
+      // invalidateQuery();
+      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
     },
     onError: (error: ErrorResponse) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
     },
   });
@@ -136,25 +151,6 @@ export default function AdminCourses() {
     const { value } = event.target;
     setSearchInput(value);
   };
-
-  if (openCreateCourse) {
-    return (
-      <CreateCourse
-        invalidate={invalidateQuery}
-        close={() => setOpenCreateCourse(false)}
-      />
-    );
-  }
-
-  if (openUpdateCourse) {
-    return (
-      <UpdateCourse
-        id={activeId}
-        invalidate={invalidateQuery}
-        close={() => setOpenUpdateCourse(false)}
-      />
-    );
-  }
 
   return (
     <>
@@ -212,15 +208,7 @@ export default function AdminCourses() {
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm" className="h-8 gap-1">
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span
-              onClick={() => setOpenCreateCourse(true)}
-              className="sr-only sm:not-sr-only sm:whitespace-nowrap"
-            >
-              Crear curso
-            </span>
-          </Button>
+          <CreateCourse invalidate={invalidateQuery} />
         </div>
       </div>
       <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
@@ -275,118 +263,134 @@ export default function AdminCourses() {
                 <React.Fragment key={page.nextId}>
                   {page.data != null &&
                     page.data.map((course) => (
-                      <TableRow
-                        className={course.id === activeDeleteId ? "hidden" : ""}
-                      >
-                        <TableCell>
-                          {course.id} === {activeDeleteId}
-                          <Checkbox checked={course.is_active} />
-                        </TableCell>
-                        <TableCell>{course.title}</TableCell>
-                        <TableCell>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                {course.description.length > 20 ? (
-                                  <>
-                                    {course.description.slice(0, 20)}
-                                    <span className="text-blue-500 cursor-pointer">
-                                      ...ver mas
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>{course.description}</>
-                                )}
-                              </TooltipTrigger>
-                              <TooltipContent className="w-[400px]">
-                                <p>{course.description}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </TableCell>
-                        <TableCell>{course.author}</TableCell>
-                        <TableCell>{course.duration}</TableCell>
-                        <TableCell>
-                          <AlertDialog>
-                            <AlertDialogTrigger>
-                              <Button size="sm" className="h-8 gap-1">
-                                Ver imagen
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Imagen del curso {course.title}.
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  <img
-                                    className="rounded-lg"
-                                    src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
-                                  />
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cerrar</AlertDialogCancel>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </TableCell>
-                        <TableCell>{course.created_at}</TableCell>
+                      <>
+                        {course.id === activeUpdateId ? (
+                          <TableRow>
+                            <TableCell colSpan={9}>
+                              <Skeleton className="w-full h-[30px]" />
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                        <TableRow
+                          className={
+                            course.id === activeDeleteId ? "hidden" : ""
+                          }
+                        >
+                          <TableCell>
+                            <Checkbox checked={course.is_active} />
+                          </TableCell>
+                          <TableCell>{course.title}
+                          </TableCell>
+                          <TableCell>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  {course.description.length > 20 ? (
+                                    <>
+                                      {course.description.slice(0, 20)}
+                                      <span className="text-blue-500 cursor-pointer">
+                                        ...ver mas
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>{course.description}</>
+                                  )}
+                                </TooltipTrigger>
+                                <TooltipContent className="w-[400px]">
+                                  <p>{course.description}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>{course.author}</TableCell>
+                          <TableCell>{course.duration}</TableCell>
+                          <TableCell>
+                            <AlertDialog>
+                              <AlertDialogTrigger>
+                                <Button size="sm" className="h-8 gap-1">
+                                  Ver imagen
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Imagen del curso {course.title}.
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    <img
+                                      className="rounded-lg"
+                                      src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
+                                    />
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cerrar</AlertDialogCancel>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </TableCell>
+                          <TableCell>{course.created_at}</TableCell>
 
-                        <TableCell className="text-right">
-                          <AlertDialog>
-                            <AlertDialogTrigger>
+                          <TableCell className="text-right">
+                            <Link to={`/admin/videos/${course.id}`}>
                               <Button
-                                onClick={() => setActiveDeleteId(course.id)}
                                 variant="outline"
                                 size="icon"
                                 className="h-8 gap-1 mx-1"
                               >
-                                <Trash className="h-5 w-5 text-red-500" />
+                                <VideoIcon className="h-5 w-5 text-zinc-200" />
                               </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Estas seguro de eliminar el curso{" "}
-                                  {course.title}?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  <p>
-                                    Esta operación no se puede deshacer. Procede
-                                    con cuidado
-                                  </p>
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cerrar</AlertDialogCancel>
-                                <AlertDialogAction>
-                                  <Button
-                                    onClick={() =>
-                                      deleteCourseMutation.mutate(course.id)
-                                    }
-                                    variant={"destructive"}
-                                  >
-                                    Eliminar
-                                  </Button>
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                            </Link>
+                            <AlertDialog>
+                              <AlertDialogTrigger>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 gap-1 mx-1"
+                                >
+                                  <Trash className="h-5 w-5 text-red-500" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Estas seguro de eliminar el curso{" "}
+                                    {course.title}?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    <p>
+                                      Esta operación no se puede deshacer.
+                                      Procede con cuidado
+                                    </p>
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cerrar</AlertDialogCancel>
+                                  <AlertDialogAction>
+                                    <Button
+                                      onClick={() => {
+                                        setActiveDeleteId(course.id);
+                                        deleteCourseMutation.mutate(course.id);
+                                      }}
+                                      variant={"destructive"}
+                                    >
+                                      Eliminar
+                                    </Button>
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                            <UpdateCourse
+                              course={course}
+                              invalidate={() =>
+                                invalidateQueryUpdate(course.id)
+                              }
+                            />
+                          </TableCell>
+                        </TableRow>
 
-                          <Button
-                            onClick={() => {
-                              setActiveId(course.id);
-                              setOpenUpdateCourse(true);
-                            }}
-                            variant="outline"
-                            size="icon"
-                            className="h-8 gap-1 mx-1"
-                          >
-                            <Pencil className="h-5 w-5 text-indigo-500" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+                        )}
+                      </>
                     ))}
                 </React.Fragment>
               ))}
