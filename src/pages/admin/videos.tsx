@@ -9,9 +9,10 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    ChevronLeft,
+  ChevronLeft,
   ListFilter,
   Loader,
+  Paperclip,
   Pencil,
   PlusCircle,
   Search,
@@ -60,13 +61,12 @@ import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import UpdateCourse from "@/components/admin/courses/update-course";
 import { Link, useParams } from "react-router-dom";
-import { adminVideos } from "@/api/videos";
+import { adminVideos, userVideos } from "@/api/videos";
 import CreateVideo from "@/components/admin/videos/create-video";
+import UpdateVideo from "@/components/admin/videos/update-video";
 
 export default function AdminVideos() {
-  const { courseId } = useParams()
-  const [openCreateVideo, setOpenCreateVideo] = useState(false);
-  const [openUpdateCourse, setOpenUpdateCourse] = useState(false);
+  const { courseId, courseTitle } = useParams();
   const [activeId, setActiveId] = useState(0);
   const [activeDeleteId, setActiveDeleteId] = useState(0);
 
@@ -79,7 +79,7 @@ export default function AdminVideos() {
 
   const invalidateQuery = () => {
     setShowSkeleton(true);
-    queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
   };
 
   const { ref, inView } = useInView();
@@ -98,7 +98,7 @@ export default function AdminVideos() {
       return adminVideos({
         pageParam: pageParam ?? 0,
         searchParam: debouncedSearchTerm,
-        active: active,
+        courseId: courseId || "",
       });
     },
     getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
@@ -109,10 +109,10 @@ export default function AdminVideos() {
     mutationFn: (id: number) => deleteCourse(id),
     onSuccess: () => {
       close();
-      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
     },
     onError: (error: ErrorResponse) => {
-      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
     },
   });
@@ -144,36 +144,22 @@ export default function AdminVideos() {
     setSearchInput(value);
   };
 
-  if (openCreateVideo) {
-    return (
-      <CreateVideo
-        invalidate={invalidateQuery}
-        close={() => setOpenCreateVideo(false)}
-      />
-    );
-  }
-
-  if (openUpdateCourse) {
-    return (
-      <UpdateCourse
-        id={activeId}
-        invalidate={invalidateQuery}
-        close={() => setOpenUpdateCourse(false)}
-      />
-    );
-  }
-
   return (
     <>
       <div className="bg-muted/40 flex justify-between pt-2 pb-[10px] px-11 border border-b">
-            <p 
-            className="underline cursor-pointer flex text-zinc-200 items-center mr-4">
-              <ChevronLeft />
-              <span>Volver atras</span>
-            </p>
-        <div>
-          <form className="ml-auto flex-1 sm:flex-initial mr-4">
+        <Link
+          to="/admin/courses"
+          className="underline cursor-pointer flex text-zinc-200 items-center mr-9"
+        >
+          <ChevronLeft />
+          <span>Volver atras</span>
+        </Link>
 
+        <p className="flex text-zinc-200 items-center mr-9 font-semibold">
+          <span>Curso: {courseTitle}</span>
+        </p>
+        <div>
+          <form className="ml-auto flex-1 sm:flex-initial mr-9">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -187,54 +173,13 @@ export default function AdminVideos() {
           </form>
         </div>
 
-
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-9">
           <p className="text-sm text-muted-foreground">
             {status !== "pending" && status !== "error" ? (
               <span>{data?.pages[0].totalCount} videos.</span>
             ) : null}
           </p>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <ListFilter className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Filtrar
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem
-                onClick={() => setActive("")}
-                checked={active === ""}
-              >
-                Ninguno
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                onClick={() => setActive(1)}
-                checked={active === 1}
-              >
-                Activo
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                onClick={() => setActive(0)}
-                checked={active === 0}
-              >
-                No Activo
-              </DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button size="sm" className="h-8 gap-1">
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span
-              onClick={() => setOpenCreateVideo(true)}
-              className="sr-only sm:not-sr-only sm:whitespace-nowrap"
-            >
-              Crear video
-            </span>
-          </Button>
+          <CreateVideo invalidate={invalidateQuery} />
         </div>
       </div>
       <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
@@ -369,16 +314,19 @@ export default function AdminVideos() {
                         <TableCell>{course.created_at}</TableCell>
 
                         <TableCell className="text-right">
-
-                          <Link to={`/admin/videos/${course.id}`}>
                           <Button
                             variant="outline"
                             size="icon"
                             className="h-8 gap-1 mx-1"
                           >
-                            <VideoIcon className="h-5 w-5 text-zinc-200" />
+                            <Paperclip className="h-5 w-5 text-zinc-200" />
                           </Button>
-                          </Link>
+
+                          <UpdateVideo 
+                          data={course} 
+                          invalidate={invalidateQuery}/>
+
+
                           <AlertDialog>
                             <AlertDialogTrigger>
                               <Button
@@ -419,18 +367,6 @@ export default function AdminVideos() {
                             </AlertDialogContent>
                           </AlertDialog>
 
-
-                          <Button
-                            onClick={() => {
-                              setActiveId(course.id);
-                              setOpenUpdateCourse(true);
-                            }}
-                            variant="outline"
-                            size="icon"
-                            className="h-8 gap-1 mx-1"
-                          >
-                            <Pencil className="h-5 w-5 text-indigo-500" />
-                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

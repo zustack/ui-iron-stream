@@ -1,8 +1,10 @@
-import { getCurrentVideo, getVideosByCourseId } from "@/api/videos";
+import { getCurrentVideo, getVideosByCourseId, updateHistory } from "@/api/videos";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import VideoFeed from "@/components/video-feed";
 import VideoHls from "@/components/video-hls";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
@@ -12,13 +14,18 @@ export default function Video() {
   const [resumeState, setResumeState] = useState(0);
   // si no course id mostrar error
 
- const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0);
+
+  const updateHistoryMutation = useMutation({
+    mutationFn: () => updateHistory(String(video.history_id), String(resumeState)),
+  });
 
   useEffect(() => {
     // Establece un intervalo que se ejecuta cada 1 segundo (1000 ms)
     const intervalId = setInterval(() => {
+      updateHistoryMutation.mutate();
       setCount(prevCount => prevCount + 1); // Actualiza el estado
-    }, 1000);
+    }, 5000);
 
     // Limpia el intervalo cuando el componente se desmonte o se actualice
     return () => clearInterval(intervalId);
@@ -42,25 +49,32 @@ export default function Video() {
     queryFn: () => getVideosByCourseId(courseId || ""),
   });
 
-
-  if (isLoadingCurrentVideo || isLoadingVideos) {
+  if (isLoadingCurrentVideo ){
     return <div>Loading...</div>;
   }
+if (isLoadingVideos) {
+  return <div>Loading...</div>;
+}
+
+  if (isErrorVideos) return <>Error</>;
+  if (isErrorCurrentVideo) return <>Error</>;
+
+  console.log(video)
 
   return (
     <div className="grid grid-cols-6 lg:grid-cols-12 gap-4">
       <div className="col-span-6 lg:col-span-8">
         <VideoHls
             setResume={setResumeState}
-            resume={video && video.resume}
-            src={video && video.video.video_hls}
+            resume={video.resume}
+            src={video.video.video_hls}
         />
         <h1 className="text-zinc-200 mt-4 text-xl font-semibold">
-          {video && video.video.title}
+          {video.video.title}
         </h1>
 
         <p className="text-zinc-400 mt-2">
-            {video && video.video.description}
+            {video.video.description}
         </p>
         <div className="mt-2 flex gap-2">
           <Button>Ver archivos</Button>
@@ -72,7 +86,7 @@ export default function Video() {
           history_id={video && video.history_id}
           resume={resumeState}
           videos={videos}
-          current_video_id={video && video.video.id}
+          current_video_id={video.video.id}
         />
       </div>
     </div>

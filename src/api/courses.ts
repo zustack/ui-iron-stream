@@ -76,6 +76,21 @@ type SearchParam = {
   active: number | string;
 }
 
+type SearchParamUserCourses = {
+  searchParam: string;
+  pageParam: number;
+}
+
+export const userCourses = async ({
+  pageParam = 0,
+  searchParam,
+}: SearchParamUserCourses): Promise<CourseResponse> => {
+  const response = await authAxios.get<CourseResponse>(
+    `/courses?cursor=${pageParam}&q=${searchParam}`
+  );
+  return response.data;
+};
+
 export const adminCourses = async ({
   pageParam = 0,
   searchParam,

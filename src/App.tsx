@@ -22,21 +22,19 @@ function App() {
           <Route path="register" element={<Register />} />
           <Route path="reset-password" element={<ResetPassword />} />
 
-          <Route path="/" element={<Layout />}>
-          <Route path="home" element={<Home />} />  
-          <Route path="video/:courseId" element={<Video />} />  
-          </Route>
           <Route path="notes" element={<Notes />} />  
           
           <Route path="/" element={<Layout />}>
-          <Route element={<PrivateRoute />}>
+            <Route element={<PrivateRoute />}>
+            <Route path="home" element={<Home />} />  
+            <Route path="video/:courseId" element={<Video />} />  
           </Route>
         </Route>
 
         <Route path="admin" element={<AdminLayout />}>
           <Route path="users" element={<AdminUsers />} />
           <Route path="courses" element={<AdminCourses />} />
-          <Route path="videos/:courseId" element={<AdminVideos />} />
+          <Route path="videos/:courseId/:courseTitle" element={<AdminVideos />} />
         </Route>
 
         <Route path="latter-admin" element={<AdminLayout />}>

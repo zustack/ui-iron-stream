@@ -314,7 +314,7 @@ export default function UpdateCourse({
         <AlertDialogFooter>
           <AlertDialogCancel>Cerrar</AlertDialogCancel>
           <Button
-            className="w-[100px]"
+            className="w-[150px]"
             disabled={
               updateCourseMutation.isPending || uploadChunkMutation.isPending
             }

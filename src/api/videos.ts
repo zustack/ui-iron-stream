@@ -1,5 +1,45 @@
 import { authAxios } from "@/lib/axiosInstances";
 
+export const updateHistory = async (
+  id: string,
+  resume: string,
+) => {
+  const response = await authAxios.put("/history/update", {
+    resume,
+    id
+  });
+  return response.data;
+};
+
+export const createVideo = async ({
+  title,
+  description,
+  course_id,
+  duration,
+  thumbnail,
+  video_tmp,
+}: {
+  title: string;
+  description: string;
+  course_id: string;
+  duration: string;
+  thumbnail: File;
+  video_tmp: string;
+}) => {
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("duration", duration);
+  formData.append("course_id", course_id);
+  formData.append("thumbnail", thumbnail);
+  formData.append("video_tmp", video_tmp);
+
+  const response = await authAxios.post("/videos", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
 type Video = {
   id: number;
   title: string;
@@ -20,16 +60,27 @@ type VideoResponse = {
 type SearchParam = {
   searchParam: string;
   pageParam: number;
-  active: number | string;
+  courseId: string;
 }
 
 export const adminVideos = async ({
   pageParam = 0,
   searchParam,
-  active,
+  courseId,
 }: SearchParam): Promise<VideoResponse> => {
   const response = await authAxios.get<VideoResponse>(
-    `/videos/admin?cursor=${pageParam}&q=${searchParam}&a=${active}`
+    `/videos/admin/${courseId}?cursor=${pageParam}&q=${searchParam}`
+  );
+  return response.data;
+};
+
+export const userVideos = async ({
+  pageParam = 0,
+  searchParam,
+  courseId,
+}: SearchParam): Promise<VideoResponse> => {
+  const response = await authAxios.get<VideoResponse>(
+    `/videos/${courseId}?cursor=${pageParam}&q=${searchParam}`
   );
   return response.data;
 };

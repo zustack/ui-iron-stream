@@ -8,13 +8,14 @@ import {
   ChevronLeft,
   Loader,
   Paperclip,
+  Pencil,
   PlusCircle,
   StarIcon,
   VideoIcon,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState, ChangeEvent, useRef } from "react";
+import React, { useState, ChangeEvent, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { createCourse, uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
@@ -43,16 +44,24 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createVideo } from "@/api/videos";
 
-export default function CreateVideo({
+type VideoProp = {
+  id: number;
+  title: string;
+  description: string;
+  duration: string;
+  thumbnail: string;
+};
+
+export default function UpdateVideo({
   invalidate,
+  data,
 }: {
   invalidate: () => void;
+  data: VideoProp;
 }) {
   const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("Creado por ");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
-  const [active, setActive] = useState(false);
   const [thumbnail, setThumbnail] = useState<File>();
   const [filePreview, setFilePreview] = useState("");
   const [video, setVideo] = useState<File>();
@@ -60,7 +69,13 @@ export default function CreateVideo({
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
 
-  const { courseId } = useParams()
+  useEffect(() => {
+      setTitle(data.title);
+      setDescription(data.description);
+      setDuration(data.duration);
+  }, [data]);
+
+  const { courseId } = useParams();
 
   const [is, setIs] = useState(false);
 
@@ -94,10 +109,12 @@ export default function CreateVideo({
     video_tmp: string;
   };
 
-  const createVideoMutation = useMutation({
+  const updateVideoMutation = useMutation({
     mutationFn: (videoPayload: VideoPayload) => createVideo(videoPayload),
     onSuccess: () => {
+      close();
       invalidate();
+      toast.success("video editado con exito.");
       setIs(false);
     },
     onError: (error: ErrorResponse) => {
@@ -122,7 +139,7 @@ export default function CreateVideo({
     },
     onSuccess: (response) => {
       if (thumbnail && courseId) {
-        createVideoMutation.mutate({
+        updateVideoMutation.mutate({
           title,
           description,
           course_id: courseId,
@@ -148,17 +165,14 @@ export default function CreateVideo({
   return (
     <AlertDialog onOpenChange={(is: boolean) => setIs(is)} open={is}>
       <AlertDialogTrigger>
-        <Button size="sm" className="h-8 gap-1">
-          <PlusCircle className="h-3.5 w-3.5" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Crear video
-          </span>
+        <Button variant="outline" size="icon" className="h-8 gap-1 mx-1">
+          <Pencil className="h-5 w-5 text-indigo-500" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
-            Crea un nuevo video dentro del curso (x)
+            Actualiza el video {data.title}
           </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
@@ -248,7 +262,6 @@ export default function CreateVideo({
                           className="hidden"
                         />
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -259,16 +272,16 @@ export default function CreateVideo({
         <AlertDialogFooter>
           <AlertDialogCancel>Cerrar</AlertDialogCancel>
           <Button
-            className="w-[100px]"
+            className="w-[150px]"
             disabled={
-              createVideoMutation.isPending || uploadChunkMutation.isPending
+              updateVideoMutation.isPending || uploadChunkMutation.isPending
             }
             onClick={detonateChain}
           >
-            {createVideoMutation.isPending || uploadChunkMutation.isPending ? (
+            {updateVideoMutation.isPending || uploadChunkMutation.isPending ? (
               <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             ) : (
-              <span>Crear curso</span>
+              <span>Actualizar video</span>
             )}
           </Button>
         </AlertDialogFooter>
