@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+    ChevronDown,
+    ChevronUp,
   ListFilter,
   Loader,
-  Pencil,
-  PlusCircle,
   Search,
   Trash,
   VideoIcon,
@@ -36,7 +36,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { adminCourses, deleteCourse } from "@/api/courses";
+import { adminCourses, deleteCourse, sortCourses } from "@/api/courses";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -112,7 +112,6 @@ export default function AdminCourses() {
   const deleteCourseMutation = useMutation({
     mutationFn: (id: number) => deleteCourse(id),
     onSuccess: () => {
-      close();
       // invalidateQuery();
       queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
     },
@@ -121,6 +120,17 @@ export default function AdminCourses() {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
     },
   });
+
+const sortCoursesMutation = useMutation({
+  mutationFn: (payload: { sortA: number; sortB: number}) => sortCourses(payload),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+  },
+  onError: (error: ErrorResponse) => {
+    queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+    toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+  },
+});
 
   useEffect(() => {
     if (!isFetching && showSkeleton) {
@@ -234,6 +244,7 @@ export default function AdminCourses() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Status</TableHead>
+              <TableHead className="w-[100px]">Orden</TableHead>
               <TableHead>Titulo</TableHead>
               <TableHead>Descripcion</TableHead>
               <TableHead>Autor</TableHead>
@@ -274,9 +285,13 @@ export default function AdminCourses() {
                             className={
                               course.id === activeDeleteId ? "hidden" : ""
                             }
+
                           >
                             <TableCell>
                               <Checkbox checked={course.is_active} />
+                            </TableCell>
+                            <TableCell>
+                              {course.sort_order}
                             </TableCell>
                             <TableCell>{course.title}</TableCell>
                             <TableCell>

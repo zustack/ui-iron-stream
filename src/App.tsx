@@ -13,6 +13,8 @@ import ResetPassword from "./pages/auth/reset-password";
 import AdminCourses from "./pages/admin/courses";
 import AdminVideos from "./pages/admin/videos";
 
+import WindowFiles from "./components/admin/videos/window-files";
+
 function App() {
   return (
     <BrowserRouter>
@@ -37,10 +39,13 @@ function App() {
           <Route path="videos/:courseId/:courseTitle" element={<AdminVideos />} />
         </Route>
 
-        <Route path="latter-admin" element={<AdminLayout />}>
-          <Route element={<AdminRoute />}>
-          </Route>
+        <Route path="new/window/admin/videos/files/:videoId" element={<WindowFiles />} />
+        <Route element={<AdminRoute />}>
         </Route>
+
+        <Route path="latter-admin" element={<AdminLayout />}>
+        </Route>
+
       </Routes>
     </BrowserRouter>
   );

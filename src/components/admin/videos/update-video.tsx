@@ -1,39 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Image from "../../../assets/image.png";
-import { Rating } from "@mui/material";
 import {
-  ChevronLeft,
   Loader,
   Paperclip,
   Pencil,
-  PlusCircle,
-  StarIcon,
-  VideoIcon,
 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState, ChangeEvent, useRef, useEffect } from "react";
+import { useState, ChangeEvent, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { createCourse, uploadChunk } from "@/api/courses";
+import { uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { CHUNK_SIZE } from "@/api/courses";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -42,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { createVideo } from "@/api/videos";
+import { updateVideo } from "@/api/videos";
 
 type VideoProp = {
   id: number;
@@ -55,19 +37,22 @@ type VideoProp = {
 export default function UpdateVideo({
   invalidate,
   data,
+  isLoading,
 }: {
   invalidate: () => void;
   data: VideoProp;
+  isLoading: boolean
 }) {
+
+  const { courseId } = useParams();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [thumbnail, setThumbnail] = useState<File>();
-  const [filePreview, setFilePreview] = useState("");
   const [video, setVideo] = useState<File>();
-  const [videoPreview, setVideoPreview] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
       setTitle(data.title);
@@ -75,19 +60,19 @@ export default function UpdateVideo({
       setDuration(data.duration);
   }, [data]);
 
-  const { courseId } = useParams();
+  useEffect(() => {
+    if (!isLoading) {
+      setIsOpen(false);
+      setThumbnail(undefined);
+      setVideo(undefined);
+    }
+  }, [isLoading]);
 
-  const [is, setIs] = useState(false);
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
     if (file) {
       setThumbnail(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFilePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -95,12 +80,11 @@ export default function UpdateVideo({
     const file = event.target.files && event.target.files[0];
     if (file) {
       setVideo(file);
-      const videoURL = URL.createObjectURL(file);
-      setVideoPreview(videoURL);
     }
   };
 
   type VideoPayload = {
+    id: number;
     title: string;
     description: string;
     course_id: string;
@@ -110,12 +94,9 @@ export default function UpdateVideo({
   };
 
   const updateVideoMutation = useMutation({
-    mutationFn: (videoPayload: VideoPayload) => createVideo(videoPayload),
+    mutationFn: (videoPayload: VideoPayload) => updateVideo(videoPayload),
     onSuccess: () => {
-      close();
       invalidate();
-      toast.success("video editado con exito.");
-      setIs(false);
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -140,6 +121,7 @@ export default function UpdateVideo({
     onSuccess: (response) => {
       if (thumbnail && courseId) {
         updateVideoMutation.mutate({
+          id: data.id,
           title,
           description,
           course_id: courseId,
@@ -163,7 +145,7 @@ export default function UpdateVideo({
   }
 
   return (
-    <AlertDialog onOpenChange={(is: boolean) => setIs(is)} open={is}>
+    <AlertDialog onOpenChange={(open: boolean) => setIsOpen(open)} open={isOpen}>
       <AlertDialogTrigger>
         <Button variant="outline" size="icon" className="h-8 gap-1 mx-1">
           <Pencil className="h-5 w-5 text-indigo-500" />
@@ -272,16 +254,16 @@ export default function UpdateVideo({
         <AlertDialogFooter>
           <AlertDialogCancel>Cerrar</AlertDialogCancel>
           <Button
-            className="w-[150px]"
+            className="w-[100px]"
             disabled={
-              updateVideoMutation.isPending || uploadChunkMutation.isPending
+              updateVideoMutation.isPending || uploadChunkMutation.isPending || isLoading
             }
             onClick={detonateChain}
           >
-            {updateVideoMutation.isPending || uploadChunkMutation.isPending ? (
+            {updateVideoMutation.isPending || uploadChunkMutation.isPending || isLoading ? (
               <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             ) : (
-              <span>Actualizar video</span>
+              <span>Actualizar</span>
             )}
           </Button>
         </AlertDialogFooter>

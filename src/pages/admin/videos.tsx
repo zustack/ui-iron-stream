@@ -8,37 +8,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  ChevronLeft,
-  ListFilter,
-  Loader,
-  Paperclip,
-  Pencil,
-  PlusCircle,
-  Search,
-  Trash,
-  VideoIcon,
-} from "lucide-react";
+import { ChevronLeft, Loader, Paperclip, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
 import React, { useEffect, useState, ChangeEvent } from "react";
-import CreateCourse from "@/components/admin/courses/create-course";
 import { useInView } from "react-intersection-observer";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { adminCourses, deleteCourse } from "@/api/courses";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -55,30 +30,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
-import toast from "react-hot-toast";
-import { ErrorResponse } from "@/types";
-import UpdateCourse from "@/components/admin/courses/update-course";
 import { Link, useParams } from "react-router-dom";
-import { adminVideos, userVideos } from "@/api/videos";
+import { adminVideos } from "@/api/videos";
 import CreateVideo from "@/components/admin/videos/create-video";
 import UpdateVideo from "@/components/admin/videos/update-video";
+import DeleteVideo from "@/components/admin/videos/delete-video";
+import VideoHls from "@/components/admin/videos/video-hls";
+import { WebviewWindow } from "@tauri-apps/api/window";
 
 export default function AdminVideos() {
   const { courseId, courseTitle } = useParams();
-  const [activeId, setActiveId] = useState(0);
-  const [activeDeleteId, setActiveDeleteId] = useState(0);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [active, setActive] = useState<number | string>("");
-  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const queryClient = useQueryClient();
 
   const invalidateQuery = () => {
-    setShowSkeleton(true);
+    setIsLoading(true);
     queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
   };
 
@@ -93,7 +63,7 @@ export default function AdminVideos() {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["admin-videos", debouncedSearchTerm, active],
+    queryKey: ["admin-videos", debouncedSearchTerm],
     queryFn: async ({ pageParam }) => {
       return adminVideos({
         pageParam: pageParam ?? 0,
@@ -105,23 +75,11 @@ export default function AdminVideos() {
     initialPageParam: 0,
   });
 
-  const deleteCourseMutation = useMutation({
-    mutationFn: (id: number) => deleteCourse(id),
-    onSuccess: () => {
-      close();
-      queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
-    },
-    onError: (error: ErrorResponse) => {
-      queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
-    },
-  });
-
   useEffect(() => {
-    if (!isFetching && showSkeleton) {
-      setShowSkeleton(false);
+    if (!isFetching && isLoading) {
+      setIsLoading(false);
     }
-  }, [isFetching, showSkeleton]);
+  }, [isFetching, isLoading]);
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -133,7 +91,6 @@ export default function AdminVideos() {
     const timerId = setTimeout(() => {
       setDebouncedSearchTerm(searchInput);
     }, 800);
-
     return () => {
       clearTimeout(timerId);
     };
@@ -142,6 +99,30 @@ export default function AdminVideos() {
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setSearchInput(value);
+  };
+
+  const openWindowFile = async (id:number) => {
+    try {
+      // Crea una instancia de WebviewWindow
+      const webview = new WebviewWindow("theUniqueLabel", {
+        url: `new/window/admin/videos/files/${id}`,
+      });
+
+      // Escucha el evento 'tauri://created' para manejar el éxito
+      webview.once("tauri://created", () => {
+        console.log("Webview window successfully created");
+      });
+
+      // Escucha el evento 'tauri://error' para manejar errores
+      webview.once("tauri://error", (error) => {
+        console.error(
+          "An error occurred during webview window creation:",
+          error
+        );
+      });
+    } catch (error) {
+      console.error("Error creating webview window:", error);
+    }
   };
 
   return (
@@ -176,10 +157,15 @@ export default function AdminVideos() {
         <div className="ml-auto flex items-center gap-9">
           <p className="text-sm text-muted-foreground">
             {status !== "pending" && status !== "error" ? (
-              <span>{data?.pages[0].totalCount} videos.</span>
+              <span>
+                {data?.pages[0].totalCount}
+                {data?.pages[0].totalCount == 1
+                  ? " video encontrado"
+                  : " videos encontrados"}
+              </span>
             ) : null}
           </p>
-          <CreateVideo invalidate={invalidateQuery} />
+          <CreateVideo isLoading={isLoading} invalidate={invalidateQuery} />
         </div>
       </div>
       <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
@@ -219,14 +205,6 @@ export default function AdminVideos() {
           </TableHeader>
 
           <TableBody>
-            {showSkeleton && (
-              <TableRow>
-                <TableCell colSpan={9}>
-                  <Skeleton className="w-full h-[30px]" />
-                </TableCell>
-              </TableRow>
-            )}
-
             {status != "pending" &&
               status != "error" &&
               data &&
@@ -234,9 +212,7 @@ export default function AdminVideos() {
                 <React.Fragment key={page.nextId}>
                   {page.data != null &&
                     page.data.map((course) => (
-                      <TableRow
-                        className={course.id === activeDeleteId ? "hidden" : ""}
-                      >
+                      <TableRow>
                         <TableCell>{course.title}</TableCell>
                         <TableCell>
                           <TooltipProvider>
@@ -262,29 +238,9 @@ export default function AdminVideos() {
                         <TableCell>{course.views}</TableCell>
                         <TableCell>{course.duration}</TableCell>
                         <TableCell>
-                          <AlertDialog>
-                            <AlertDialogTrigger>
-                              <Button size="sm" className="h-8 gap-1">
-                                Ver video
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Imagen del curso {course.title}.
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  <img
-                                    className="rounded-lg"
-                                    src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
-                                  />
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cerrar</AlertDialogCancel>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <VideoHls
+                            src={`${import.meta.env.VITE_BACKEND_URL}${course.video_hls}`}
+                          />
                         </TableCell>
                         <TableCell>
                           <AlertDialog>
@@ -293,7 +249,7 @@ export default function AdminVideos() {
                                 Ver imagen
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="max-w-5xl">
                               <AlertDialogHeader>
                                 <AlertDialogTitle>
                                   Imagen del curso {course.title}.
@@ -315,6 +271,7 @@ export default function AdminVideos() {
 
                         <TableCell className="text-right">
                           <Button
+                            onClick={() => openWindowFile(course.id)}
                             variant="outline"
                             size="icon"
                             className="h-8 gap-1 mx-1"
@@ -322,51 +279,17 @@ export default function AdminVideos() {
                             <Paperclip className="h-5 w-5 text-zinc-200" />
                           </Button>
 
-                          <UpdateVideo 
-                          data={course} 
-                          invalidate={invalidateQuery}/>
+                          <UpdateVideo
+                            isLoading={isLoading}
+                            data={course}
+                            invalidate={invalidateQuery}
+                          />
 
-
-                          <AlertDialog>
-                            <AlertDialogTrigger>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 gap-1 mx-1"
-                              >
-                                <Trash className="h-5 w-5 text-red-500" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Estas seguro de eliminar el curso{" "}
-                                  {course.title}?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  <p>
-                                    Esta operación no se puede deshacer. Procede
-                                    con cuidado
-                                  </p>
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cerrar</AlertDialogCancel>
-                                <AlertDialogAction>
-                                  <Button
-                                    onClick={() => {
-                                      setActiveDeleteId(course.id);
-                                      deleteCourseMutation.mutate(course.id);
-                                    }}
-                                    variant={"destructive"}
-                                  >
-                                    Eliminar
-                                  </Button>
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-
+                          <DeleteVideo
+                            isLoading={isLoading}
+                            id={course.id}
+                            invalidate={invalidateQuery}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}

@@ -2,8 +2,30 @@ import { authAxios } from "@/lib/axiosInstances";
 
 export const CHUNK_SIZE = 1 * 1024 * 1024;
 
+/*
+  update sort_order:
+  Que nesesito? ejemplo con mover para arriba
+  a => sort_order + 1
+  b => sort_order
+  id_a => (id_a)
+  id_b => (id_b)
+  update course WHERE id_a = (id_a) sort_order = (a, ?) 
+  update course WHERE id_b = (id_b) sort_order = (b, ?) 
+
+     -d '{"idA": 10, "idB": 11, "sortA": 10, "sortB": 11}'
+*/
+
+export const sortCourses = async ({idA, idB}: {idA: number, idB: number}) => {
+  const response = await authAxios.put("/courses/sort", {
+    idA,
+    idB,
+  })
+  return response.data
+}
+
 export const updateCourse = async ({
   id,
+  sort_order,
   title,
   description,
   author,
@@ -13,6 +35,7 @@ export const updateCourse = async ({
   preview_tmp,
 }: {
   id: number;
+  sort_order: number;
   title: string;
   description: string;
   author: string;
@@ -23,6 +46,7 @@ export const updateCourse = async ({
 }) => {
   const formData = new FormData();
   formData.append("id", id.toString());
+  formData.append("sortOrder", sort_order.toString());
   formData.append("title", title);
   formData.append("description", description);
   formData.append("author", author);

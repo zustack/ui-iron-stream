@@ -1,38 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Image from "../../../assets/image.png";
-import { Rating } from "@mui/material";
 import {
-  ChevronLeft,
   Loader,
   Paperclip,
   PlusCircle,
-  StarIcon,
-  VideoIcon,
 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState, ChangeEvent, useRef } from "react";
+import { useState, ChangeEvent, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { createCourse, uploadChunk } from "@/api/courses";
+import { uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { CHUNK_SIZE } from "@/api/courses";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -45,34 +28,26 @@ import { createVideo } from "@/api/videos";
 
 export default function CreateVideo({
   invalidate,
+  isLoading,
 }: {
   invalidate: () => void;
+  isLoading: boolean;
 }) {
   const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("Creado por ");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
-  const [active, setActive] = useState(false);
   const [thumbnail, setThumbnail] = useState<File>();
-  const [filePreview, setFilePreview] = useState("");
   const [video, setVideo] = useState<File>();
-  const [videoPreview, setVideoPreview] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const { courseId } = useParams()
-
-  const [is, setIs] = useState(false);
+  const { courseId, courseTitle } = useParams()
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
     if (file) {
       setThumbnail(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFilePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -80,8 +55,6 @@ export default function CreateVideo({
     const file = event.target.files && event.target.files[0];
     if (file) {
       setVideo(file);
-      const videoURL = URL.createObjectURL(file);
-      setVideoPreview(videoURL);
     }
   };
 
@@ -98,12 +71,22 @@ export default function CreateVideo({
     mutationFn: (videoPayload: VideoPayload) => createVideo(videoPayload),
     onSuccess: () => {
       invalidate();
-      setIs(false);
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
     },
   });
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsOpen(false);
+      setTitle("");
+      setDescription("");
+      setDuration("");
+      setThumbnail(undefined);
+      setVideo(undefined);
+    }
+  }, [isLoading]);
 
   const uploadChunkMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -146,7 +129,7 @@ export default function CreateVideo({
   }
 
   return (
-    <AlertDialog onOpenChange={(is: boolean) => setIs(is)} open={is}>
+    <AlertDialog onOpenChange={(open: boolean) => setIsOpen(open)} open={isOpen}>
       <AlertDialogTrigger>
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
@@ -158,7 +141,8 @@ export default function CreateVideo({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
-            Crea un nuevo video dentro del curso (x)
+            Crear video para curso: {" "}
+                {courseTitle}
           </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
@@ -261,14 +245,14 @@ export default function CreateVideo({
           <Button
             className="w-[100px]"
             disabled={
-              createVideoMutation.isPending || uploadChunkMutation.isPending
+              createVideoMutation.isPending || uploadChunkMutation.isPending || isLoading
             }
             onClick={detonateChain}
           >
-            {createVideoMutation.isPending || uploadChunkMutation.isPending ? (
+            {createVideoMutation.isPending || uploadChunkMutation.isPending || isLoading ? (
               <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             ) : (
-              <span>Crear curso</span>
+              <span>Crear video</span>
             )}
           </Button>
         </AlertDialogFooter>

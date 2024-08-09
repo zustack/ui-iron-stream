@@ -47,6 +47,7 @@ import {
     is_active: boolean;
     thumbnail: string;
     preview: string;
+    sort_order:number;
   };
 
 export default function UpdateCourse({
@@ -67,6 +68,7 @@ export default function UpdateCourse({
   const [thumbnail, setThumbnail] = useState<File>();
   const [filePreview, setFilePreview] = useState("");
   const [currentThumbnail, setCurrentThumbnail] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
 
   const [video, setVideo] = useState<File>();
   const [videoPreview, setVideoPreview] = useState("");
@@ -77,6 +79,7 @@ export default function UpdateCourse({
 
   useEffect(() => {
       setTitle(course.title);
+      setSortOrder(String(course.sort_order));
       setDescription(course.description);
       setAuthor(course.author);
       setDuration(course.duration);
@@ -110,6 +113,7 @@ export default function UpdateCourse({
 
   type CourseData = {
     id: number;
+    sort_order:number;
     title: string;
     description: string;
     author: string;
@@ -150,6 +154,7 @@ export default function UpdateCourse({
       if (thumbnail) {
         updateCourseMutation.mutate({
           id: course.id,
+          sort_order:Number(sortOrder),
           title,
           description,
           author,
@@ -288,6 +293,18 @@ export default function UpdateCourse({
                           className="hidden"
                         />
                       </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="sort">Sort order</Label>
+                        <Input
+                          id="sort"
+                          value={sortOrder}
+                          onChange={(e) => setSortOrder(e.target.value)}
+                          placeholder="Sort"
+                          required
+                        />
+                      </div>
+
 
                       <div className="flex items-center space-x-2">
                         <Checkbox

@@ -1,5 +1,10 @@
 import { authAxios } from "@/lib/axiosInstances";
 
+export const deleteVideo = async (id: number) => {
+  const response = await authAxios.delete(`/videos/${id}`);
+  return response.data;
+};
+
 export const updateHistory = async (
   id: string,
   resume: string,
@@ -7,6 +12,38 @@ export const updateHistory = async (
   const response = await authAxios.put("/history/update", {
     resume,
     id
+  });
+  return response.data;
+};
+
+export const updateVideo = async ({
+  id,
+  title,
+  description,
+  course_id,
+  duration,
+  thumbnail,
+  video_tmp,
+}: {
+  id:number
+  title: string;
+  description: string;
+  course_id: string;
+  duration: string;
+  thumbnail: File;
+  video_tmp: string;
+}) => {
+  const formData = new FormData();
+  formData.append("id", id.toString())
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("duration", duration);
+  formData.append("course_id", course_id);
+  formData.append("thumbnail", thumbnail);
+  formData.append("video_tmp", video_tmp);
+
+  const response = await authAxios.put("/videos", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return response.data;
 };
@@ -47,6 +84,7 @@ type Video = {
   views: number;
   thumbnail: string;
   duration: string;
+  video_hls: string
   created_at: string;
 };
 
