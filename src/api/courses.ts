@@ -1,5 +1,6 @@
 import { authAxios } from "@/lib/axiosInstances";
 
+
 export const CHUNK_SIZE = 1 * 1024 * 1024;
 
 /*
@@ -15,10 +16,9 @@ export const CHUNK_SIZE = 1 * 1024 * 1024;
      -d '{"idA": 10, "idB": 11, "sortA": 10, "sortB": 11}'
 */
 
-export const sortCourses = async ({idA, idB}: {idA: number, idB: number}) => {
-  const response = await authAxios.put("/courses/sort", {
-    idA,
-    idB,
+export const sortCourses = async (sort_courses: { id: number; sort_order: string }[]) => {
+  const response = await authAxios.post("/courses/sort/trash", {
+    sort_courses: sort_courses
   })
   return response.data
 }

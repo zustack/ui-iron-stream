@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    ChevronDown,
-    ChevronUp,
+  ChevronDown,
+  ChevronUp,
   ListFilter,
   Loader,
   Search,
@@ -69,6 +69,39 @@ export default function AdminCourses() {
   const [active, setActive] = useState<number | string>("");
   const [showSkeleton, setShowSkeleton] = useState(false);
 
+  const [isEditSort, setIsEditSort] = useState(false);
+  const [editSort, setEditSort] = useState<
+    { id: number; sort_order: string }[]
+  >([]);
+
+  const sortCoursesMutation = useMutation({
+    mutationFn: () => sortCourses(editSort),
+    onSuccess: () => {
+      setIsEditSort(false)
+      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+    },
+    onError: (error: ErrorResponse) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+    },
+  });
+
+  const handleInputSortChange = (id: number, value: string) => {
+    setEditSort((prev) => {
+      // Verifica si el objeto ya está en el estado
+      const index = prev.findIndex((item) => item.id === id);
+      if (index !== -1) {
+        // Actualiza el objeto existente
+        const updatedSorts = [...prev];
+        updatedSorts[index] = { id, sort_order: value };
+        return updatedSorts;
+      } else {
+        // Agrega un nuevo objeto
+        return [...prev, { id, sort_order: value }];
+      }
+    });
+  };
+
   const queryClient = useQueryClient();
 
   const invalidateQuery = () => {
@@ -121,16 +154,6 @@ export default function AdminCourses() {
     },
   });
 
-const sortCoursesMutation = useMutation({
-  mutationFn: (payload: { sortA: number; sortB: number}) => sortCourses(payload),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-  },
-  onError: (error: ErrorResponse) => {
-    queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-    toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
-  },
-});
 
   useEffect(() => {
     if (!isFetching && showSkeleton) {
@@ -183,6 +206,37 @@ const sortCoursesMutation = useMutation({
               <span>{data?.pages[0].totalCount} cursos.</span>
             ) : null}
           </p>
+          {isEditSort ? (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  sortCoursesMutation.mutate()
+                }}
+                size="sm"
+                className="h-8 gap-1"
+              >
+                Guardar cambios
+              </Button>
+              <Button
+                onClick={() => setIsEditSort(false)}
+                variant="destructive"
+                size="sm"
+                className="h-8 gap-1"
+              >
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => setIsEditSort(true)}
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1"
+            >
+              Ordenar cursos
+            </Button>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 gap-1">
@@ -244,7 +298,7 @@ const sortCoursesMutation = useMutation({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[100px]">Orden</TableHead>
+              <TableHead className="w-[150px]">Orden</TableHead>
               <TableHead>Titulo</TableHead>
               <TableHead>Descripcion</TableHead>
               <TableHead>Autor</TableHead>
@@ -285,13 +339,31 @@ const sortCoursesMutation = useMutation({
                             className={
                               course.id === activeDeleteId ? "hidden" : ""
                             }
-
                           >
                             <TableCell>
                               <Checkbox checked={course.is_active} />
                             </TableCell>
                             <TableCell>
-                              {course.sort_order}
+                              {isEditSort ? (
+                                <Input
+                                  className="h-8 w-20"
+                                  type="text"
+                                  defaultValue={course.sort_order}
+                                  value={
+                                    editSort.find(
+                                      (item) => item.id === course.id
+                                    )?.sort_order ?? course.sort_order
+                                  }
+                                  onChange={(e) =>
+                                    handleInputSortChange(
+                                      course.id,
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              ) : (
+                                <>{course.sort_order}</>
+                              )}
                             </TableCell>
                             <TableCell>{course.title}</TableCell>
                             <TableCell>
@@ -350,7 +422,9 @@ const sortCoursesMutation = useMutation({
                             <TableCell>{course.created_at}</TableCell>
 
                             <TableCell className="text-right">
-                              <Link to={`/admin/videos/${course.id}/${course.title}`}>
+                              <Link
+                                to={`/admin/videos/${course.id}/${course.title}`}
+                              >
                                 <Button
                                   variant="outline"
                                   size="icon"
