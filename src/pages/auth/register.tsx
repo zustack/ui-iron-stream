@@ -23,13 +23,16 @@ import { useMutation } from "@tanstack/react-query";
 import { ErrorResponse } from "@/types";
 import { register } from "@/api/users";
 import EmailVerification from "@/components/auth/email-verfication";
+import { Loader } from "lucide-react";
 
 export default function Register() {
   const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pc, setPc] = useState("");
+  const [os, setOs] = useState("");
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -38,10 +41,13 @@ export default function Register() {
       let commandName: string = "";
 
       if (platformName === "darwin") {
+        setOs("Mac");
         commandName = "serial-mac";
       } else if (platformName === "win32") {
+        setOs("Windows");
         commandName = "serial-win";
       } else if (platformName === "linux") {
+        setOs("Linux");
         commandName = "serial-linux";
       } else {
         toast.error("Ocurrio un error");
@@ -74,7 +80,7 @@ export default function Register() {
   }, []);
 
   const registerMutation = useMutation({
-    mutationFn: () => register(email, fullName, password, pc),
+    mutationFn: () => register(email, name, surname, password, pc, os),
     onSuccess: () => {
       setSuccess(true);
     },
@@ -98,7 +104,18 @@ export default function Register() {
 
   if (success) {
     return (
-      <EmailVerification email={email} />
+      <EmailVerification 
+      close={() => {
+        setEmail("")
+        setName("")
+        setSurname("")
+        setPassword("")
+        setConfirmPassword("")
+        setPc("")
+        setOs("")
+        setSuccess(false)
+      }}
+      email={email} />
     )
   }
 
@@ -130,16 +147,29 @@ export default function Register() {
             </div>
 
             <div className="grid gap-2 mb-4">
-              <Label htmlFor="name">Nombre Completo</Label>
+              <Label htmlFor="name">Nombre</Label>
               <Input
                 id="name"
                 type="text"
-                onChange={(e) => setFullName(e.target.value)}
-                value={fullName}
-                placeholder="John Doe"
+                onChange={(e) => setName(e.target.value)}
+                value={name}
+                placeholder="Agustin"
                 required
               />
             </div>
+
+            <div className="grid gap-2 mb-4">
+              <Label htmlFor="name">Apellido</Label>
+              <Input
+                id="name"
+                type="text"
+                onChange={(e) => setSurname(e.target.value)}
+                value={surname}
+                placeholder="Fricke"
+                required
+              />
+            </div>
+
 
             <div className="grid gap-2 mb-4">
               <div className="flex items-center">
@@ -213,9 +243,13 @@ export default function Register() {
             </div>
             <Button
               type="submit"
-              className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500"
+            className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
             >
-              Crear cuenta
+            {registerMutation.isPending ? (
+              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
+            ) : (
+              <span>Crear cuenta</span>
+            )}
             </Button>
           </form>
 

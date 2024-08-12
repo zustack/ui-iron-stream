@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Image from "../assets/image.png";
 import { Button } from "./ui/button";
 import Rating from "@mui/material/Rating";
@@ -25,12 +25,15 @@ type CourseProp = {
 };
 
 export default function CourseCard({ course }: { course: CourseProp }) {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-2 min-h-[300px] border mb-8">
-      <img 
-      src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
-      alt="" 
-      className="p-1 rounded-[0.75rem]" />
+      <img
+        src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
+        alt=""
+        className="p-1 rounded-[0.75rem]"
+      />
       <div className="flex flex-col justify-between p-4">
         <div>
           <h1 className="max-w-2xl text-4xl font-bold tracking-tight leading-none text-zinc-200 mb-6">
@@ -62,22 +65,24 @@ export default function CourseCard({ course }: { course: CourseProp }) {
             {course.duration}
           </p>
         </div>
-        <div className="flex gap-2 mt-auto">
+        <div className="flex gap-2 mt-auto flex-col lg:flex-row">
           {course.allowed ? (
             <>
-              <Link to={`/video/${course.id}`}>
-                <Button className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500">
-                  Ingresar
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
-              </Link>
+              <Button
+                onClick={() => navigate(`/video/${course.id}`)}
+                className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
+              >
+                Ingresar
+                <ChevronRight className="h-5 w-5" />
+              </Button>
 
-              <Link to={`/video/${course.id}`}>
-                <Button className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500">
-                  Crear resena
-                  <MessageSquareMore className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
+              <Button
+                onClick={() => navigate(`/reviews/create/${course.id}`)}
+                className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
+              >
+                Crear resena
+                <MessageSquareMore className="h-5 w-5 ml-2" />
+              </Button>
             </>
           ) : (
             <Button
@@ -90,12 +95,13 @@ export default function CourseCard({ course }: { course: CourseProp }) {
           )}
 
           {course.preview && (
-            <Link to={`/course/preview/${course.id}`}>
-              <Button className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500">
-                Ver preview gratuita
-                <Video className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
+            <Button
+              onClick={() => navigate(`/course/preview/${course.id}`)}
+              className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
+            >
+              Ver preview gratuita
+              <Video className="h-5 w-5 ml-2" />
+            </Button>
           )}
         </div>
       </div>

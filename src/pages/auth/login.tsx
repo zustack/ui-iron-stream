@@ -121,7 +121,7 @@ export default function Login() {
                 required
               />
             </div>
-            <Button className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500">
+            <Button className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500">
               Iniciar sesión
             </Button>
           </form>

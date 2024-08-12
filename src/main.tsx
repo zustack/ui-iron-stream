@@ -7,6 +7,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
 const queryClient = new QueryClient();
+const loadingSpinner = document.getElementById('loading-spinner');
+
+if (loadingSpinner) {
+  loadingSpinner.style.display = 'none';
+}
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

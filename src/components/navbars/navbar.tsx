@@ -9,8 +9,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { CircleUser, Package2 } from "lucide-react";
+import { useAuthStore } from "@/store/auth";
 
 export default function Navbar() {
+
+  const { logout } = useAuthStore()
+
   return (
     <header className="sticky top-0 flex h-16 items-center border-b bg-background px-4 md:px-6">
       <div className="container mx-auto flex items-center justify-between gap-4">
@@ -49,7 +53,9 @@ export default function Navbar() {
                 <DropdownMenuItem>Configuraciones</DropdownMenuItem>
                 <DropdownMenuItem>Feedback</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                <DropdownMenuItem
+                onClick={() => logout()}
+                >Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
