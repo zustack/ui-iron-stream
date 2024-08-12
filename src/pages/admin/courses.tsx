@@ -9,8 +9,6 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  ChevronDown,
-  ChevronUp,
   ListFilter,
   Loader,
   Search,
@@ -62,12 +60,23 @@ import { Link } from "react-router-dom";
 
 export default function AdminCourses() {
   const [activeDeleteId, setActiveDeleteId] = useState(0);
-  const [activeUpdateId, setActiveUpdateId] = useState(0);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [active, setActive] = useState<number | string>("");
-  const [showSkeleton, setShowSkeleton] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSort, setIsLoadingSort] = useState(false);
+
+  const invalidateQuery = () => {
+    setIsLoading(true);
+    queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+  };
+
+  const invalidateQuerySortOrder = () => {
+    setIsLoadingSort(true);
+    queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+  };
 
   const [isEditSort, setIsEditSort] = useState(false);
   const [editSort, setEditSort] = useState<
@@ -78,7 +87,7 @@ export default function AdminCourses() {
     mutationFn: () => sortCourses(editSort),
     onSuccess: () => {
       setIsEditSort(false)
-      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      invalidateQuerySortOrder()
     },
     onError: (error: ErrorResponse) => {
       queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
@@ -88,36 +97,18 @@ export default function AdminCourses() {
 
   const handleInputSortChange = (id: number, value: string) => {
     setEditSort((prev) => {
-      // Verifica si el objeto ya está en el estado
       const index = prev.findIndex((item) => item.id === id);
       if (index !== -1) {
-        // Actualiza el objeto existente
         const updatedSorts = [...prev];
         updatedSorts[index] = { id, sort_order: value };
         return updatedSorts;
       } else {
-        // Agrega un nuevo objeto
         return [...prev, { id, sort_order: value }];
       }
     });
   };
 
   const queryClient = useQueryClient();
-
-  const invalidateQuery = () => {
-    setShowSkeleton(true);
-    queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
-  };
-
-  const invalidateQueryUpdate = (id: number) => {
-    setActiveUpdateId(id);
-    queryClient.invalidateQueries({ queryKey: ["admin-courses"] }).then(() => {
-      // Espera un poco antes de quitar el skeleton para asegurar que los datos se han actualizado
-      setTimeout(() => {
-        setActiveUpdateId(0);
-      }, 500);
-    });
-  };
 
   const { ref, inView } = useInView();
 
@@ -145,8 +136,7 @@ export default function AdminCourses() {
   const deleteCourseMutation = useMutation({
     mutationFn: (id: number) => deleteCourse(id),
     onSuccess: () => {
-      // invalidateQuery();
-      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      invalidateQuery();
     },
     onError: (error: ErrorResponse) => {
       queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
@@ -154,12 +144,17 @@ export default function AdminCourses() {
     },
   });
 
+  useEffect(() => {
+    if (!isFetching && isLoadingSort) {
+      setIsLoadingSort(false);
+    }
+  }, [isFetching, isLoadingSort]);
 
   useEffect(() => {
-    if (!isFetching && showSkeleton) {
-      setShowSkeleton(false);
+    if (!isFetching && isLoading) {
+      setIsLoading(false);
     }
-  }, [isFetching, showSkeleton]);
+  }, [isFetching, isLoading]);
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -269,13 +264,19 @@ export default function AdminCourses() {
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <CreateCourse invalidate={invalidateQuery} />
+          <CreateCourse isLoading={isLoading} invalidate={invalidateQuery} />
         </div>
       </div>
       <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
         <Table>
           <TableCaption>
             {status === "pending" ? (
+              <div className="h-[100px] flex justify-center items-center">
+                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+              </div>
+            ) : null}
+
+            {isLoadingSort ? (
               <div className="h-[100px] flex justify-center items-center">
                 <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
               </div>
@@ -311,15 +312,10 @@ export default function AdminCourses() {
             </TableRow>
           </TableHeader>
 
+          {isLoadingSort ? (
+            <></>
+          ) : (
           <TableBody>
-            {showSkeleton && (
-              <TableRow>
-                <TableCell colSpan={11}>
-                  <Skeleton className="w-full h-[30px]" />
-                </TableCell>
-              </TableRow>
-            )}
-
             {status != "pending" &&
               status != "error" &&
               data &&
@@ -328,17 +324,14 @@ export default function AdminCourses() {
                   {page.data != null &&
                     page.data.map((course) => (
                       <>
-                        {course.id === activeUpdateId ? (
-                          <TableRow>
-                            <TableCell colSpan={11}>
-                              <Skeleton className="w-full h-[30px]" />
-                            </TableCell>
-                          </TableRow>
-                        ) : (
+                      {(course.id === activeDeleteId) && (isLoading || deleteCourseMutation.isPending) ? (
+                        <TableRow>
+                        <TableCell colSpan={11}>
+                        <Skeleton className="w-full h-[30px]" />
+                        </TableCell>
+                        </TableRow>
+                      ) : (
                           <TableRow
-                            className={
-                              course.id === activeDeleteId ? "hidden" : ""
-                            }
                           >
                             <TableCell>
                               <Checkbox checked={course.is_active} />
@@ -463,33 +456,38 @@ export default function AdminCourses() {
                                     <AlertDialogAction>
                                       <Button
                                         onClick={() => {
-                                          setActiveDeleteId(course.id);
                                           deleteCourseMutation.mutate(
                                             course.id
                                           );
+                                          setActiveDeleteId(course.id);
                                         }}
                                         variant={"destructive"}
                                       >
-                                        Eliminar
+                                      Eliminar
                                       </Button>
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
                               <UpdateCourse
+                                isLoading={isLoading}
                                 course={course}
                                 invalidate={() =>
-                                  invalidateQueryUpdate(course.id)
+                                  invalidateQuery()
                                 }
                               />
                             </TableCell>
                           </TableRow>
-                        )}
+
+                      )}
                       </>
                     ))}
                 </React.Fragment>
               ))}
           </TableBody>
+
+          )}
+
         </Table>
       </ScrollArea>
     </>

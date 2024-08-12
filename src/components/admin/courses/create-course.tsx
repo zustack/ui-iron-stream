@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { createCourse, uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
@@ -34,8 +34,10 @@ import {
 
 export default function CreateCourse({
   invalidate,
+  isLoading,
 }: {
   invalidate: () => void;
+  isLoading: boolean;
 }) {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("Creado por ");
@@ -46,7 +48,7 @@ export default function CreateCourse({
   const [video, setVideo] = useState<File>();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
-  const [is, setIs] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -72,11 +74,23 @@ export default function CreateCourse({
     preview_tmp: string;
   };
 
+  useEffect(() => {
+    if (!isLoading) {
+      setIsOpen(false);
+      setTitle("");
+      setDescription("");
+      setAuthor("Creado por")
+      setActive(false)
+      setDuration("");
+      setThumbnail(undefined);
+      setVideo(undefined);
+    }
+  }, [isLoading]);
+
   const createCourseMutation = useMutation({
     mutationFn: (courseData: CourseData) => createCourse(courseData),
     onSuccess: () => {
       invalidate();
-      setIs(false);
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -135,7 +149,7 @@ export default function CreateCourse({
   }
 
   return (
-    <AlertDialog onOpenChange={(is: boolean) => setIs(is)} open={is}>
+    <AlertDialog onOpenChange={(open: boolean) => setIsOpen(open)} open={isOpen}>
       <AlertDialogTrigger>
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
@@ -275,11 +289,11 @@ export default function CreateCourse({
           <Button
             className="w-[100px]"
             disabled={
-              createCourseMutation.isPending || uploadChunkMutation.isPending
+              createCourseMutation.isPending || uploadChunkMutation.isPending || isLoading 
             }
             onClick={detonateChain}
           >
-            {createCourseMutation.isPending || uploadChunkMutation.isPending ? (
+            {createCourseMutation.isPending || uploadChunkMutation.isPending || isLoading ? (
               <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             ) : (
               <span>Crear curso</span>

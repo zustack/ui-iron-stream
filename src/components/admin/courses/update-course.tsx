@@ -51,9 +51,11 @@ import {
   };
 
 export default function UpdateCourse({
+  isLoading,
   invalidate,
   course
 }: {
+  isLoading: boolean;
   invalidate: () => void;
   course: CourseProp
 }) {
@@ -63,16 +65,11 @@ export default function UpdateCourse({
   const [duration, setDuration] = useState("");
   const [active, setActive] = useState(false);
 
-  const [is, setIs] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [thumbnail, setThumbnail] = useState<File>();
-  const [filePreview, setFilePreview] = useState("");
-  const [currentThumbnail, setCurrentThumbnail] = useState("");
   const [sortOrder, setSortOrder] = useState("");
-
   const [video, setVideo] = useState<File>();
-  const [videoPreview, setVideoPreview] = useState("");
-  const [currentPreview, setCurrentPreview] = useState("");
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
@@ -84,21 +81,20 @@ export default function UpdateCourse({
       setAuthor(course.author);
       setDuration(course.duration);
       setActive(course.is_active);
-      setCurrentThumbnail(
-        `${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`
-      );
-      setCurrentPreview(`${import.meta.env.VITE_BACKEND_URL}${course.preview}`);
   }, [course]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsOpen(false);
+      setThumbnail(undefined);
+      setVideo(undefined);
+    }
+  }, [isLoading]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
     if (file) {
       setThumbnail(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFilePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -106,8 +102,6 @@ export default function UpdateCourse({
     const file = event.target.files && event.target.files[0];
     if (file) {
       setVideo(file);
-      const videoURL = URL.createObjectURL(file);
-      setVideoPreview(videoURL);
     }
   };
 
@@ -127,8 +121,6 @@ export default function UpdateCourse({
     mutationFn: (courseData: CourseData) => updateCourse(courseData),
     onSuccess: () => {
       invalidate();
-      toast.success("Curso actualizado");
-      setIs(false);
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -179,7 +171,7 @@ export default function UpdateCourse({
   }
 
   return (
-    <AlertDialog onOpenChange={(is: boolean) => setIs(is)} open={is}>
+    <AlertDialog onOpenChange={(open: boolean) => setIsOpen(open)} open={isOpen}>
       <AlertDialogTrigger>
         <Button
           onClick={() => {}}
@@ -333,11 +325,11 @@ export default function UpdateCourse({
           <Button
             className="w-[150px]"
             disabled={
-              updateCourseMutation.isPending || uploadChunkMutation.isPending
+              updateCourseMutation.isPending || uploadChunkMutation.isPending || isLoading
             }
             onClick={detonateChain}
           >
-            {updateCourseMutation.isPending || uploadChunkMutation.isPending ? (
+            {updateCourseMutation.isPending || uploadChunkMutation.isPending || isLoading ? (
               <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             ) : (
               <span>Actualizar curso</span>
