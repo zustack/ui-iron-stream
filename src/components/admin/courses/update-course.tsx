@@ -68,6 +68,8 @@ export default function UpdateCourse({
   const [isOpen, setIsOpen] = useState(false);
 
   const [thumbnail, setThumbnail] = useState<File>();
+  const [oldThumbnail, setOldThumbnail] = useState("");
+
   const [sortOrder, setSortOrder] = useState("");
   const [video, setVideo] = useState<File>();
 
@@ -81,6 +83,7 @@ export default function UpdateCourse({
       setAuthor(course.author);
       setDuration(course.duration);
       setActive(course.is_active);
+      setOldThumbnail(course.thumbnail);
   }, [course]);
 
   useEffect(() => {
@@ -114,6 +117,7 @@ export default function UpdateCourse({
     duration: string;
     is_active: boolean;
     thumbnail: File;
+    old_thumbnail: string;
     preview_tmp: string;
   };
 
@@ -153,6 +157,7 @@ export default function UpdateCourse({
           duration,
           is_active: active,
           thumbnail,
+          old_thumbnail: oldThumbnail,
           preview_tmp: response,
         });
       }

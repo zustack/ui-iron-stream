@@ -32,6 +32,7 @@ export const updateCourse = async ({
   duration,
   is_active,
   thumbnail,
+  old_thumbnail,
   preview_tmp,
 }: {
   id: number;
@@ -42,6 +43,7 @@ export const updateCourse = async ({
   duration: string;
   is_active: boolean;
   thumbnail: File;
+  old_thumbnail: string;
   preview_tmp: string;
 }) => {
   const formData = new FormData();
@@ -53,7 +55,10 @@ export const updateCourse = async ({
   formData.append("duration", duration);
   formData.append("is_active", is_active.toString());
   formData.append("thumbnail", thumbnail);
+  formData.append("old_thumbnail", old_thumbnail);
   formData.append("preview_tmp", preview_tmp);
+  /*
+  */
 
   const response = await authAxios.put("/courses/update", formData, {
     headers: { "Content-Type": "multipart/form-data" },
