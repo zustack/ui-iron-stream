@@ -23,6 +23,8 @@ export const updateVideo = async ({
   course_id,
   duration,
   thumbnail,
+  old_thumbnail,
+  old_video,
   video_tmp,
 }: {
   id:number
@@ -31,6 +33,8 @@ export const updateVideo = async ({
   course_id: string;
   duration: string;
   thumbnail: File;
+  old_thumbnail: string;
+  old_video: string
   video_tmp: string;
 }) => {
   const formData = new FormData();
@@ -40,6 +44,8 @@ export const updateVideo = async ({
   formData.append("duration", duration);
   formData.append("course_id", course_id);
   formData.append("thumbnail", thumbnail);
+  formData.append("old_thumbnail", old_thumbnail);
+  formData.append("old_video", old_video);
   formData.append("video_tmp", video_tmp);
 
   const response = await authAxios.put("/videos", formData, {

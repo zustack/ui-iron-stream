@@ -177,8 +177,6 @@ export default function AdminCourses() {
     setSearchInput(value);
   };
 
-  console.log(data)
-
   return (
     <>
       <div className="bg-muted/40 flex justify-between pt-2 pb-[10px] px-11 border border-b">

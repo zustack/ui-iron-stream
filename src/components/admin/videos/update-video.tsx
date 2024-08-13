@@ -32,6 +32,7 @@ type VideoProp = {
   description: string;
   duration: string;
   thumbnail: string;
+  video_hls: string;
 };
 
 export default function UpdateVideo({
@@ -50,6 +51,10 @@ export default function UpdateVideo({
   const [duration, setDuration] = useState("");
   const [thumbnail, setThumbnail] = useState<File>();
   const [video, setVideo] = useState<File>();
+
+  const [oldThumbnail, setOldThumbnail] = useState("");
+  const [oldVideo, setOldVideo] = useState("");
+
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +63,8 @@ export default function UpdateVideo({
       setTitle(data.title);
       setDescription(data.description);
       setDuration(data.duration);
+      setOldThumbnail(data.thumbnail);
+      setOldVideo(data.video_hls);
   }, [data]);
 
   useEffect(() => {
@@ -65,6 +72,8 @@ export default function UpdateVideo({
       setIsOpen(false);
       setThumbnail(undefined);
       setVideo(undefined);
+      setOldThumbnail("");
+      setOldVideo("");
     }
   }, [isLoading]);
 
@@ -91,6 +100,8 @@ export default function UpdateVideo({
     duration: string;
     thumbnail: File;
     video_tmp: string;
+    old_thumbnail: string;
+    old_video: string;
   };
 
   const updateVideoMutation = useMutation({
@@ -128,6 +139,8 @@ export default function UpdateVideo({
           duration,
           thumbnail,
           video_tmp: response,
+          old_thumbnail: oldThumbnail,
+          old_video: oldVideo,
         });
       }
     },
