@@ -91,6 +91,7 @@ type SearchParam = {
 type SearchParamUserCourses = {
   searchParam: string;
   pageParam: number;
+  id?: number
 }
 
 export const userCourses = async ({
@@ -99,6 +100,17 @@ export const userCourses = async ({
 }: SearchParamUserCourses): Promise<CourseResponse> => {
   const response = await authAxios.get<CourseResponse>(
     `/courses?cursor=${pageParam}&q=${searchParam}`
+  );
+  return response.data;
+};
+
+export const coursesByUserId = async ({
+  pageParam = 0,
+  searchParam,
+  id
+}: SearchParamUserCourses): Promise<CourseResponse> => {
+  const response = await authAxios.get<CourseResponse>(
+    `/courses/user/${id}?cursor=${pageParam}&q=${searchParam}`
   );
   return response.data;
 };

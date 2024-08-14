@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    GraduationCap,
+  GraduationCap,
   ListFilter,
   Loader,
   Plus,
@@ -59,8 +59,13 @@ import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import UpdateCourse from "@/components/admin/courses/update-course";
 import { Link } from "react-router-dom";
-import { adminUsers, deleteAccountAtRegister, updateActiveStatus } from "@/api/users";
+import {
+  adminUsers,
+  deleteAccountAtRegister,
+  updateActiveStatus,
+} from "@/api/users";
 import AddCouseToUser from "@/components/admin/users/add-course-to-user";
+import Deactivate from "@/components/admin/users/deactivate";
 
 export default function AdminUsers() {
   const [activeDeleteId, setActiveDeleteId] = useState(0);
@@ -94,7 +99,14 @@ export default function AdminUsers() {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["admin-users", debouncedSearchTerm, activeParam, adminParam, specialParam, verifiedParam],
+    queryKey: [
+      "admin-users",
+      debouncedSearchTerm,
+      activeParam,
+      adminParam,
+      specialParam,
+      verifiedParam,
+    ],
     queryFn: async ({ pageParam }) => {
       return adminUsers({
         pageParam: pageParam ?? 0,
@@ -151,7 +163,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     const timerId = setTimeout(() => {
-      const backendSearchInput = searchInput.replace(/ /g, '&');
+      const backendSearchInput = searchInput.replace(/ /g, "&");
       setDebouncedSearchTerm(backendSearchInput);
     }, 800);
 
@@ -207,7 +219,7 @@ export default function AdminUsers() {
                   if (activeParam === 1) {
                     setActiveParam("");
                   } else {
-                    setActiveParam(1)
+                    setActiveParam(1);
                   }
                 }}
                 checked={activeParam === 1}
@@ -219,7 +231,7 @@ export default function AdminUsers() {
                   if (adminParam === 1) {
                     setAdminParam("");
                   } else {
-                    setAdminParam(1)
+                    setAdminParam(1);
                   }
                 }}
                 checked={adminParam === 1}
@@ -232,7 +244,7 @@ export default function AdminUsers() {
                   if (verifiedParam === 1) {
                     setVerifiedParam("");
                   } else {
-                    setVerifiedParam(1)
+                    setVerifiedParam(1);
                   }
                 }}
                 checked={verifiedParam === 1}
@@ -244,7 +256,7 @@ export default function AdminUsers() {
                   if (specialParam === 1) {
                     setSpecialParam("");
                   } else {
-                    setSpecialParam(1)
+                    setSpecialParam(1);
                   }
                 }}
                 checked={specialParam === 1}
@@ -254,7 +266,9 @@ export default function AdminUsers() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <CreateCourse isLoading={isLoading} invalidate={invalidateQuery} />
+          <Deactivate 
+          />
+
         </div>
       </div>
       <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
@@ -288,7 +302,9 @@ export default function AdminUsers() {
           </TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Status</TableHead>
+              <TableHead className="w-[100px]">
+                Activo
+              </TableHead>
               <TableHead className="w-[100px]">Admin</TableHead>
               <TableHead className="w-[100px]">Verificado</TableHead>
               <TableHead className="w-[100px]">Apps</TableHead>
@@ -305,111 +321,111 @@ export default function AdminUsers() {
           {isLoadingSort ? (
             <></>
           ) : (
-          <TableBody>
-            {status != "pending" &&
-              status != "error" &&
-              data &&
-              data.pages.map((page) => (
-                <React.Fragment key={page.nextId}>
-                  {page.data != null &&
-                    page.data.map((course) => (
-                      <>
-                      {(course.id === activeDeleteId) && (isLoading || deleteUserMutation.isPending) ? (
-                        <TableRow>
-                        <TableCell colSpan={11}>
-                        <Skeleton className="w-full h-[30px]" />
-                        </TableCell>
-                        </TableRow>
-                      ) : (
-                          <TableRow
-                          >
-                            <TableCell>
-                              <Checkbox 
-                              onClick={() => updateActiveMutation.mutate(course.id)}
-                                checked={course.is_active} />
-                            </TableCell>
+            <TableBody>
+              {status != "pending" &&
+                status != "error" &&
+                data &&
+                data.pages.map((page) => (
+                  <React.Fragment key={page.nextId}>
+                    {page.data != null &&
+                      page.data.map((course) => (
+                        <>
+                          {course.id === activeDeleteId &&
+                          (isLoading || deleteUserMutation.isPending) ? (
+                            <TableRow>
+                              <TableCell colSpan={11}>
+                                <Skeleton className="w-full h-[30px]" />
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            <TableRow>
+                              <TableCell>
+                                <Checkbox
+                                  onClick={() =>
+                                    updateActiveMutation.mutate(course.id)
+                                  }
+                                  checked={course.is_active}
+                                />
+                              </TableCell>
 
-                            <TableCell>
-                              <Checkbox checked={course.isAdmin} />
-                            </TableCell>
+                              <TableCell>
+                                <Checkbox checked={course.isAdmin} />
+                              </TableCell>
 
-                            <TableCell>
-                              <Checkbox checked={course.verified} />
-                            </TableCell>
+                              <TableCell>
+                                <Checkbox checked={course.verified} />
+                              </TableCell>
 
-                            <TableCell>
-                              <Checkbox checked={course.specialApps} />
-                            </TableCell>
+                              <TableCell>
+                                <Checkbox checked={course.specialApps} />
+                              </TableCell>
 
-                            <TableCell>{course.email}</TableCell>
-                            <TableCell>{course.name}</TableCell>
-                            <TableCell>{course.surname}</TableCell>
-                            <TableCell>{course.pc}</TableCell>
-                            <TableCell>{course.os}</TableCell>
-                            <TableCell>{course.created_at}</TableCell>
+                              <TableCell>{course.email}</TableCell>
+                              <TableCell>{course.name}</TableCell>
+                              <TableCell>{course.surname}</TableCell>
+                              <TableCell>{course.pc}</TableCell>
+                              <TableCell>{course.os}</TableCell>
+                              <TableCell>{course.created_at}</TableCell>
 
-                            <TableCell className="text-right">
-                            <AddCouseToUser 
-                              email={course.email}
-                              name={course.name}
-                              surname={course.surname}
-                              userId={course.id}
-                            />
-                              <AlertDialog>
-                                <AlertDialogTrigger>
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 gap-1 mx-1"
-                                  >
-                                    <Trash className="h-5 w-5 text-red-500" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                      Estas seguro de eliminar el curso{" "}
-                                      {course.name}?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      <p>
-                                        Esta operación no se puede deshacer.
-                                        Procede con cuidado
-                                      </p>
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>
-                                      Cerrar
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction>
-                                      <Button
-                                        onClick={() => {
-                                          deleteUserMutation.mutate(
-                                            course.email
-                                          );
-                                          setActiveDeleteId(course.id);
-                                        }}
-                                        variant={"destructive"}
-                                      >
-                                      Eliminar
-                                      </Button>
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </TableCell>
-                          </TableRow>
-
-                      )}
-                      </>
-                    ))}
-                </React.Fragment>
-              ))}
-          </TableBody>
-
+                              <TableCell className="text-right">
+                                <AddCouseToUser
+                                  email={course.email}
+                                  name={course.name}
+                                  surname={course.surname}
+                                  userId={course.id}
+                                />
+                                <AlertDialog>
+                                  <AlertDialogTrigger>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-8 gap-1 mx-1"
+                                    >
+                                      <Trash className="h-5 w-5 text-red-500" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        Estas seguro de eliminar el curso{" "}
+                                        {course.name}?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        <p>
+                                          Esta operación no se puede deshacer.
+                                          Procede con cuidado
+                                        </p>
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>
+                                        Cerrar
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction>
+                                        <Button
+                                          onClick={() => {
+                                            deleteUserMutation.mutate(
+                                              course.email
+                                            );
+                                            setActiveDeleteId(course.id);
+                                          }}
+                                          variant={"destructive"}
+                                        >
+                                          Eliminar
+                                        </Button>
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
+                      ))}
+                  </React.Fragment>
+                ))}
+            </TableBody>
           )}
-
         </Table>
       </ScrollArea>
     </>

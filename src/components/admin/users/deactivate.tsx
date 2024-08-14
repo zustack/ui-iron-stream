@@ -1,4 +1,4 @@
-import { adminCourses, coursesByUserId, userCourses } from "@/api/courses";
+import { deactivateAllCourses, deactivateCourseForAllUsers, updateActiveStatusAllUser } from "@/api/users";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -12,22 +12,56 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader, Plus } from "lucide-react";
-import React, { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { addCourseToUser } from "@/api/users";
-import toast from "react-hot-toast";
+import React, { useEffect, useState } from "react";
 import { ErrorResponse } from "@/types";
+import toast from "react-hot-toast";
+import { useInView } from "react-intersection-observer";
+import { adminCourses, coursesByUserId } from "@/api/courses";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { Loader } from "lucide-react";
 
-type Props = {
-  userId: number
-  email: string
-  name: string
-  surname: string
-}
+export default function Deactivate() {
+  const [isOpen, setIsOpen] = useState(false);
 
-export default function AddCouseToUser({userId, email, name, surname}: Props) {
+  const addCourseToUserMutation = useMutation({
+    mutationFn: (action:boolean) => updateActiveStatusAllUser(action),
+    onSuccess: () => {
+    },
+    onError: (error: ErrorResponse) => {
+      if (error.response.data.error === "") {
+        toast.error("Ocurrio un error inesperado");
+      }
+      toast.error(error.response.data.error);
+    },
+  });
+
+  const deactivateAllCoursesMutation = useMutation({
+    mutationFn: () => deactivateAllCourses(),
+    onSuccess: () => {
+    },
+    onError: (error: ErrorResponse) => {
+      if (error.response.data.error === "") {
+        toast.error("Ocurrio un error inesperado");
+      }
+      toast.error(error.response.data.error);
+    },
+  });
+
+  const deactivateCourseForAllUsersMutation = useMutation({
+    mutationFn: (id:number) => deactivateCourseForAllUsers(id),
+    onSuccess: () => {
+      toast.success("Hey it's ok")
+    },
+    onError: (error: ErrorResponse) => {
+      if (error.response.data.error === "") {
+        toast.error("Ocurrio un error inesperado");
+      }
+      toast.error(error.response.data.error);
+    },
+  });
+
+// deactivateCourseForAllUsers 
+
   const { ref, inView } = useInView();
 
   const queryClient = useQueryClient();
@@ -41,12 +75,12 @@ export default function AddCouseToUser({userId, email, name, surname}: Props) {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["add-courses-to-user", userId],
+    queryKey: ["add-courses-to-user"],
     queryFn: async ({ pageParam }) => {
-      return coursesByUserId({
+      return adminCourses({
         pageParam: pageParam ?? 0,
         searchParam: "",
-        id: userId,
+        active: 1,
       });
     },
     getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
@@ -59,46 +93,41 @@ export default function AddCouseToUser({userId, email, name, surname}: Props) {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  type AddCourseToUserPayload = {
-    user_id: number;
-    courses: number;
-  }
 
-  const addCourseToUserMutation = useMutation({
-    mutationFn: (payload: AddCourseToUserPayload) => addCourseToUser(payload.user_id, payload.courses),
-    onSuccess: () => {
-      toast.success("hey es success")
-      queryClient.invalidateQueries({ queryKey: ["add-courses-to-user"] });
-    },
-    onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
-    },
-  });
 
   return (
-    <AlertDialog>
+    <AlertDialog
+      onOpenChange={(open: boolean) => setIsOpen(open)}
+      open={isOpen}
+    >
       <AlertDialogTrigger>
-        <Button variant="outline" size="icon" className="h-8 gap-1 mx-1">
-          <Plus className="h-5 w-5 text-zinc-200" />
+        <Button size="sm" className="h-8 gap-1">
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Desactivar
+          </span>
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Agrega cursos al usuario {" "}
-         <span className="text-indigo-400"> 
-         {name}{" "} 
-         {surname}{" "} idd::: {userId}
-         </span>
-          con 
-          el correo electronico{" "}
-         <span className="text-indigo-400"> 
-         {email}
-         </span>
-          </AlertDialogTitle>
+          <AlertDialogTitle>Desactivar</AlertDialogTitle>
           <AlertDialogDescription>
+            <h4 className="text-lg">Usuarios</h4>
+            <div className="flex flex-col gap-2">
+              <Button
+              onClick={() => addCourseToUserMutation.mutate(false)}
+              >Desactivar todos los usuarios</Button>
+              <Button
+              onClick={() => addCourseToUserMutation.mutate(true)}
+              >Activar todos los usuarios</Button>
+            </div>
+
+            <h4 className="text-lg">Cursos</h4>
+            <div className="flex flex-col gap-2">
+              <Button
+              onClick={() => deactivateAllCoursesMutation.mutate()}
+              >Desactivar todos los cursos</Button>
+            </div>
+
             <ScrollArea className="h-[200px] w-[350px]p-4">
               {status === "pending" ? (
                 <div className="flex justify-center items-center h-[200px]">
@@ -116,12 +145,13 @@ export default function AddCouseToUser({userId, email, name, surname}: Props) {
                     {page.data != null &&
                       page.data.map((course) => (
                         <div className="flex items-center space-x-2 py-2">
-                          <Checkbox 
-                          checked={course.allowed}
+                          <Button
                           onClick={() => {
-                            addCourseToUserMutation.mutate({user_id: userId, courses: course.id})}
-                          }
-                          id="terms" />
+                            deactivateCourseForAllUsersMutation.mutate(course.id)
+                          }}
+                          >
+                            Desactivar
+                          </Button>
                           <label
                             htmlFor="terms"
                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -149,6 +179,7 @@ export default function AddCouseToUser({userId, email, name, surname}: Props) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cerrar</AlertDialogCancel>
+          <Button className="w-[100px]">Some action</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

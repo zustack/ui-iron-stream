@@ -1,5 +1,40 @@
 import { authAxios, noAuthAxios } from "@/lib/axiosInstances";
 
+/*
+```bash
+curl -X PUT "http://localhost:8081/deactivate/all/courses"  \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNjE4MDIsImlhdCI6MTcyMzU2OTgwMiwibmJmIjoxNzIzNTY5ODAyLCJzdWIiOjR9.cn0fUJUF6ZFE6Iklxt-CL1KR2_uJ5eHWfX4iOFQdKi4" 
+```
+
+```bash
+curl -X PUT "http://localhost:8081/deactivate/course/for/all/users/1"  \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNjE4MDIsImlhdCI6MTcyMzU2OTgwMiwibmJmIjoxNzIzNTY5ODAyLCJzdWIiOjR9.cn0fUJUF6ZFE6Iklxt-CL1KR2_uJ5eHWfX4iOFQdKi4" 
+```
+
+curl -X PUT "http://localhost:8081/update/active/status"  \
+  -H "Content-Type: multipart/form-data" \
+  -F "isActive=true" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYxNjE4MDIsImlhdCI6MTcyMzU2OTgwMiwibmJmIjoxNzIzNTY5ODAyLCJzdWIiOjR9.cn0fUJUF6ZFE6Iklxt-CL1KR2_uJ5eHWfX4iOFQdKi4" 
+*/
+
+export const deactivateCourseForAllUsers = async(id:number) => {
+  const response = await authAxios.put(`/deactivate/course/for/all/users/${id}`);
+  return response.data;
+}
+
+export const deactivateAllCourses = async() => {
+  const response = await authAxios.put("/deactivate/all/courses");
+  return response.data;
+}
+
+export const updateActiveStatusAllUser = async(isActive: boolean) => {
+  const formData = new FormData();
+  formData.append("isActive", isActive.toString());
+  const response = await authAxios.put("/update/active/status", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+}
 
 export const updateActiveStatus = async (
   user_id: number,
@@ -16,7 +51,7 @@ curl -X PUT "http://localhost:8081/courses/add/user" \
 */
 
 export const addCourseToUser = async (
-  user_id: string,
+  user_id: number,
   course_id: number
 ) => {
   const response = await authAxios.put("/courses/add/user", {
