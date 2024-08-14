@@ -2,17 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Image from "../../../assets/image.png";
-import { Rating } from "@mui/material";
 import {
-  ChevronLeft,
   Loader,
   Paperclip,
   PlusCircle,
-  StarIcon,
-  VideoIcon,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -22,7 +16,6 @@ import { ErrorResponse } from "@/types";
 import { CHUNK_SIZE } from "@/api/courses";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,

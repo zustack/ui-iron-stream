@@ -14,6 +14,7 @@ import AdminCourses from "./pages/admin/courses";
 import AdminVideos from "./pages/admin/videos";
 
 import WindowFiles from "./components/admin/videos/window-files";
+import AdminApps from "./pages/admin/apps";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="courses" element={<AdminCourses />} />
           <Route path="videos/:courseId/:courseTitle" element={<AdminVideos />} />
+          <Route path="apps" element={<AdminApps />} />
         </Route>
 
         <Route path="new/window/admin/videos/files/:videoId" element={<WindowFiles />} />
