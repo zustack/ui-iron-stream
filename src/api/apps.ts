@@ -1,5 +1,18 @@
 import { authAxios } from "@/lib/axiosInstances";
 
+export const getUserSpecialApps = async (userId: number) => {
+  const response = await authAxios.get(`/special/apps/get/${userId}`);
+  return response.data;
+};
+
+export const createSpecialApps = async (apps: { name: string; process_name: string; os: string; is_active: boolean }[], userId: number) => {
+  const response = await authAxios.post("/special/apps/create", {
+    apps: apps,
+    user_id: userId
+  })
+  return response.data
+}
+
 export const deleteApp = async (id:number) => {
   const response = await authAxios.delete(`/apps/delete/${id}`)
   return response.data

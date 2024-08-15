@@ -66,6 +66,8 @@ import {
 } from "@/api/users";
 import AddCouseToUser from "@/components/admin/users/add-course-to-user";
 import Deactivate from "@/components/admin/users/deactivate";
+import SpecialApps from "@/components/admin/users/special-apps";
+import TrueSpecialApps from "@/components/admin/users/true-special-apps";
 
 export default function AdminUsers() {
   const [activeDeleteId, setActiveDeleteId] = useState(0);
@@ -176,6 +178,8 @@ export default function AdminUsers() {
     const { value } = event.target;
     setSearchInput(value);
   };
+
+  console.log(data)
 
   return (
     <>
@@ -357,7 +361,16 @@ export default function AdminUsers() {
                               </TableCell>
 
                               <TableCell>
-                                <Checkbox checked={course.specialApps} />
+                                <Checkbox checked={course.special_apps} />
+                                  {course.special_apps ? (
+                                    <TrueSpecialApps
+                                  specialApps={course.special_apps}
+                                  userId={course.id} />
+                                  ) : (
+                                  <SpecialApps 
+                                  specialApps={course.special_apps}
+                                  userId={course.id} />
+                                  )}
                               </TableCell>
 
                               <TableCell>{course.email}</TableCell>
