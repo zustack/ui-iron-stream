@@ -1,5 +1,10 @@
 import { authAxios } from "@/lib/axiosInstances";
 
+export const getForbiddenApps = async () => {
+  const response = await authAxios.get(`/special/apps/get`);
+  return response.data;
+};
+
 export const getUserSpecialApps = async (userId: number) => {
   const response = await authAxios.get(`/special/apps/get/${userId}`);
   return response.data;

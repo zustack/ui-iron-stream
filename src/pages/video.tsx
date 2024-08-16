@@ -1,36 +1,86 @@
-import { getCurrentVideo, getVideosByCourseId, updateHistory } from "@/api/videos";
+import { getForbiddenApps } from "@/api/apps";
+import {
+  getCurrentVideo,
+  getVideosByCourseId,
+  updateHistory,
+} from "@/api/videos";
+import ForbiddenApps from "@/components/forbidden-apps";
 import { Button } from "@/components/ui/button";
 import VideoFeed from "@/components/video-feed";
 import VideoHls from "@/components/video-hls";
+import { useOsStore } from "@/store/os";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Command } from "@tauri-apps/api/shell";
 import { appWindow } from "@tauri-apps/api/window";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+
+type App = {
+  name: string;
+  process_name: string;
+};
 
 export default function Video() {
   const { courseId } = useParams();
   const [resumeState, setResumeState] = useState(0);
 
-  // poner todo esto en video-hls
-  const updateHistoryMutation = useMutation({
-    mutationFn: () => updateHistory(String(video.history_id), String(resumeState)),
+
+  // start forbidden apps logic
+  const [localApps, setLocalApps] = useState("");
+  const [foundApps, setFoundApps] = useState<App[]>([]);
+  const { os } = useOsStore()
+
+  async function getLocalApps() {
+    let commandName: string = "";
+    if (os === "darwin") {
+      commandName = "apps-mac";
+    } else if (os === "win32") {
+      commandName = "apps-win";
+    } else if (os === "linux") {
+      commandName = "apps-linux";
+    } else {
+      console.error("Unsupported platform");
+      return;
+    }
+    const command = new Command(commandName);
+    const output = await command.execute();
+    const data = output.stdout;
+    setLocalApps(data);
+  }
+
+  // query to get remote apps 
+  // this endpoint should check if the user.isSepcialApps is true
+  // if true, it should return the special apps by user_id
+  // if not true, it should return the normal apps by os!!
+  const {
+    data: forbiddenApps,
+    isLoading: isLoadingForbiddenApps,
+    isError: isErrorForbiddenApps,
+  } = useQuery({
+    queryKey: ["forbidden-apps"],
+    queryFn: () => getForbiddenApps(),
   });
 
-    /*
-      isChangePageRequested: boolean
-      changePage:() => void;
-    */
+    console.log(forbiddenApps)
+    console.log("local apps", localApps)
+    console.log("found apps", foundApps)
 
-  // el usuario le dio click a otra pagina?
-  // cambiar changePageRequested(true)
-  // en el useEffect poner la dependecia de changePageRequested para capturar el evento(resume time)
-  // 
+  const findAndStoreApps = () => {
+    if (!forbiddenApps || !localApps) return;
+    const found = forbiddenApps.filter((item: App) =>
+      localApps.includes(item.process_name)
+    );
+    setFoundApps(found);
+  };
 
-  appWindow.listen("tauri://close-requested", async function () {
-    // make logout
-    updateHistoryMutation.mutate();
-  });
-  // end video-hls
+  useEffect(() => {
+      const intervalId = setInterval(() => {
+        getLocalApps();
+        findAndStoreApps();
+      }, 5000);
+      return () => clearInterval(intervalId);
+  }, [localApps, foundApps, forbiddenApps]);
+  // end forbidden apps logic
 
   const {
     data: video,
@@ -50,12 +100,18 @@ export default function Video() {
     queryFn: () => getVideosByCourseId(courseId || ""),
   });
 
-  if (isLoadingCurrentVideo ){
+  if (isLoadingCurrentVideo) {
     return <div>Loading...</div>;
   }
-if (isLoadingVideos) {
-  return <div>Loading...</div>;
-}
+  if (isLoadingVideos) {
+    return <div>Loading...</div>;
+  }
+
+  if (foundApps && foundApps.length > 0) {
+    return (
+      <ForbiddenApps apps={foundApps}/>
+    )
+  }
 
   if (isErrorVideos) return <>Error</>;
   if (isErrorCurrentVideo) return <>Error</>;
@@ -64,18 +120,16 @@ if (isLoadingVideos) {
     <div className="grid grid-cols-6 lg:grid-cols-12 gap-4">
       <div className="col-span-6 lg:col-span-8">
         <VideoHls
-            setResume={setResumeState}
-            resume={video.resume}
-            src={video.video.video_hls}
-            history_id={video && video.history_id}
+          setResume={setResumeState}
+          resume={video.resume}
+          src={video.video.video_hls}
+          history_id={video && video.history_id}
         />
         <h1 className="text-zinc-200 mt-4 text-xl font-semibold">
           {video.video.title}
         </h1>
 
-        <p className="text-zinc-400 mt-2">
-            {video.video.description}
-        </p>
+        <p className="text-zinc-400 mt-2">{video.video.description}</p>
         <div className="mt-2 flex gap-2">
           <Button>Ver archivos</Button>
           <Button>Abrir notas</Button>

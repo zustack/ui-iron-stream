@@ -15,8 +15,21 @@ import AdminVideos from "./pages/admin/videos";
 
 import WindowFiles from "./components/admin/videos/window-files";
 import AdminApps from "./pages/admin/apps";
+import { platform } from "@tauri-apps/api/os";
+import { useOsStore } from "./store/os";
+import { useEffect } from "react";
 
 function App() {
+  const { setOs, os } = useOsStore()
+
+  useEffect(() => {
+    async function getPlaform() {
+      const osSystem = await platform();
+      setOs(osSystem);
+    }
+    getPlaform();
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

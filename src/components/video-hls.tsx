@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useVideoResumeStore } from "@/store/video-resume";
 import { updateHistory } from "@/api/videos";
 import { useMutation } from "@tanstack/react-query";
+import { appWindow } from "@tauri-apps/api/window";
 
 type Props = {
   src: string;
@@ -15,11 +16,12 @@ type Props = {
 const VideoHls = ({ src, resume, setResume, history_id }: Props) => {
 
   const updateHistoryMutation = useMutation({
-    mutationFn: (resumeState: number) => updateHistory(String(history_id), String(resumeState)),
+    mutationFn: (resumeState: number) =>
+      updateHistory(String(history_id), String(resumeState)),
   });
 
   const videoRef = useRef<HTMLMediaElement | null>(null);
-  const { isChangePageRequested } = useVideoResumeStore()
+  const { isChangePageRequested } = useVideoResumeStore();
 
   useEffect(() => {
     let videoSrc = `${import.meta.env.VITE_BACKEND_URL}${src}`;
@@ -149,15 +151,22 @@ const VideoHls = ({ src, resume, setResume, history_id }: Props) => {
       updateHistoryMutation.mutate(videoRef.current.currentTime);
     }
 
-  }, [resume, src, isChangePageRequested ]);
+  }, [resume, src, isChangePageRequested]);
 
   setResume(videoRef.current?.currentTime || 0);
+
+  appWindow.listen("tauri://close-requested", async function () {
+    // make logout
+    if (videoRef.current) {
+      updateHistoryMutation.mutate(videoRef.current.currentTime);
+    }
+  });
 
   return (
     <div className="relative">
       <video
         className="player"
-        autoPlay={false}
+        autoPlay={true}
         id="video"
         preload="auto"
       ></video>

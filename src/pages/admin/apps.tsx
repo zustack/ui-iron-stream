@@ -133,7 +133,7 @@ export default function AdminApps() {
       <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
         <Table>
           <TableCaption>
-            {data.data == null && (
+            {data && data.data == null && (
               <div className="h-[100px] flex justify-center items-center">
                 No apps found
               </div>
