@@ -23,16 +23,18 @@
             "cmd": "system_profiler",
             "args": ["SPHardwareDataType"]
           },
+           
           {
             "name": "serial-linux",
             "cmd": "echo",
-            "args": ["42069"]
+            "args": ["$(whoami)@$(hostname)"]
           },
           {
             "name": "serial-win",
             "cmd": "wmic",
             "args": ["bios", "get", "serialnumber"] 
           },
+
           {
             "name": "apps-win",
             "cmd": "tasklist",
@@ -47,6 +49,22 @@
             "name": "apps-linux",
             "cmd": "ps",
             "args": ["-eo", "comm"] 
+          },
+
+          {
+            "name": "kill-win",
+            "cmd": "taskkill",
+            "args": ["/IM", { "validator": "\\S+" }, "/F"] 
+          },
+          {
+            "name": "kill-mac",
+            "cmd": "pkill",
+            "args": [{ "validator": "\\S+" }] 
+          },
+          {
+            "name": "kill-linux",
+            "cmd": "pkill",
+            "args": [{ "validator": "\\S+" }] 
           }
         ]
       }

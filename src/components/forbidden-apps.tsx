@@ -9,11 +9,35 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Checkbox } from "./ui/checkbox";
+import { Command } from '@tauri-apps/api/shell'
 
 export default function ForbiddenApps({ apps }: any) {
   const [show, setShow] = useState(true);
+
+  /*
+    import { Command } from '@tauri-apps/api/shell'
+    new Command('kill-win', ['/IM', 'app', '/F'])
+    * tauri.conf.json
+            "name": "kill-win",
+            "cmd": "taskkill",
+            "args": ["/IM", { "validator": "\\S+" }, "/F"] 
+  */
+
+  function killApps(apps: any) {
+    // check the os and execute a different command depending of that
+    for (const app of apps) {
+      new Command('kill-win', ['/IM', app, '/F'])
+    }
+  }
+
+  // if the user click kill apps automatically
+  // esto deberia estar en video.tsx, donde cada (x) time cierra las aplicaciones
+  // si una condicion se cumple, si el video esta en pausa no se ejecuta nada
+  // para no gastar recursos
+  // una opcion para poder cambiar el estado?
+
   return (
     <AlertDialog open={show} onOpenChange={setShow}>
       <AlertDialogContent>

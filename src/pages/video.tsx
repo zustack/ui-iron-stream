@@ -75,6 +75,12 @@ export default function Video() {
 
   useEffect(() => {
       const intervalId = setInterval(() => {
+        // if automatic == true {
+        // kill the apps found every (x) time
+        // do not show the modal
+        // if player == pause {
+        // return and do not execute
+        // }
         getLocalApps();
         findAndStoreApps();
       }, 5000);
