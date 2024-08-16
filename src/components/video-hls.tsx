@@ -1,15 +1,25 @@
 import Plyr from "plyr";
 import Hls from "hls.js";
 import { useEffect, useRef } from "react";
+import { useVideoResumeStore } from "@/store/video-resume";
+import { updateHistory } from "@/api/videos";
+import { useMutation } from "@tanstack/react-query";
 
 type Props = {
   src: string;
   resume: string;
   setResume: (num: number) => void;
+  history_id: string;
 };
 
-const VideoHls = ({ src, resume, setResume }: Props) => {
+const VideoHls = ({ src, resume, setResume, history_id }: Props) => {
+
+  const updateHistoryMutation = useMutation({
+    mutationFn: (resumeState: number) => updateHistory(String(history_id), String(resumeState)),
+  });
+
   const videoRef = useRef<HTMLMediaElement | null>(null);
+  const { isChangePageRequested } = useVideoResumeStore()
 
   useEffect(() => {
     let videoSrc = `${import.meta.env.VITE_BACKEND_URL}${src}`;
@@ -134,19 +144,24 @@ const VideoHls = ({ src, resume, setResume }: Props) => {
     if (videoRef.current) {
       videoRef.current.currentTime = Number(resume);
     }
-  }, [resume, src]);
+
+    if (isChangePageRequested) {
+      updateHistoryMutation.mutate(videoRef.current.currentTime);
+    }
+
+  }, [resume, src, isChangePageRequested ]);
 
   setResume(videoRef.current?.currentTime || 0);
 
   return (
-      <div className="relative">
-        <video
-          className="player"
-          autoPlay={false}
-          id="video"
-          preload="auto"
-        ></video>
-      </div>
+    <div className="relative">
+      <video
+        className="player"
+        autoPlay={false}
+        id="video"
+        preload="auto"
+      ></video>
+    </div>
   );
 };
 

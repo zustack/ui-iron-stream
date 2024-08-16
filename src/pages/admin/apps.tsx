@@ -77,10 +77,6 @@ export default function AdminApps() {
     setSearchParam(value);
   };
 
-  if (data == undefined) return <>no apps</>;
-
-  if (data && data.data == null) return <>no apps</>;
-
   return (
     <>
       <div className="bg-muted/40 flex justify-between pt-2 pb-[10px] px-11 border border-b">

@@ -11,6 +11,7 @@ import {
   Video,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useVideoResumeStore } from "@/store/video-resume";
 
 type CourseProp = {
   id: number;
@@ -26,6 +27,7 @@ type CourseProp = {
 
 export default function CourseCard({ course }: { course: CourseProp }) {
   const navigate = useNavigate();
+  const { changePage } = useVideoResumeStore()
 
   return (
     <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-2 min-h-[300px] border mb-8">
@@ -69,7 +71,9 @@ export default function CourseCard({ course }: { course: CourseProp }) {
           {course.allowed ? (
             <>
               <Button
-                onClick={() => navigate(`/video/${course.id}`)}
+                onClick={() => {
+                  changePage(false)
+                  navigate(`/video/${course.id}`)}}
                 className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
               >
                 Ingresar

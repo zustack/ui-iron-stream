@@ -1,35 +1,36 @@
 import { getCurrentVideo, getVideosByCourseId, updateHistory } from "@/api/videos";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import VideoFeed from "@/components/video-feed";
 import VideoHls from "@/components/video-hls";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { appWindow } from "@tauri-apps/api/window";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function Video() {
   const { courseId } = useParams();
   const [resumeState, setResumeState] = useState(0);
-  // si no course id mostrar error
 
-  const [count, setCount] = useState(0);
-
+  // poner todo esto en video-hls
   const updateHistoryMutation = useMutation({
     mutationFn: () => updateHistory(String(video.history_id), String(resumeState)),
   });
 
-  useEffect(() => {
-    // Establece un intervalo que se ejecuta cada 1 segundo (1000 ms)
-    const intervalId = setInterval(() => {
-      updateHistoryMutation.mutate();
-      setCount(prevCount => prevCount + 1); // Actualiza el estado
-    }, 5000);
+    /*
+      isChangePageRequested: boolean
+      changePage:() => void;
+    */
 
-    // Limpia el intervalo cuando el componente se desmonte o se actualice
-    return () => clearInterval(intervalId);
-  }, []); // Dependencias vacías para ejecutar el efecto solo una vez
+  // el usuario le dio click a otra pagina?
+  // cambiar changePageRequested(true)
+  // en el useEffect poner la dependecia de changePageRequested para capturar el evento(resume time)
+  // 
+
+  appWindow.listen("tauri://close-requested", async function () {
+    // make logout
+    updateHistoryMutation.mutate();
+  });
+  // end video-hls
 
   const {
     data: video,
@@ -59,8 +60,6 @@ if (isLoadingVideos) {
   if (isErrorVideos) return <>Error</>;
   if (isErrorCurrentVideo) return <>Error</>;
 
-  console.log(video)
-
   return (
     <div className="grid grid-cols-6 lg:grid-cols-12 gap-4">
       <div className="col-span-6 lg:col-span-8">
@@ -68,6 +67,7 @@ if (isLoadingVideos) {
             setResume={setResumeState}
             resume={video.resume}
             src={video.video.video_hls}
+            history_id={video && video.history_id}
         />
         <h1 className="text-zinc-200 mt-4 text-xl font-semibold">
           {video.video.title}
