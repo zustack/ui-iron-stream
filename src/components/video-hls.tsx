@@ -23,7 +23,7 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
   });
 
   const videoRef = useRef<HTMLMediaElement | null>(null);
-  const { isChangePageRequested } = useVideoResumeStore();
+  const { isChangePageRequested, setResume:setResumeZustand, setHistoryId } = useVideoResumeStore();
 
   useEffect(() => {
     let videoSrc = `${import.meta.env.VITE_BACKEND_URL}${src}`;
@@ -65,11 +65,16 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
       videoRef.current.currentTime = Number(resume);
     }
 
+    setHistoryId(history_id)
+
+  }, [resume, src]);
+
+  useEffect(() => {
     if (isChangePageRequested) {
+      console.log("historuuuuuu")
       updateHistoryMutation.mutate(videoRef.current.currentTime);
     }
-
-  }, [resume, src, isChangePageRequested]);
+  }, [isChangePageRequested]);
 
   useEffect(() => {
     if (isPaused) {
@@ -78,6 +83,12 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
       videoRef.current?.play();
     }
   }, [isPaused]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      setResumeZustand(videoRef.current?.currentTime);
+    }
+  }, [videoRef.current?.currentTime]);
 
   setResume(videoRef.current?.currentTime || 0);
 
@@ -90,6 +101,10 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
 
   return (
     <div className="relative">
+    <p className="text-red-400">{isChangePageRequested  ? "yess" : "nop"}</p>
+    <p className="text-red-400">{videoRef.current?.currentTime}</p>
+    <p className="text-red-400">Historu: id:  {history_id}</p>
+    <button onClick={() => updateHistoryMutation.mutate(videoRef.current.currentTime)}>Save</button>
       <video
         className="player"
         autoPlay={true}
