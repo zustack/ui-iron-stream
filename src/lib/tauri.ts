@@ -21,7 +21,7 @@ export function killApps(apps: any) {
   }
 }
 
-export async function getLocalApps() {
+export async function getLocalApps(): Promise<string> {
   let commandName: string = "";
   if (os === "darwin") {
     commandName = "apps-mac";
@@ -30,8 +30,7 @@ export async function getLocalApps() {
   } else if (os === "linux") {
     commandName = "apps-linux";
   } else {
-    console.error("Unsupported platform");
-    return;
+    return "Unsupported platform";
   }
   const command = new Command(commandName);
   const output = await command.execute();

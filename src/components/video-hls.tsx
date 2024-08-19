@@ -12,9 +12,10 @@ type Props = {
   resume: string;
   setResume: (num: number) => void;
   history_id: string;
+  isPaused: boolean;
 };
 
-const VideoHls = ({ src, resume, setResume, history_id }: Props) => {
+const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
 
   const updateHistoryMutation = useMutation({
     mutationFn: (resumeState: number) =>
@@ -69,6 +70,14 @@ const VideoHls = ({ src, resume, setResume, history_id }: Props) => {
     }
 
   }, [resume, src, isChangePageRequested]);
+
+  useEffect(() => {
+    if (isPaused) {
+      videoRef.current?.pause();
+    } else {
+      videoRef.current?.play();
+    }
+  }, [isPaused]);
 
   setResume(videoRef.current?.currentTime || 0);
 
