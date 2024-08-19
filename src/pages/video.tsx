@@ -24,7 +24,6 @@ export default function Video() {
   const { courseId } = useParams();
   const [resumeState, setResumeState] = useState(0);
 
-
   // start forbidden apps logic
   const [localApps, setLocalApps] = useState("");
   const [foundApps, setFoundApps] = useState<App[]>([]);

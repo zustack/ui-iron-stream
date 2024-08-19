@@ -5,6 +5,7 @@ import { useVideoResumeStore } from "@/store/video-resume";
 import { updateHistory } from "@/api/videos";
 import { useMutation } from "@tanstack/react-query";
 import { appWindow } from "@tauri-apps/api/window";
+import { plyrOptions } from "@/lib/plyr-options";
 
 type Props = {
   src: string;
@@ -28,76 +29,7 @@ const VideoHls = ({ src, resume, setResume, history_id }: Props) => {
     const video = document.getElementById("video") as HTMLMediaElement;
     videoRef.current = video;
 
-    const defaultOptions: Plyr.Options = {
-      controls: [
-        "play-large",
-        "restart",
-        "rewind",
-        "play",
-        "fast-forward",
-        "progress",
-        "current-time",
-        "duration",
-        "mute",
-        "volume",
-        "captions",
-        "settings",
-        "fullscreen",
-      ],
-      settings: ["captions", "quality", "speed"],
-      i18n: {
-        restart: "Restart",
-        rewind: "Rewind {seektime}s",
-        play: "Play",
-        pause: "Pause",
-        fastForward: "Forward {seektime}s",
-        seek: "Seek",
-        seekLabel: "{currentTime} of {duration}",
-        played: "Played",
-        buffered: "Buffered",
-        currentTime: "Current time",
-        duration: "Duration",
-        volume: "Volume",
-        mute: "Mute",
-        unmute: "Unmute",
-        enableCaptions: "Enable captions",
-        disableCaptions: "Disable captions",
-        download: "Download",
-        enterFullscreen: "Enter fullscreen",
-        exitFullscreen: "Exit fullscreen",
-        frameTitle: "Player for {title}",
-        captions: "Captions",
-        settings: "Settings",
-        pip: "PIP",
-        menuBack: "Go back to previous menu",
-        speed: "Velocidad",
-        normal: "Normal",
-        quality: "Calidad",
-        loop: "Loop",
-        start: "Start",
-        end: "End",
-        all: "All",
-        reset: "Reset",
-        disabled: "Disabled",
-        enabled: "Enabled",
-        advertisement: "Ad",
-        qualityBadge: {
-          2160: "4K",
-          1440: "HD",
-          1080: "HD",
-          720: "HD",
-          576: "SD",
-          480: "SD",
-          360: "SD",
-        },
-      },
-      quality: {
-        default: 1080,
-        options: [1080, 720, 480, 360],
-        forced: true,
-        onChange: (newQuality: number) => updateQuality(newQuality),
-      },
-    };
+    const defaultOptions: Plyr.Options = plyrOptions
 
     if (Hls.isSupported()) {
       const hls = new Hls({
@@ -120,27 +52,12 @@ const VideoHls = ({ src, resume, setResume, history_id }: Props) => {
         }
         new Plyr(video, defaultOptions);
       });
-      hls.on(Hls.Events.ERROR, function (event, data) {
-        console.error("HLS error:", event, data);
-      });
-      (window as any).hls = hls;
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       // For browsers that support HLS natively (e.g. Safari)
       video.src = videoSrc;
       new Plyr(video, defaultOptions);
     } else {
       console.error("This browser doesn't support HLS");
-    }
-
-    function updateQuality(newQuality: number) {
-      if ((window as any).hls) {
-        const levelIndex = (window as any).hls.levels.findIndex(
-          (level: any) => level.height === newQuality
-        );
-        if (levelIndex !== -1) {
-          (window as any).hls.currentLevel = levelIndex;
-        }
-      }
     }
 
     if (videoRef.current) {

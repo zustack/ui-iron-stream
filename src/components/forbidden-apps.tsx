@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
 import { Checkbox } from "./ui/checkbox";
-import { Command } from '@tauri-apps/api/shell'
+import { Command } from "@tauri-apps/api/shell";
 
 export default function ForbiddenApps({ apps }: any) {
   const [show, setShow] = useState(true);
@@ -25,10 +25,18 @@ export default function ForbiddenApps({ apps }: any) {
             "args": ["/IM", { "validator": "\\S+" }, "/F"] 
   */
 
-  function killApps(apps: any) {
-    // check the os and execute a different command depending of that
+  function killApps(apps: any, os: string) {
     for (const app of apps) {
-      new Command('kill-win', ['/IM', app, '/F'])
+      if (os == "win32") {
+        new Command("kill-win", ["/IM", app, "/F"]).execute();
+      } else if (os === "darwin") {
+        new Command("kill-win", ["/IM", app, "/F"]).execute();
+      } else if (os === "linux") {
+        new Command("kill-win", ["/IM", app, "/F"]).execute();
+      } else {
+        console.error("Unsupported platform");
+        return;
+      }
     }
   }
 
