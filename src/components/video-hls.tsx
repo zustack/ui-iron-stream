@@ -92,13 +92,6 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
 
   setResume(videoRef.current?.currentTime || 0);
 
-  appWindow.listen("tauri://close-requested", async function () {
-    // make logout
-    if (videoRef.current) {
-      updateHistoryMutation.mutate(videoRef.current.currentTime);
-    }
-  });
-
   return (
     <div className="relative">
     <p className="text-red-400">{isChangePageRequested  ? "yess" : "nop"}</p>
