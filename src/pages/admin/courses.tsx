@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListFilter, Loader, Search, Trash, VideoIcon } from "lucide-react";
+import { Eye, ListFilter, Loader, Search, Trash, VideoIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -200,6 +200,10 @@ export default function AdminCourses() {
             <div className="flex gap-2">
               <Button
                 onClick={() => {
+                  if (editSort.map((item) => item.sort_order).join("") === "") {
+                    toast.error("Todos los cursos deben tener un orden");
+                    return
+                  }
                   sortCoursesMutation.mutate();
                 }}
                 size="sm"
@@ -293,16 +297,16 @@ export default function AdminCourses() {
           </TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead>Orden</TableHead>
+              <TableHead className="w-[50px]">Status</TableHead>
+              <TableHead className="w-[50px]">Orden</TableHead>
               <TableHead>Titulo</TableHead>
               <TableHead>Descripcion</TableHead>
               <TableHead>Autor</TableHead>
               <TableHead>Duration</TableHead>
               <TableHead>Thumbnail</TableHead>
-              <TableHead>Video Preview</TableHead>
+              <TableHead>Preview</TableHead>
               <TableHead>Rating</TableHead>
-              <TableHead>Numero de resenas</TableHead>
+              <TableHead>Resenas</TableHead>
               <TableHead>Fecha de creación</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
@@ -361,10 +365,7 @@ export default function AdminCourses() {
                                     <TooltipTrigger>
                                       {course.description.length > 20 ? (
                                         <>
-                                          {course.description.slice(0, 20)}
-                                          <span className="text-blue-500 cursor-pointer">
-                                            ...ver mas
-                                          </span>
+                                          {course.description.slice(0, 20)}...
                                         </>
                                       ) : (
                                         <>{course.description}</>
@@ -382,7 +383,7 @@ export default function AdminCourses() {
                                 <AlertDialog>
                                   <AlertDialogTrigger>
                                     <Button size="sm" className="h-8 gap-1">
-                                      Ver imagen
+                                      <Eye className="h-4 w-4" />
                                     </Button>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent>
@@ -407,9 +408,11 @@ export default function AdminCourses() {
                               </TableCell>
 
                               <TableCell>
+                              {course.preview && (
                               <VideoHls
                               src={`${import.meta.env.VITE_BACKEND_URL}${course.preview}`}
-                              />
+                                />
+                              )}
                               </TableCell>
 
                               <TableCell>{course.num_reviews}</TableCell>

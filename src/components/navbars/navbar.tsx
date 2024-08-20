@@ -15,7 +15,7 @@ import { useMutation } from "@tanstack/react-query";
 import { updateHistory } from "@/api/videos";
 
 export default function Navbar() {
-  const { logout } = useAuthStore();
+  const { logout, isAdmin } = useAuthStore();
   const navigate = useNavigate();
 
   const { changePage, resume, history_id } = useVideoResumeStore();
@@ -81,11 +81,11 @@ export default function Navbar() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Hola, Agustin Fricke</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
+                  <DropdownMenuItem
                   onClick={() => handleNavigation("/admin/courses")}
-                >
+                  >
                   Cursos
-                </DropdownMenuItem>
+                  </DropdownMenuItem>
                 <DropdownMenuItem>Historial</DropdownMenuItem>
                 <DropdownMenuItem>Configuraciones</DropdownMenuItem>
                 <DropdownMenuItem>Feedback</DropdownMenuItem>

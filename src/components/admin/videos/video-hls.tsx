@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import Plyr from "plyr";
 import Hls from "hls.js";
 import { useEffect, useRef, useState } from "react";
+import { Eye } from "lucide-react";
 
 export default function VideoHls({ src }: { src: string }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -95,7 +96,7 @@ export default function VideoHls({ src }: { src: string }) {
     <AlertDialog onOpenChange={setIsOpen}>
       <AlertDialogTrigger>
         <Button size="sm" className="h-8 gap-1">
-          Ver video
+        <Eye className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
 

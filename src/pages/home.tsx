@@ -51,6 +51,7 @@ export default function Home() {
     const { value } = event.target;
     setSearchInput(value);
   };
+
   return (
     <section className="">
       <form className="ml-auto flex-1 sm:flex-initial mb-8 mr-4 flex justify-center">
