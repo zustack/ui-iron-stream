@@ -101,10 +101,9 @@ export default function CourseCard({ course }: { course: CourseProp }) {
             </Button>
           )}
 
-          {course.preview}
           {course.preview != "" && (
             <Button
-              onClick={() => navigate(`/course/preview/${course.id}`)}
+              onClick={() => navigate(`/preview/${course.id}`)}
               className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
             >
               Ver preview gratuita
