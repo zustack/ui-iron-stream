@@ -60,7 +60,7 @@ function App() {
     <>
     {updateHistoryMutation.isPending ? (
       <div className="text-red-500 text-4xl">
-        closing bitch!!!
+        Loading to close!
       </div>
     ) : (
     <BrowserRouter>

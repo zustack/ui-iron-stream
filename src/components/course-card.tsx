@@ -75,7 +75,7 @@ export default function CourseCard({ course }: { course: CourseProp }) {
                   changePage(false)
                   setHistoryId("")
                   setResume(0)
-                  setTimeout(() => navigate(`/video/${course.id}`), 2000)
+                  navigate(`/video/${course.id}`)
                   }}
                 className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
               >
@@ -101,7 +101,8 @@ export default function CourseCard({ course }: { course: CourseProp }) {
             </Button>
           )}
 
-          {course.preview && (
+          {course.preview}
+          {course.preview != "" && (
             <Button
               onClick={() => navigate(`/course/preview/${course.id}`)}
               className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"

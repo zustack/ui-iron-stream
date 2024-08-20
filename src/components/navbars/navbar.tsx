@@ -18,12 +18,12 @@ export default function Navbar() {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
 
-  const { changePage, resume, history_id } = useVideoResumeStore()
+  const { changePage, resume, history_id } = useVideoResumeStore();
 
   // hacer el request aca
   // que nesesito? -> historyId & resumeState
   //
-  // almacenar el videoRef.current.currentTime en el estado de 
+  // almacenar el videoRef.current.currentTime en el estado de
   // zustand(con un useEffect nuevo que se dispare cada vez que cambie el videoRef.current.currentTime)
   //
   // history id: video.history_id, se carga cada vez que pasa a otro video
@@ -34,12 +34,12 @@ export default function Navbar() {
 
   const handleNavigation = (path: string) => {
     if (location.pathname.includes("video")) {
-      console.log("foo")
+      console.log("foo");
       // esta saliendo del video y hay que cambiar el estado de zustand
-      changePage(true)
-      updateHistoryMutation.mutate()
+      changePage(true);
+      updateHistoryMutation.mutate();
       navigate(path);
-      return
+      return;
       // update the history here
       // poner en course card = false
     }
@@ -59,9 +59,11 @@ export default function Navbar() {
             className="flex gap-1 font-semibold text-xl text-foreground transition-colors hover:text-white cursor-pointer"
           >
             <Package2 className="h-6 w-6" />
-            <span>Acme || {history_id}</span>
-            <span>Inc {resume}</span>
+            <span>Acme</span>
+            <span>Inc</span>
           </a>
+          <p className="text-red-400">resume: {resume}</p>
+          <p className="text-blue-400">history_id: {history_id}</p>
         </nav>
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
           <div className="ml-auto flex-1 sm:flex-initial">
@@ -90,11 +92,8 @@ export default function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
-                    if (isVideoPage) {
-                      console.log("hello");
-                      changePage();
-                    }
                     logout();
+                    handleNavigation("/login");
                   }}
                 >
                   Logout
