@@ -8,15 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  GraduationCap,
-  ListFilter,
-  Loader,
-  Plus,
-  Search,
-  Trash,
-  VideoIcon,
-} from "lucide-react";
+import { ListFilter, Loader, Search, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,14 +21,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import React, { useEffect, useState, ChangeEvent } from "react";
-import CreateCourse from "@/components/admin/courses/create-course";
 import { useInView } from "react-intersection-observer";
 import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { adminCourses, deleteCourse, sortCourses } from "@/api/courses";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -47,18 +37,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
-import UpdateCourse from "@/components/admin/courses/update-course";
-import { Link } from "react-router-dom";
 import {
   adminUsers,
   deleteAccountAtRegister,
@@ -129,7 +111,6 @@ export default function AdminUsers() {
       invalidateQuery();
     },
     onError: (error: ErrorResponse) => {
-      // queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
     },
   });
@@ -140,7 +121,6 @@ export default function AdminUsers() {
       invalidateQuery();
     },
     onError: (error: ErrorResponse) => {
-      // queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
     },
   });
@@ -178,8 +158,6 @@ export default function AdminUsers() {
     const { value } = event.target;
     setSearchInput(value);
   };
-
-  console.log(data)
 
   return (
     <>
@@ -270,9 +248,7 @@ export default function AdminUsers() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Deactivate 
-          />
-
+          <Deactivate />
         </div>
       </div>
       <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
@@ -306,9 +282,7 @@ export default function AdminUsers() {
           </TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">
-                Activo
-              </TableHead>
+              <TableHead className="w-[100px]">Activo</TableHead>
               <TableHead className="w-[100px]">Admin</TableHead>
               <TableHead className="w-[100px]">Verificado</TableHead>
               <TableHead className="w-[100px]">Apps</TableHead>
@@ -362,15 +336,17 @@ export default function AdminUsers() {
 
                               <TableCell>
                                 <Checkbox checked={course.special_apps} />
-                                  {course.special_apps ? (
-                                    <TrueSpecialApps
-                                  specialApps={course.special_apps}
-                                  userId={course.id} />
-                                  ) : (
-                                  <SpecialApps 
-                                  specialApps={course.special_apps}
-                                  userId={course.id} />
-                                  )}
+                                {course.special_apps ? (
+                                  <TrueSpecialApps
+                                    specialApps={course.special_apps}
+                                    userId={course.id}
+                                  />
+                                ) : (
+                                  <SpecialApps
+                                    specialApps={course.special_apps}
+                                    userId={course.id}
+                                  />
+                                )}
                               </TableCell>
 
                               <TableCell>{course.email}</TableCell>

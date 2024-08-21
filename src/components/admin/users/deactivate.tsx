@@ -1,4 +1,8 @@
-import { deactivateAllCourses, deactivateCourseForAllUsers, updateActiveStatusAllUser } from "@/api/users";
+import {
+  deactivateAllCourses,
+  deactivateCourseForAllUsers,
+  updateActiveStatusAllUser,
+} from "@/api/users";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -11,7 +15,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { ErrorResponse } from "@/types";
 import toast from "react-hot-toast";
@@ -24,9 +33,8 @@ export default function Deactivate() {
   const [isOpen, setIsOpen] = useState(false);
 
   const addCourseToUserMutation = useMutation({
-    mutationFn: (action:boolean) => updateActiveStatusAllUser(action),
-    onSuccess: () => {
-    },
+    mutationFn: (action: boolean) => updateActiveStatusAllUser(action),
+    onSuccess: () => {},
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
         toast.error("Ocurrio un error inesperado");
@@ -37,8 +45,7 @@ export default function Deactivate() {
 
   const deactivateAllCoursesMutation = useMutation({
     mutationFn: () => deactivateAllCourses(),
-    onSuccess: () => {
-    },
+    onSuccess: () => {},
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
         toast.error("Ocurrio un error inesperado");
@@ -48,9 +55,9 @@ export default function Deactivate() {
   });
 
   const deactivateCourseForAllUsersMutation = useMutation({
-    mutationFn: (id:number) => deactivateCourseForAllUsers(id),
+    mutationFn: (id: number) => deactivateCourseForAllUsers(id),
     onSuccess: () => {
-      toast.success("Hey it's ok")
+      toast.success("Hey it's ok");
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -60,40 +67,12 @@ export default function Deactivate() {
     },
   });
 
-// deactivateCourseForAllUsers 
-
-  const { ref, inView } = useInView();
-
-  const queryClient = useQueryClient();
-
-  const {
-    status,
-    data,
-    error,
-    isFetchingNextPage,
-    isFetching,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["add-courses-to-user"],
-    queryFn: async ({ pageParam }) => {
-      return adminCourses({
-        pageParam: pageParam ?? 0,
-        searchParam: "",
-        active: 1,
-      });
-    },
-    getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
-    initialPageParam: 0,
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["home-courses"],
+    queryFn: () => adminCourses("", ""),
   });
 
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
-
-
+  // deactivateCourseForAllUsers
 
   return (
     <AlertDialog
@@ -113,67 +92,58 @@ export default function Deactivate() {
           <AlertDialogDescription>
             <h4 className="text-lg">Usuarios</h4>
             <div className="flex flex-col gap-2">
-              <Button
-              onClick={() => addCourseToUserMutation.mutate(false)}
-              >Desactivar todos los usuarios</Button>
-              <Button
-              onClick={() => addCourseToUserMutation.mutate(true)}
-              >Activar todos los usuarios</Button>
+              <Button onClick={() => addCourseToUserMutation.mutate(false)}>
+                Desactivar todos los usuarios
+              </Button>
+              <Button onClick={() => addCourseToUserMutation.mutate(true)}>
+                Activar todos los usuarios
+              </Button>
             </div>
 
             <h4 className="text-lg">Cursos</h4>
             <div className="flex flex-col gap-2">
-              <Button
-              onClick={() => deactivateAllCoursesMutation.mutate()}
-              >Desactivar todos los cursos</Button>
+              <Button onClick={() => deactivateAllCoursesMutation.mutate()}>
+                Desactivar todos los cursos
+              </Button>
             </div>
 
             <ScrollArea className="h-[200px] w-[350px]p-4">
-              {status === "pending" ? (
-                <div className="flex justify-center items-center h-[200px]">
+              {data && data.length === 0 && (
+                <div className="text-center text-zinc-400">
+                  No se encontraron resultados
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="h-[100px] flex justify-center items-center">
                   <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
                 </div>
-              ) : null}
+              )}
 
-              {status === "error" ? <span>Error: {error.message}</span> : null}
+              {isError && (
+                <div className="h-[100px] flex justify-center items-center">
+                  Error: {error.message}
+                </div>
+              )}
 
-              {status != "pending" &&
-                status != "error" &&
-                data &&
-                data.pages.map((page) => (
-                  <React.Fragment key={page.nextId}>
-                    {page.data != null &&
-                      page.data.map((course) => (
-                        <div className="flex items-center space-x-2 py-2">
-                          <Button
-                          onClick={() => {
-                            deactivateCourseForAllUsersMutation.mutate(course.id)
-                          }}
-                          >
-                            Desactivar
-                          </Button>
-                          <label
-                            htmlFor="terms"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {course.title}
-                          </label>
-                        </div>
-                      ))}
-                  </React.Fragment>
-                ))}
-
-              <div ref={ref} onClick={() => fetchNextPage()}>
-                {isFetchingNextPage ? (
-                  <div className="h-[100px] flex justify-center items-center">
-                    <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+              {data &&
+                data.map((course: any) => (
+                  <div className="flex items-center space-x-2 py-2">
+                    <Button
+                      onClick={() => {
+                        deactivateCourseForAllUsersMutation.mutate(course.id);
+                      }}
+                    >
+                      Desactivar
+                    </Button>
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {course.title}
+                    </label>
                   </div>
-                ) : hasNextPage ? (
-                  ""
-                ) : (
-                  ""
-                )}
-              </div>
+                ))}
             </ScrollArea>
           </AlertDialogDescription>
         </AlertDialogHeader>

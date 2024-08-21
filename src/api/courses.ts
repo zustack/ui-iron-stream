@@ -8,7 +8,9 @@ export const userCourses = async (query: string) => {
 };
 
 export const adminCourses = async (searchParam: string, active: string) => {
-  const response = await authAxios.get(`/courses/admin?q=${searchParam}&a=${active}`);
+  const response = await authAxios.get(
+    `/courses/admin?q=${searchParam}&a=${active}`
+  );
   return response.data;
 };
 
@@ -79,52 +81,6 @@ export const getSoloCourse = async (id: number) => {
 
 export const deleteCourse = async (id: number) => {
   const response = await authAxios.delete(`/courses/delete/${id}`);
-  return response.data;
-};
-
-type Course = {
-  id: number;
-  title: string;
-  description: string;
-  author: string;
-  thumbnail: string;
-  preview: string;
-  rating: number;
-  num_reviews: number;
-  duration: string;
-  is_active: boolean;
-  sort_order: number;
-  on: boolean;
-  created_at: string;
-};
-
-type CourseResponse = {
-  data: Course[];
-  totalCount: number;
-  previousId: number | null;
-  nextId: number | null;
-};
-
-type SearchParam = {
-  searchParam: string;
-  pageParam: number;
-  active: number | string;
-};
-
-type SearchParamUserCourses = {
-  searchParam: string;
-  pageParam: number;
-  id?: number;
-};
-
-export const coursesByUserId = async ({
-  pageParam = 0,
-  searchParam,
-  id,
-}: SearchParamUserCourses): Promise<CourseResponse> => {
-  const response = await authAxios.get<CourseResponse>(
-    `/courses/user/${id}?cursor=${pageParam}&q=${searchParam}`
-  );
   return response.data;
 };
 

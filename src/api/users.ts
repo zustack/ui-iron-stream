@@ -43,9 +43,9 @@ type User = {
   name: string;
   surname: string;
   thumbnail: string;
-  isAdmin: boolean;
-  specialApps: boolean;
-  isActive: boolean;
+  is_admin: boolean;
+  special_apps: boolean;
+  is_active: boolean;
   verified: boolean;
   pc: string;
   os: string;

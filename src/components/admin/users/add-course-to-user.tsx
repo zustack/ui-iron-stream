@@ -1,4 +1,4 @@
-import { coursesByUserId } from "@/api/courses";
+import { adminCourses, coursesByUserId, userCourses } from "@/api/courses";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -11,14 +11,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader, Plus } from "lucide-react";
-import React, { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { addCourseToUser } from "@/api/users";
 import toast from "react-hot-toast";
@@ -37,36 +31,13 @@ export default function AddCouseToUser({
   name,
   surname,
 }: Props) {
-  const { ref, inView } = useInView();
-
   const queryClient = useQueryClient();
 
-  const {
-    status,
-    data,
-    error,
-    isFetchingNextPage,
-    isFetching,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["add-courses-to-user", userId],
-    queryFn: async ({ pageParam }) => {
-      return coursesByUserId({
-        pageParam: pageParam ?? 0,
-        searchParam: "",
-        id: userId,
-      });
-    },
-    getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
-    initialPageParam: 0,
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["admin-coursess"],
+    // is "" because we dont want to search a course here!
+    queryFn: () => adminCourses("", ""),
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
 
   type AddCourseToUserPayload = {
     user_id: number;
@@ -98,63 +69,49 @@ export default function AddCouseToUser({
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Agrega cursos al usuario{" "}
-            <span className="text-indigo-400">
-              {name} {surname} idd::: {userId}
-            </span>
-            con el correo electronico{" "}
-            <span className="text-indigo-400">{email}</span>
+            Agrega cursos al usuario {name} {surname}, email: {email}
           </AlertDialogTitle>
           <AlertDialogDescription>
             <ScrollArea className="h-[200px] w-[350px]p-4">
-              {status === "pending" ? (
-                <div className="flex justify-center items-center h-[200px]">
+              {data && data.length === 0 && (
+                <div className="text-center text-zinc-400">
+                  No se encontraron resultados
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="h-[100px] flex justify-center items-center">
                   <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
                 </div>
-              ) : null}
+              )}
 
-              {status === "error" ? <span>Error: {error.message}</span> : null}
+              {isError && (
+                <div className="h-[100px] flex justify-center items-center">
+                  Error: {error.message}
+                </div>
+              )}
 
-              {status != "pending" &&
-                status != "error" &&
-                data &&
-                data.pages.map((page) => (
-                  <React.Fragment key={page.nextId}>
-                    {page.data != null &&
-                      page.data.map((course) => (
-                        <div className="flex items-center space-x-2 py-2">
-                          <Checkbox
-                            checked={course.allowed}
-                            onClick={() => {
-                              addCourseToUserMutation.mutate({
-                                user_id: userId,
-                                courses: course.id,
-                              });
-                            }}
-                            id="terms"
-                          />
-                          <label
-                            htmlFor="terms"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {course.title}
-                          </label>
-                        </div>
-                      ))}
-                  </React.Fragment>
-                ))}
-
-              <div ref={ref} onClick={() => fetchNextPage()}>
-                {isFetchingNextPage ? (
-                  <div className="h-[100px] flex justify-center items-center">
-                    <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+              {data &&
+                data.map((course: any) => (
+                  <div className="flex items-center space-x-2 py-2">
+                    <Checkbox
+                      checked={course.allowed}
+                      onClick={() => {
+                        addCourseToUserMutation.mutate({
+                          user_id: userId,
+                          courses: course.id,
+                        });
+                      }}
+                      id="terms"
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {course.title}
+                    </label>
                   </div>
-                ) : hasNextPage ? (
-                  ""
-                ) : (
-                  ""
-                )}
-              </div>
+                ))}
             </ScrollArea>
           </AlertDialogDescription>
         </AlertDialogHeader>
