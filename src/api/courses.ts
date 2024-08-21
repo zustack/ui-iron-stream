@@ -7,6 +7,11 @@ export const userCourses = async (query: string) => {
   return response.data;
 };
 
+export const adminCourses = async (searchParam: string, active: string) => {
+  const response = await authAxios.get(`/courses/admin?q=${searchParam}&a=${active}`);
+  return response.data;
+};
+
 export const updateCourseActiveStatus = async (course_id: number) => {
   const response = await authAxios.put(`/courses/update/active/${course_id}`);
   return response.data;
@@ -119,17 +124,6 @@ export const coursesByUserId = async ({
 }: SearchParamUserCourses): Promise<CourseResponse> => {
   const response = await authAxios.get<CourseResponse>(
     `/courses/user/${id}?cursor=${pageParam}&q=${searchParam}`
-  );
-  return response.data;
-};
-
-export const adminCourses = async ({
-  pageParam = 0,
-  searchParam,
-  active,
-}: SearchParam): Promise<CourseResponse> => {
-  const response = await authAxios.get<CourseResponse>(
-    `/courses/admin?cursor=${pageParam}&q=${searchParam}&a=${active}`
   );
   return response.data;
 };

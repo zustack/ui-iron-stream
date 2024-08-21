@@ -27,12 +27,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
-import React, { useEffect, useState, ChangeEvent } from "react";
+import { useEffect, useState, ChangeEvent } from "react";
 import CreateCourse from "@/components/admin/courses/create-course";
-import { useInView } from "react-intersection-observer";
 import {
-  useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import {
@@ -71,7 +70,7 @@ export default function AdminCourses() {
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [active, setActive] = useState<number | string>("");
+  const [active, setActive] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingSort, setIsLoadingSort] = useState(false);
@@ -118,27 +117,9 @@ export default function AdminCourses() {
 
   const queryClient = useQueryClient();
 
-  const { ref, inView } = useInView();
-
-  const {
-    status,
-    data,
-    error,
-    isFetchingNextPage,
-    isFetching,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
+  const { data, isFetching, isError, error } = useQuery({
     queryKey: ["admin-courses", debouncedSearchTerm, active],
-    queryFn: async ({ pageParam }) => {
-      return adminCourses({
-        pageParam: pageParam ?? 0,
-        searchParam: debouncedSearchTerm,
-        active: active,
-      });
-    },
-    getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
-    initialPageParam: 0,
+    queryFn: () => adminCourses(debouncedSearchTerm, active),
   });
 
   const deleteCourseMutation = useMutation({
@@ -176,12 +157,6 @@ export default function AdminCourses() {
   }, [isFetching, isLoading]);
 
   useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
-
-  useEffect(() => {
     const timerId = setTimeout(() => {
       setDebouncedSearchTerm(searchInput);
     }, 800);
@@ -216,10 +191,9 @@ export default function AdminCourses() {
 
         <div className="ml-auto flex items-center gap-2">
           <p className="text-sm text-muted-foreground">
-            {status !== "pending" && status !== "error" ? (
-              <span>{data?.pages[0].totalCount} cursos.</span>
-            ) : null}
+            {data && <span>{data.length} cursos.</span>}
           </p>
+
           {isEditSort ? (
             <div className="flex gap-2">
               <Button
@@ -274,14 +248,14 @@ export default function AdminCourses() {
                 Ninguno
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                onClick={() => setActive(1)}
-                checked={active === 1}
+                onClick={() => setActive("1")}
+                checked={active === "1"}
               >
                 Activo
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                onClick={() => setActive(0)}
-                checked={active === 0}
+                onClick={() => setActive("0")}
+                checked={active === "0"}
               >
                 No Activo
               </DropdownMenuCheckboxItem>
@@ -293,11 +267,11 @@ export default function AdminCourses() {
       <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
         <Table>
           <TableCaption>
-            {status === "pending" ? (
+            {isFetching && (
               <div className="h-[100px] flex justify-center items-center">
                 <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
               </div>
-            ) : null}
+            )}
 
             {isLoadingSort ? (
               <div className="h-[100px] flex justify-center items-center">
@@ -305,19 +279,11 @@ export default function AdminCourses() {
               </div>
             ) : null}
 
-            {status === "error" ? <span>Error: {error.message}</span> : null}
-
-            <div ref={ref} onClick={() => fetchNextPage()}>
-              {isFetchingNextPage ? (
-                <div className="h-[100px] flex justify-center items-center">
-                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                </div>
-              ) : hasNextPage ? (
-                ""
-              ) : (
-                ""
-              )}
-            </div>
+            {isError && (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>Error: {error.message}</span>
+              </div>
+            )}
           </TableCaption>
           <TableHeader>
             <TableRow>
@@ -340,189 +306,168 @@ export default function AdminCourses() {
             <></>
           ) : (
             <TableBody>
-              {status != "pending" &&
-                status != "error" &&
-                data &&
-                data.pages.map((page) => (
-                  <React.Fragment key={page.nextId}>
-                    {page.data != null &&
-                      page.data.map((course) => (
-                        <>
-                          {course.id === activeDeleteId &&
-                          (isLoading || deleteCourseMutation.isPending) ? (
-                            <TableRow>
-                              <TableCell colSpan={11}>
-                                <Skeleton className="w-full h-[30px]" />
-                              </TableCell>
-                            </TableRow>
+              {data &&
+                data.map((course: any) => (
+                  <>
+                    {course.id === activeDeleteId &&
+                    (isLoading || deleteCourseMutation.isPending) ? (
+                      <TableRow>
+                        <TableCell colSpan={11}>
+                          <Skeleton className="w-full h-[30px]" />
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      <TableRow>
+                        <TableCell>
+                          {course.id === activeUpdateStatusId &&
+                          (updateCourseStatusMutation.isPending ||
+                            isLoading) ? (
+                            <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
                           ) : (
-                            <TableRow>
-                              <TableCell>
-                                {course.id === activeUpdateStatusId &&
-                                (updateCourseStatusMutation.isPending ||
-                                  isLoading) ? (
-                                  <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
-                                ) : (
-                                  <Checkbox
-                                    onClick={() => {
-                                      setActiveUpdateStatusId(course.id);
-                                      updateCourseStatusMutation.mutate(
-                                        course.id
-                                      );
-                                    }}
-                                    checked={course.is_active}
-                                  />
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {isEditSort ? (
-                                  <Input
-                                    className="h-8 w-20"
-                                    type="text"
-                                    defaultValue={course.sort_order}
-                                    value={
-                                      editSort.find(
-                                        (item) => item.id === course.id
-                                      )?.sort_order ?? course.sort_order
-                                    }
-                                    onChange={(e) =>
-                                      handleInputSortChange(
-                                        course.id,
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                ) : (
-                                  <>{course.sort_order}</>
-                                )}
-                              </TableCell>
-                              <TableCell>{course.title}</TableCell>
-                              <TableCell>
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      {course.description.length > 20 ? (
-                                        <>
-                                          {course.description.slice(0, 20)}...
-                                        </>
-                                      ) : (
-                                        <>{course.description}</>
-                                      )}
-                                    </TooltipTrigger>
-                                    <TooltipContent className="w-[400px]">
-                                      <p>{course.description}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </TableCell>
-                              <TableCell>{course.author}</TableCell>
-                              <TableCell>{course.duration}</TableCell>
-                              <TableCell>
-                                <AlertDialog>
-                                  <AlertDialogTrigger>
-                                    <Button size="sm" className="h-8 gap-1">
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>
-                                        Imagen del curso {course.title}.
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        <img
-                                          className="rounded-lg"
-                                          src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
-                                        />
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>
-                                        Cerrar
-                                      </AlertDialogCancel>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </TableCell>
-
-                              <TableCell>
-                                {course.preview && (
-                                  <VideoHls
-                                    src={`${import.meta.env.VITE_BACKEND_URL}${course.preview}`}
-                                  />
-                                )}
-                              </TableCell>
-
-                              <TableCell>{course.num_reviews}</TableCell>
-                              <TableCell>{course.rating}</TableCell>
-                              <TableCell>{course.created_at}</TableCell>
-
-                              <TableCell className="text-right">
-                                <Link
-                                  to={`/admin/videos/${course.id}/${course.title}`}
-                                >
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 gap-1 mx-1"
-                                  >
-                                    <VideoIcon className="h-5 w-5 text-zinc-200" />
-                                  </Button>
-                                </Link>
-                                <AlertDialog>
-                                  <AlertDialogTrigger>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="h-8 gap-1 mx-1"
-                                    >
-                                      <Trash className="h-5 w-5 text-red-500" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>
-                                        Estas seguro de eliminar el curso{" "}
-                                        {course.title}?
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        <p>
-                                          Esta operación no se puede deshacer.
-                                          Procede con cuidado
-                                        </p>
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>
-                                        Cerrar
-                                      </AlertDialogCancel>
-                                      <AlertDialogAction>
-                                        <Button
-                                          onClick={() => {
-                                            deleteCourseMutation.mutate(
-                                              course.id
-                                            );
-                                            setActiveDeleteId(course.id);
-                                          }}
-                                          variant={"destructive"}
-                                        >
-                                          Eliminar
-                                        </Button>
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                                <UpdateCourse
-                                  isLoading={isLoading}
-                                  course={course}
-                                  invalidate={() => invalidateQuery()}
-                                />
-                              </TableCell>
-                            </TableRow>
+                            <Checkbox
+                              onClick={() => {
+                                setActiveUpdateStatusId(course.id);
+                                updateCourseStatusMutation.mutate(course.id);
+                              }}
+                              checked={course.is_active}
+                            />
                           )}
-                        </>
-                      ))}
-                  </React.Fragment>
+                        </TableCell>
+                        <TableCell>
+                          {isEditSort ? (
+                            <Input
+                              className="h-8 w-20"
+                              type="text"
+                              defaultValue={course.sort_order}
+                              value={
+                                editSort.find((item) => item.id === course.id)
+                                  ?.sort_order ?? course.sort_order
+                              }
+                              onChange={(e) =>
+                                handleInputSortChange(course.id, e.target.value)
+                              }
+                            />
+                          ) : (
+                            <>{course.sort_order}</>
+                          )}
+                        </TableCell>
+                        <TableCell>{course.title}</TableCell>
+                        <TableCell>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                {course.description.length > 20 ? (
+                                  <>{course.description.slice(0, 20)}...</>
+                                ) : (
+                                  <>{course.description}</>
+                                )}
+                              </TooltipTrigger>
+                              <TooltipContent className="w-[400px]">
+                                <p>{course.description}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </TableCell>
+                        <TableCell>{course.author}</TableCell>
+                        <TableCell>{course.duration}</TableCell>
+                        <TableCell>
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              <Button size="sm" className="h-8 gap-1">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Imagen del curso {course.title}.
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  <img
+                                    className="rounded-lg"
+                                    src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
+                                  />
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cerrar</AlertDialogCancel>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
+
+                        <TableCell>
+                          {course.preview && (
+                            <VideoHls
+                              src={`${import.meta.env.VITE_BACKEND_URL}${course.preview}`}
+                            />
+                          )}
+                        </TableCell>
+
+                        <TableCell>{course.num_reviews}</TableCell>
+                        <TableCell>{course.rating}</TableCell>
+                        <TableCell>{course.created_at}</TableCell>
+
+                        <TableCell className="text-right">
+                          <Link
+                            to={`/admin/videos/${course.id}/${course.title}`}
+                          >
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 gap-1 mx-1"
+                            >
+                              <VideoIcon className="h-5 w-5 text-zinc-200" />
+                            </Button>
+                          </Link>
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 gap-1 mx-1"
+                              >
+                                <Trash className="h-5 w-5 text-red-500" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Estas seguro de eliminar el curso{" "}
+                                  {course.title}?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  <p>
+                                    Esta operación no se puede deshacer. Procede
+                                    con cuidado
+                                  </p>
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cerrar</AlertDialogCancel>
+                                <AlertDialogAction>
+                                  <Button
+                                    onClick={() => {
+                                      deleteCourseMutation.mutate(course.id);
+                                      setActiveDeleteId(course.id);
+                                    }}
+                                    variant={"destructive"}
+                                  >
+                                    Eliminar
+                                  </Button>
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          <UpdateCourse
+                            isLoading={isLoading}
+                            course={course}
+                            invalidate={() => invalidateQuery()}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 ))}
             </TableBody>
           )}
