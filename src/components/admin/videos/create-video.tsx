@@ -104,7 +104,6 @@ export default function CreateVideo({
       return finalResponse;
     },
     onSuccess: (response) => {
-      console.log(response);
       if (thumbnail && courseId) {
         createVideoMutation.mutate({
           title,
