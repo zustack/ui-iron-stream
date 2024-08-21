@@ -35,7 +35,12 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { adminCourses, deleteCourse, sortCourses } from "@/api/courses";
+import {
+  adminCourses,
+  deleteCourse,
+  sortCourses,
+  updateCourseActiveStatus,
+} from "@/api/courses";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -62,6 +67,7 @@ import VideoHls from "@/components/admin/videos/video-hls";
 
 export default function AdminCourses() {
   const [activeDeleteId, setActiveDeleteId] = useState(0);
+  const [activeUpdateStatusId, setActiveUpdateStatusId] = useState(0);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -137,6 +143,17 @@ export default function AdminCourses() {
 
   const deleteCourseMutation = useMutation({
     mutationFn: (id: number) => deleteCourse(id),
+    onSuccess: () => {
+      invalidateQuery();
+    },
+    onError: (error: ErrorResponse) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+    },
+  });
+
+  const updateCourseStatusMutation = useMutation({
+    mutationFn: (id: number) => updateCourseActiveStatus(id),
     onSuccess: () => {
       invalidateQuery();
     },
@@ -341,7 +358,21 @@ export default function AdminCourses() {
                           ) : (
                             <TableRow>
                               <TableCell>
-                                <Checkbox checked={course.is_active} />
+                                {course.id === activeUpdateStatusId &&
+                                (updateCourseStatusMutation.isPending ||
+                                  isLoading) ? (
+                                  <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
+                                ) : (
+                                  <Checkbox
+                                    onClick={() => {
+                                      setActiveUpdateStatusId(course.id);
+                                      updateCourseStatusMutation.mutate(
+                                        course.id
+                                      );
+                                    }}
+                                    checked={course.is_active}
+                                  />
+                                )}
                               </TableCell>
                               <TableCell>
                                 {isEditSort ? (

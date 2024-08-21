@@ -148,7 +148,7 @@ export default function UpdateCourse({
         old_thumbnail: oldThumbnail,
         old_video: oldVideo,
         preview_tmp: response,
-        isVideo
+        isVideo,
       });
     },
     onError: (error: ErrorResponse) => {
@@ -173,7 +173,7 @@ export default function UpdateCourse({
         old_thumbnail: oldThumbnail,
         old_video: oldVideo,
         preview_tmp: "",
-        isVideo
+        isVideo,
       });
     }
   }
@@ -287,8 +287,7 @@ export default function UpdateCourse({
                             </label>
                           </div>
                         ) : (
-
-                        <Label htmlFor="video">Video</Label>
+                          <Label htmlFor="video">Video</Label>
                         )}
 
                         <Button

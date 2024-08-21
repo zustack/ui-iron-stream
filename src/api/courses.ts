@@ -2,6 +2,13 @@ import { authAxios } from "@/lib/axiosInstances";
 
 export const CHUNK_SIZE = 1 * 1024 * 1024;
 
+export const updateCourseActiveStatus = async (
+  course_id: number,
+) => {
+  const response = await authAxios.put(`/courses/update/active/${course_id}`);
+  return response.data;
+};
+
 export const sortCourses = async (sort_courses: { id: number; sort_order: string }[]) => {
   const response = await authAxios.post("/courses/sort/trash", {
     sort_courses: sort_courses
@@ -44,7 +51,7 @@ export const updateCourse = async ({
   formData.append("author", author);
   formData.append("duration", duration);
   formData.append("is_active", is_active.toString());
-  formData.append("thumbnail", thumbnail);
+  formData.append("thumbnail", thumbnail || "");
   formData.append("old_thumbnail", old_thumbnail);
   formData.append("preview_tmp", preview_tmp);
   formData.append("old_video", old_video);
