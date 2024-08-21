@@ -104,6 +104,7 @@ export default function CreateVideo({
       return finalResponse;
     },
     onSuccess: (response) => {
+      console.log(response);
       if (thumbnail && courseId) {
         createVideoMutation.mutate({
           title,
@@ -122,9 +123,14 @@ export default function CreateVideo({
 
   function detonateChain() {
     if (video) {
+      if (!thumbnail) {
+        toast.error("Por favor, selecciona un thumbnail");
+        return;
+      }
       uploadChunkMutation.mutate(video);
     } else {
       toast.error("Por favor, selecciona un video");
+      return
     }
   }
 

@@ -137,6 +137,9 @@ export default function CreateCourse({
           thumbnail,
           preview_tmp: "",
         });
+      } else {
+        toast.error("Debe adjuntar un archivo para el thumbnail");
+        return
       }
     }
   }

@@ -72,11 +72,10 @@ export default function UpdateVideo({
       setIsOpen(false);
       setThumbnail(undefined);
       setVideo(undefined);
-      setOldThumbnail("");
-      setOldVideo("");
+      // setOldThumbnail("");
+      // setOldVideo("");
     }
   }, [isLoading]);
-
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -130,7 +129,6 @@ export default function UpdateVideo({
       return finalResponse;
     },
     onSuccess: (response) => {
-      if (thumbnail && courseId) {
         updateVideoMutation.mutate({
           id: data.id,
           title,
@@ -142,7 +140,6 @@ export default function UpdateVideo({
           old_thumbnail: oldThumbnail,
           old_video: oldVideo,
         });
-      }
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -153,7 +150,19 @@ export default function UpdateVideo({
     if (video) {
       uploadChunkMutation.mutate(video);
     } else {
-      toast.error("Por favor, selecciona un video");
+      updateVideoMutation.mutate({
+        id: data.id,
+        title,
+        description,
+        course_id: courseId,
+        duration,
+        thumbnail,
+        video_tmp: "",
+        old_thumbnail: oldThumbnail,
+        old_video: oldVideo,
+      })
+      console.log(oldThumbnail)
+      console.log(oldVideo)
     }
   }
 
