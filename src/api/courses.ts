@@ -2,19 +2,24 @@ import { authAxios } from "@/lib/axiosInstances";
 
 export const CHUNK_SIZE = 1 * 1024 * 1024;
 
-export const updateCourseActiveStatus = async (
-  course_id: number,
-) => {
+export const userCourses = async (query: string) => {
+  const response = await authAxios.get(`/user/courses?q=${query}`);
+  return response.data;
+};
+
+export const updateCourseActiveStatus = async (course_id: number) => {
   const response = await authAxios.put(`/courses/update/active/${course_id}`);
   return response.data;
 };
 
-export const sortCourses = async (sort_courses: { id: number; sort_order: string }[]) => {
-  const response = await authAxios.post("/courses/sort/trash", {
-    sort_courses: sort_courses
-  })
-  return response.data
-}
+export const sortCourses = async (
+  sort_courses: { id: number; sort_order: string }[]
+) => {
+  const response = await authAxios.post("/courses/sort", {
+    sort_courses: sort_courses,
+  });
+  return response.data;
+};
 
 export const updateCourse = async ({
   id,
@@ -28,7 +33,7 @@ export const updateCourse = async ({
   old_thumbnail,
   preview_tmp,
   old_video,
-  isVideo
+  isVideo,
 }: {
   id: number;
   sort_order: number;
@@ -40,8 +45,8 @@ export const updateCourse = async ({
   thumbnail: File | undefined;
   old_thumbnail: string;
   preview_tmp: string;
-  old_video: string
-  isVideo: boolean
+  old_video: string;
+  isVideo: boolean;
 }) => {
   const formData = new FormData();
   formData.append("id", id.toString());
@@ -93,34 +98,24 @@ type CourseResponse = {
   totalCount: number;
   previousId: number | null;
   nextId: number | null;
-}
+};
 
 type SearchParam = {
   searchParam: string;
   pageParam: number;
   active: number | string;
-}
+};
 
 type SearchParamUserCourses = {
   searchParam: string;
   pageParam: number;
-  id?: number
-}
-
-export const userCourses = async ({
-  pageParam = 0,
-  searchParam,
-}: SearchParamUserCourses): Promise<CourseResponse> => {
-  const response = await authAxios.get<CourseResponse>(
-    `/courses?cursor=${pageParam}&q=${searchParam}`
-  );
-  return response.data;
+  id?: number;
 };
 
 export const coursesByUserId = async ({
   pageParam = 0,
   searchParam,
-  id
+  id,
 }: SearchParamUserCourses): Promise<CourseResponse> => {
   const response = await authAxios.get<CourseResponse>(
     `/courses/user/${id}?cursor=${pageParam}&q=${searchParam}`

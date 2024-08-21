@@ -1,41 +1,18 @@
 import { userCourses } from "@/api/courses";
 import CourseCard from "@/components/course-card";
 import { Input } from "@/components/ui/input";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Loader, Search } from "lucide-react";
-import React, { useEffect, useState, ChangeEvent } from "react";
-import { useInView } from "react-intersection-observer";
+import { useEffect, useState, ChangeEvent } from "react";
 
 export default function Home() {
-  const { ref, inView } = useInView();
-
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  const {
-    status,
-    data,
-    error,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["user-courses", debouncedSearchTerm],
-    queryFn: async ({ pageParam }) => {
-      return userCourses({
-        pageParam: pageParam ?? 0,
-        searchParam: debouncedSearchTerm,
-      });
-    },
-    getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
-    initialPageParam: 0,
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["home-courses", debouncedSearchTerm],
+    queryFn: () => userCourses(debouncedSearchTerm),
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -66,39 +43,29 @@ export default function Home() {
           />
         </div>
       </form>
-      {status === "pending" ? (
+
+      {data && data.data.length === 0 && (
+        <div className="text-center text-zinc-400">
+          No se encontraron resultados
+        </div>
+      )}
+
+      {isLoading && (
         <div className="h-[100px] flex justify-center items-center">
           <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
         </div>
-      ) : null}
+      )}
 
-      {status === "error" ? <span>Error: {error.message}</span> : null}
+      {isError && (
+        <div className="h-[100px] flex justify-center items-center">
+          Error: {error.message}
+        </div>
+      )}
 
-      {status != "pending" &&
-        status != "error" &&
-        data &&
-        data.pages.map((page) => (
-          <React.Fragment key={page.nextId}>
-            {page.data != null &&
-              page.data.map((course) => (
-                <>
-                  <CourseCard course={course} />
-                </>
-              ))}
-          </React.Fragment>
+      {data &&
+        data.data.map((course: any) => (
+          <CourseCard key={course.id} course={course} />
         ))}
-
-      <div ref={ref} onClick={() => fetchNextPage()}>
-        {isFetchingNextPage ? (
-          <div className="h-[100px] flex justify-center items-center">
-            <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-          </div>
-        ) : hasNextPage ? (
-          ""
-        ) : (
-          ""
-        )}
-      </div>
     </section>
   );
 }

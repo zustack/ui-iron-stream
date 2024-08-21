@@ -1,4 +1,4 @@
-import { adminCourses, coursesByUserId, userCourses } from "@/api/courses";
+import { coursesByUserId } from "@/api/courses";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -11,7 +11,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Loader, Plus } from "lucide-react";
 import React, { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
@@ -21,13 +25,18 @@ import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 
 type Props = {
-  userId: number
-  email: string
-  name: string
-  surname: string
-}
+  userId: number;
+  email: string;
+  name: string;
+  surname: string;
+};
 
-export default function AddCouseToUser({userId, email, name, surname}: Props) {
+export default function AddCouseToUser({
+  userId,
+  email,
+  name,
+  surname,
+}: Props) {
   const { ref, inView } = useInView();
 
   const queryClient = useQueryClient();
@@ -62,12 +71,13 @@ export default function AddCouseToUser({userId, email, name, surname}: Props) {
   type AddCourseToUserPayload = {
     user_id: number;
     courses: number;
-  }
+  };
 
   const addCourseToUserMutation = useMutation({
-    mutationFn: (payload: AddCourseToUserPayload) => addCourseToUser(payload.user_id, payload.courses),
+    mutationFn: (payload: AddCourseToUserPayload) =>
+      addCourseToUser(payload.user_id, payload.courses),
     onSuccess: () => {
-      toast.success("hey es success")
+      toast.success("hey es success");
       queryClient.invalidateQueries({ queryKey: ["add-courses-to-user"] });
     },
     onError: (error: ErrorResponse) => {
@@ -87,16 +97,13 @@ export default function AddCouseToUser({userId, email, name, surname}: Props) {
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>Agrega cursos al usuario {" "}
-         <span className="text-indigo-400"> 
-         {name}{" "} 
-         {surname}{" "} idd::: {userId}
-         </span>
-          con 
-          el correo electronico{" "}
-         <span className="text-indigo-400"> 
-         {email}
-         </span>
+          <AlertDialogTitle>
+            Agrega cursos al usuario{" "}
+            <span className="text-indigo-400">
+              {name} {surname} idd::: {userId}
+            </span>
+            con el correo electronico{" "}
+            <span className="text-indigo-400">{email}</span>
           </AlertDialogTitle>
           <AlertDialogDescription>
             <ScrollArea className="h-[200px] w-[350px]p-4">
@@ -116,12 +123,16 @@ export default function AddCouseToUser({userId, email, name, surname}: Props) {
                     {page.data != null &&
                       page.data.map((course) => (
                         <div className="flex items-center space-x-2 py-2">
-                          <Checkbox 
-                          checked={course.allowed}
-                          onClick={() => {
-                            addCourseToUserMutation.mutate({user_id: userId, courses: course.id})}
-                          }
-                          id="terms" />
+                          <Checkbox
+                            checked={course.allowed}
+                            onClick={() => {
+                              addCourseToUserMutation.mutate({
+                                user_id: userId,
+                                courses: course.id,
+                              });
+                            }}
+                            id="terms"
+                          />
                           <label
                             htmlFor="terms"
                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
