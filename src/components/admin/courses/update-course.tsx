@@ -2,33 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Image from "../../../assets/image.png";
-import { Rating } from "@mui/material";
-import {
-  ChevronLeft,
-  Loader,
-  Paperclip,
-  Pencil,
-  StarIcon,
-  VideoIcon,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import { Loader, Paperclip, Pencil } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  createCourse,
-  getSoloCourse,
-  updateCourse,
-  uploadChunk,
-} from "@/api/courses";
+import { useMutation } from "@tanstack/react-query";
+import { updateCourse, uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { CHUNK_SIZE } from "@/api/courses";
-import CurrentVideoHls from "./current-video-hls";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -38,52 +21,55 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-  type CourseProp = {
-    id: number;
-    title: string;
-    description: string;
-    author: string;
-    duration: string;
-    is_active: boolean;
-    thumbnail: string;
-    preview: string;
-    sort_order:number;
-  };
+type CourseProp = {
+  id: number;
+  title: string;
+  description: string;
+  author: string;
+  duration: string;
+  is_active: boolean;
+  thumbnail: string;
+  preview: string;
+  sort_order: number;
+};
 
 export default function UpdateCourse({
   isLoading,
   invalidate,
-  course
+  course,
 }: {
   isLoading: boolean;
   invalidate: () => void;
-  course: CourseProp
+  course: CourseProp;
 }) {
   const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("Creado por ");
+  const [author, setAuthor] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [active, setActive] = useState(false);
-
   const [isOpen, setIsOpen] = useState(false);
-
   const [thumbnail, setThumbnail] = useState<File>();
   const [oldThumbnail, setOldThumbnail] = useState("");
-
   const [sortOrder, setSortOrder] = useState("");
   const [video, setVideo] = useState<File>();
+  const [oldVideo, setOldVideo] = useState("");
+  const [isVideo, setIsVideo] = useState(false);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-      setTitle(course.title);
-      setSortOrder(String(course.sort_order));
-      setDescription(course.description);
-      setAuthor(course.author);
-      setDuration(course.duration);
-      setActive(course.is_active);
-      setOldThumbnail(course.thumbnail);
+    setTitle(course.title);
+    setSortOrder(String(course.sort_order));
+    setDescription(course.description);
+    setAuthor(course.author);
+    setDuration(course.duration);
+    setActive(course.is_active);
+    setOldThumbnail(course.thumbnail);
+    setOldVideo(course.preview);
+    if (course.preview) {
+      setIsVideo(true);
+    }
   }, [course]);
 
   useEffect(() => {
@@ -105,20 +91,23 @@ export default function UpdateCourse({
     const file = event.target.files && event.target.files[0];
     if (file) {
       setVideo(file);
+      setIsVideo(true);
     }
   };
 
   type CourseData = {
     id: number;
-    sort_order:number;
+    sort_order: number;
     title: string;
     description: string;
     author: string;
     duration: string;
     is_active: boolean;
-    thumbnail: File;
+    thumbnail: File | undefined;
     old_thumbnail: string;
     preview_tmp: string;
+    old_video: string;
+    isVideo: boolean;
   };
 
   const updateCourseMutation = useMutation({
@@ -147,20 +136,20 @@ export default function UpdateCourse({
       return finalResponse;
     },
     onSuccess: (response) => {
-      if (thumbnail) {
-        updateCourseMutation.mutate({
-          id: course.id,
-          sort_order:Number(sortOrder),
-          title,
-          description,
-          author,
-          duration,
-          is_active: active,
-          thumbnail,
-          old_thumbnail: oldThumbnail,
-          preview_tmp: response,
-        });
-      }
+      updateCourseMutation.mutate({
+        id: course.id,
+        sort_order: Number(sortOrder),
+        title,
+        description,
+        author,
+        duration,
+        is_active: active,
+        thumbnail,
+        old_thumbnail: oldThumbnail,
+        old_video: oldVideo,
+        preview_tmp: response,
+        isVideo
+      });
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -170,20 +159,32 @@ export default function UpdateCourse({
   function detonateChain() {
     if (video) {
       uploadChunkMutation.mutate(video);
+      return;
     } else {
-      toast.error("Por favor, selecciona un video");
+      updateCourseMutation.mutate({
+        id: course.id,
+        sort_order: Number(sortOrder),
+        title,
+        description,
+        author,
+        duration,
+        is_active: active,
+        thumbnail,
+        old_thumbnail: oldThumbnail,
+        old_video: oldVideo,
+        preview_tmp: "",
+        isVideo
+      });
     }
   }
 
   return (
-    <AlertDialog onOpenChange={(open: boolean) => setIsOpen(open)} open={isOpen}>
+    <AlertDialog
+      onOpenChange={(open: boolean) => setIsOpen(open)}
+      open={isOpen}
+    >
       <AlertDialogTrigger>
-        <Button
-          onClick={() => {}}
-          variant="outline"
-          size="icon"
-          className="h-8 gap-1 mx-1"
-        >
+        <Button variant="outline" size="icon" className="h-8 gap-1 mx-1">
           <Pencil className="h-5 w-5 text-indigo-500" />
         </Button>
       </AlertDialogTrigger>
@@ -244,6 +245,7 @@ export default function UpdateCourse({
 
                       <div className="grid gap-2">
                         <Label htmlFor="thumbnail">Thumbnail</Label>
+
                         <Button
                           id="thumbnail"
                           onClick={() => inputRef.current?.click()}
@@ -268,7 +270,27 @@ export default function UpdateCourse({
                       </div>
 
                       <div className="grid gap-2">
+                        {isVideo ? (
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={isVideo}
+                              onCheckedChange={(active: boolean) =>
+                                setIsVideo(active)
+                              }
+                              id="terms"
+                            />
+                            <label
+                              htmlFor="terms"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Video preview
+                            </label>
+                          </div>
+                        ) : (
+
                         <Label htmlFor="video">Video</Label>
+                        )}
+
                         <Button
                           variant="outline"
                           className="flex justify-start gap-4"
@@ -302,7 +324,6 @@ export default function UpdateCourse({
                         />
                       </div>
 
-
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           checked={active}
@@ -330,11 +351,15 @@ export default function UpdateCourse({
           <Button
             className="w-[150px]"
             disabled={
-              updateCourseMutation.isPending || uploadChunkMutation.isPending || isLoading
+              updateCourseMutation.isPending ||
+              uploadChunkMutation.isPending ||
+              isLoading
             }
             onClick={detonateChain}
           >
-            {updateCourseMutation.isPending || uploadChunkMutation.isPending || isLoading ? (
+            {updateCourseMutation.isPending ||
+            uploadChunkMutation.isPending ||
+            isLoading ? (
               <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             ) : (
               <span>Actualizar curso</span>

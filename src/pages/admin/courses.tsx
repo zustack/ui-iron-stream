@@ -8,7 +8,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Eye, ListFilter, Loader, Search, Trash, VideoIcon } from "lucide-react";
+import {
+  Eye,
+  ListFilter,
+  Loader,
+  Search,
+  Trash,
+  VideoIcon,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -202,7 +209,7 @@ export default function AdminCourses() {
                 onClick={() => {
                   if (editSort.map((item) => item.sort_order).join("") === "") {
                     toast.error("Todos los cursos deben tener un orden");
-                    return
+                    return;
                   }
                   sortCoursesMutation.mutate();
                 }}
@@ -408,11 +415,11 @@ export default function AdminCourses() {
                               </TableCell>
 
                               <TableCell>
-                              {course.preview && (
-                              <VideoHls
-                              src={`${import.meta.env.VITE_BACKEND_URL}${course.preview}`}
-                                />
-                              )}
+                                {course.preview && (
+                                  <VideoHls
+                                    src={`${import.meta.env.VITE_BACKEND_URL}${course.preview}`}
+                                  />
+                                )}
                               </TableCell>
 
                               <TableCell>{course.num_reviews}</TableCell>

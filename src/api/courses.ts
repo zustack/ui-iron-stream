@@ -20,6 +20,8 @@ export const updateCourse = async ({
   thumbnail,
   old_thumbnail,
   preview_tmp,
+  old_video,
+  isVideo
 }: {
   id: number;
   sort_order: number;
@@ -28,9 +30,11 @@ export const updateCourse = async ({
   author: string;
   duration: string;
   is_active: boolean;
-  thumbnail: File;
+  thumbnail: File | undefined;
   old_thumbnail: string;
   preview_tmp: string;
+  old_video: string
+  isVideo: boolean
 }) => {
   const formData = new FormData();
   formData.append("id", id.toString());
@@ -43,6 +47,8 @@ export const updateCourse = async ({
   formData.append("thumbnail", thumbnail);
   formData.append("old_thumbnail", old_thumbnail);
   formData.append("preview_tmp", preview_tmp);
+  formData.append("old_video", old_video);
+  formData.append("isVideo", isVideo.toString());
   const response = await authAxios.put("/courses/update", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
