@@ -38,23 +38,20 @@ export default function AddCouseToUser({
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [activeUpdateId, setActiveUpdateId] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const { data, isFetching, isError, error } = useQuery({
+  const { data, isFetching, isLoading, isError, error } = useQuery({
     queryKey: ["user-courses", userId],
-    // is "" because we dont want to search a course here!
-    // or do we?
-    // here should be userCourses via userId!
+    // is "" because we dont want to search a course here! or do we?
     queryFn: () => userCourses("", userId),
+    enabled: isOpen,
   });
 
-  // aca deberia estar tambien deleteUserCourseMutation
-  // like this : {course.allowed ? "del" : "add"}
   const createUserCourseMutation = useMutation({
     mutationFn: ({ userId, courseId }: { userId: number; courseId: number }) =>
       createUserCourse(userId, courseId),
     onSuccess: () => {
       invalidateQuery();
-      // queryClient.invalidateQueries({ queryKey: ["user-courses"] });
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -69,7 +66,6 @@ export default function AddCouseToUser({
       deleteUserCoursesByCourseIdAndUserId(userId, courseId),
     onSuccess: () => {
       invalidateQuery();
-      // queryClient.invalidateQueries({ queryKey: ["user-courses"] });
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -91,7 +87,7 @@ export default function AddCouseToUser({
   }, [isFetching, loading]);
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger>
         <Button variant="outline" size="icon" className="h-8 gap-1 mx-1">
           <Plus className="h-5 w-5 text-zinc-200" />
@@ -99,17 +95,13 @@ export default function AddCouseToUser({
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Agrega cursos al usuario 
-          </AlertDialogTitle>
+          <AlertDialogTitle>Agrega cursos al usuario</AlertDialogTitle>
           <AlertDialogDescription>
             <div className="flex flex-col py-2 pb-4">
-            <p>
-              Nombre: {name} {surname}
-            </p>
-            <p>
-              Email: {email}
-            </p>
+              <p>
+                Nombre: {name} {surname}
+              </p>
+              <p>Email: {email}</p>
             </div>
             <ScrollArea className="h-[200px] w-[350px]p-4">
               {data && data.data.length === 0 && (
@@ -118,7 +110,7 @@ export default function AddCouseToUser({
                 </div>
               )}
 
-              {isFetching && !loading && (
+              {isLoading && (
                 <div className="h-[100px] flex justify-center items-center">
                   <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
                 </div>
