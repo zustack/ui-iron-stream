@@ -1,4 +1,4 @@
-import { adminCourses, coursesByUserId, userCourses } from "@/api/courses";
+import { userCourses } from "@/api/courses";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -14,9 +14,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader, Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { addCourseToUser } from "@/api/users";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
+import {
+  createUserCourse,
+  deleteUserCoursesByCourseIdAndUserId,
+} from "@/api/user-courses";
+import { useEffect, useState } from "react";
 
 type Props = {
   userId: number;
@@ -32,24 +36,25 @@ export default function AddCouseToUser({
   surname,
 }: Props) {
   const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
+  const [activeUpdateId, setActiveUpdateId] = useState(0);
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["admin-coursess"],
+  const { data, isFetching, isError, error } = useQuery({
+    queryKey: ["user-courses", userId],
     // is "" because we dont want to search a course here!
-    queryFn: () => adminCourses("", ""),
+    // or do we?
+    // here should be userCourses via userId!
+    queryFn: () => userCourses("", userId),
   });
 
-  type AddCourseToUserPayload = {
-    user_id: number;
-    courses: number;
-  };
-
-  const addCourseToUserMutation = useMutation({
-    mutationFn: (payload: AddCourseToUserPayload) =>
-      addCourseToUser(payload.user_id, payload.courses),
+  // aca deberia estar tambien deleteUserCourseMutation
+  // like this : {course.allowed ? "del" : "add"}
+  const createUserCourseMutation = useMutation({
+    mutationFn: ({ userId, courseId }: { userId: number; courseId: number }) =>
+      createUserCourse(userId, courseId),
     onSuccess: () => {
-      toast.success("hey es success");
-      queryClient.invalidateQueries({ queryKey: ["add-courses-to-user"] });
+      invalidateQuery();
+      // queryClient.invalidateQueries({ queryKey: ["user-courses"] });
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -58,6 +63,32 @@ export default function AddCouseToUser({
       toast.error(error.response.data.error);
     },
   });
+
+  const deleteUserCoursesByCourseIdAndUserIdMutation = useMutation({
+    mutationFn: ({ userId, courseId }: { userId: number; courseId: number }) =>
+      deleteUserCoursesByCourseIdAndUserId(userId, courseId),
+    onSuccess: () => {
+      invalidateQuery();
+      // queryClient.invalidateQueries({ queryKey: ["user-courses"] });
+    },
+    onError: (error: ErrorResponse) => {
+      if (error.response.data.error === "") {
+        toast.error("Ocurrio un error inesperado");
+      }
+      toast.error(error.response.data.error);
+    },
+  });
+
+  const invalidateQuery = () => {
+    setLoading(true);
+    queryClient.invalidateQueries({ queryKey: ["user-courses"] });
+  };
+
+  useEffect(() => {
+    if (!isFetching && loading) {
+      setLoading(false);
+    }
+  }, [isFetching, loading]);
 
   return (
     <AlertDialog>
@@ -69,17 +100,25 @@ export default function AddCouseToUser({
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Agrega cursos al usuario {name} {surname}, email: {email}
+            Agrega cursos al usuario 
           </AlertDialogTitle>
           <AlertDialogDescription>
+            <div className="flex flex-col py-2 pb-4">
+            <p>
+              Nombre: {name} {surname}
+            </p>
+            <p>
+              Email: {email}
+            </p>
+            </div>
             <ScrollArea className="h-[200px] w-[350px]p-4">
-              {data && data.length === 0 && (
+              {data && data.data.length === 0 && (
                 <div className="text-center text-zinc-400">
                   No se encontraron resultados
                 </div>
               )}
 
-              {isLoading && (
+              {isFetching && !loading && (
                 <div className="h-[100px] flex justify-center items-center">
                   <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
                 </div>
@@ -92,23 +131,40 @@ export default function AddCouseToUser({
               )}
 
               {data &&
-                data.map((course: any) => (
+                data.data.map((course: any) => (
                   <div className="flex items-center space-x-2 py-2">
-                    <Checkbox
-                      checked={course.allowed}
-                      onClick={() => {
-                        addCourseToUserMutation.mutate({
-                          user_id: userId,
-                          courses: course.id,
-                        });
-                      }}
-                      id="terms"
-                    />
+                    {course.id === activeUpdateId &&
+                    (createUserCourseMutation.isPending ||
+                      deleteUserCoursesByCourseIdAndUserIdMutation.isPending ||
+                      loading) ? (
+                      <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
+                    ) : (
+                      <Checkbox
+                        checked={course.allowed}
+                        onClick={() => {
+                          setActiveUpdateId(course.id);
+                          if (course.allowed) {
+                            deleteUserCoursesByCourseIdAndUserIdMutation.mutate(
+                              {
+                                userId: userId,
+                                courseId: course.id,
+                              }
+                            );
+                          } else {
+                            createUserCourseMutation.mutate({
+                              userId: userId,
+                              courseId: course.id,
+                            });
+                          }
+                        }}
+                        id="terms"
+                      />
+                    )}
                     <label
                       htmlFor="terms"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      {course.title}
+                      {course.title} {course.id}
                     </label>
                   </div>
                 ))}

@@ -26,16 +26,6 @@ export const updateActiveStatus = async (
   return response.data;
 };
 
-export const addCourseToUser = async (
-  user_id: number,
-  course_id: number
-) => {
-  const response = await authAxios.put("/courses/add/user", {
-    user_id,
-    course_id
-  });
-  return response.data;
-};
 
 type User = {
   id: number;

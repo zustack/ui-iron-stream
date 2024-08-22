@@ -2,8 +2,8 @@ import { authAxios } from "@/lib/axiosInstances";
 
 export const CHUNK_SIZE = 1 * 1024 * 1024;
 
-export const userCourses = async (query: string) => {
-  const response = await authAxios.get(`/user/courses?q=${query}`);
+export const userCourses = async (query: string, userId: number) => {
+  const response = await authAxios.get(`/user/courses/${userId}?q=${query}`);
   return response.data;
 };
 
