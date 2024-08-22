@@ -20,7 +20,7 @@ import {
   createUserCourse,
   deleteUserCoursesByCourseIdAndUserId,
 } from "@/api/user-courses";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Props = {
   userId: number;

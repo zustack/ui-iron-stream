@@ -21,10 +21,8 @@ import { Loader, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { addCourseToUser } from "@/api/users";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
-import { createSpecialApps, getApps, getUserSpecialApps } from "@/api/apps";
 import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
 
 type Props = {

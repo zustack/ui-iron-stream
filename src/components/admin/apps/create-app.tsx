@@ -2,18 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Loader,
-  Paperclip,
-  PlusCircle,
-} from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import React, { useState, ChangeEvent, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { createCourse, uploadChunk } from "@/api/courses";
+import { Loader, PlusCircle } from "lucide-react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
-import { CHUNK_SIZE } from "@/api/courses";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -26,22 +19,22 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createApp } from "@/api/apps";
 
-export default function CreateApp({
-  isLoading,
-}: {
-  invalidate: () => void;
-  isLoading: boolean;
-}) {
+export default function CreateApp() {
   const [name, setName] = useState("");
   const [processName, setProcessName] = useState("");
-  const [os, setOs] = useState("");
-  const [active,setActive] = useState(false)
+  const [active, setActive] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // add mutation and api/apps async fucntion
+  const queryClient = useQueryClient();
+
   const createAppMutation = useMutation({
-    mutationFn: () => createApp(name, processName, os, active),
-    onSuccess: () => {
-      toast.success("App Creada");
+    mutationFn: () => createApp(name, processName, active),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
+      setIsOpen(false);
+      setName("");
+      setProcessName("");
+      setActive(true);
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -52,7 +45,10 @@ export default function CreateApp({
   });
 
   return (
-    <AlertDialog>
+    <AlertDialog
+      onOpenChange={(open: boolean) => setIsOpen(open)}
+      open={isOpen}
+    >
       <AlertDialogTrigger>
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
@@ -73,35 +69,23 @@ export default function CreateApp({
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Titulo</Label>
+                        <Label htmlFor="first-name">Nombre de la app</Label>
                         <Input
                           id="first-name"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          placeholder="Name"
+                          placeholder="Nombre de la app"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Process Name</Label>
+                        <Label htmlFor="first-name">Nombre del proceso</Label>
                         <Input
                           id="first-name"
                           value={processName}
                           onChange={(e) => setProcessName(e.target.value)}
-                          placeholder="Process Name"
-                          required
-                        />
-                      </div>
-
-
-                      <div className="grid gap-2">
-                        <Label htmlFor="first-name">Os</Label>
-                        <Input
-                          id="first-name"
-                          value={os}
-                          onChange={(e) => setOs(e.target.value)}
-                          placeholder="Process Name"
+                          placeholder="Nombre del proceso"
                           required
                         />
                       </div>
@@ -121,7 +105,6 @@ export default function CreateApp({
                           Estado {active ? "Activo" : "Inactivo"}
                         </label>
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -135,7 +118,10 @@ export default function CreateApp({
             onClick={() => createAppMutation.mutate()}
             className="w-[100px]"
           >
-            Crear app
+            {createAppMutation.isPending && (
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            <span>Crear app</span>
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

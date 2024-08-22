@@ -1,4 +1,3 @@
-import { getForbiddenApps } from "@/api/apps";
 import {
   getCurrentVideo,
   getVideosByCourseId,
@@ -27,14 +26,6 @@ export default function Video() {
   const { os } = useOsStore();
   const [loading, setLoading] = useState(false);
 
-  const {
-    data: forbiddenApps,
-    isLoading: isLoadingForbiddenApps,
-    isError: isErrorForbiddenApps,
-  } = useQuery({
-    queryKey: ["forbidden-apps"],
-    queryFn: () => getForbiddenApps(),
-  });
 
   async function killApps(apps: App[], os: string) {
     setLoading(true);

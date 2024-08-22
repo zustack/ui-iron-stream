@@ -1,50 +1,58 @@
 import { authAxios } from "@/lib/axiosInstances";
 
-export const getForbiddenApps = async () => {
-  const response = await authAxios.get(`/special/apps/get`);
+export const updateAppStatus = async (id: number, is_active: boolean) => {
+  const response = await authAxios.put(
+    `/apps/update/status/${id}/${is_active}`
+  );
   return response.data;
 };
 
-export const getUserSpecialApps = async (userId: number) => {
-  const response = await authAxios.get(`/special/apps/get/${userId}`);
+export const getActiveApps = async () => {
+  const response = await authAxios.get("/apps/active");
   return response.data;
 };
 
-export const createSpecialApps = async (apps: { name: string; process_name: string; os: string; is_active: boolean }[], userId: number) => {
-  const response = await authAxios.post("/special/apps/create", {
-    apps: apps,
-    user_id: userId
-  })
-  return response.data
-}
+export const getAppById = async (id: number) => {
+  const response = await authAxios.get(`/apps/by/id/${id}`);
+  return response.data;
+};
 
-export const deleteApp = async (id:number) => {
-  const response = await authAxios.delete(`/apps/delete/${id}`)
-  return response.data
-}
+export const getAdminApps = async (searchParam: string, is_active: string) => {
+  const response = await authAxios.get(
+    `/apps/admin?q=${searchParam}&a=${is_active}`
+  );
+  return response.data;
+};
 
-export const updateApp = async (id:number, name: string, process_name: string, os: string, is_active: boolean) => {
+export const updateApp = async (
+  id: number,
+  name: string,
+  process_name: string,
+  is_active: boolean
+) => {
   const response = await authAxios.put("/apps/update", {
     id,
     name,
     process_name,
-    os,
-    is_active
-  })
-  return response.data
-}
+    is_active,
+  });
+  return response.data;
+};
 
-export const createApp = async (name: string, process_name: string, os: string, is_active: boolean) => {
+export const deleteApp = async (id: number) => {
+  const response = await authAxios.delete(`/apps/delete/${id}`);
+  return response.data;
+};
+
+export const createApp = async (
+  name: string,
+  process_name: string,
+  is_active: boolean
+) => {
   const response = await authAxios.post("/apps/create", {
     name,
     process_name,
-    os,
-    is_active
-  })
-  return response.data
-}
-
-export const getApps = async (searchParam: string, is_active: string) => {
-  const response = await authAxios.get(`/apps?q=${searchParam}&a=${is_active}`);
+    is_active,
+  });
   return response.data;
 };
