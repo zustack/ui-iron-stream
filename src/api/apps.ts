@@ -1,5 +1,11 @@
 import { authAxios } from "@/lib/axiosInstances";
 
+export const getForbiddenApps = async () => {
+  const response = await authAxios.get("/apps/forbidden");
+  return response.data;
+};
+
+
 export const updateAppStatus = async (id: number, is_active: boolean) => {
   const response = await authAxios.put(
     `/apps/update/status/${id}/${is_active}`

@@ -11,6 +11,7 @@ import { Command } from "@tauri-apps/api/shell";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Loader } from "lucide-react";
+import { getForbiddenApps } from "@/api/apps";
 
 type App = {
   name: string;
@@ -26,6 +27,14 @@ export default function Video() {
   const { os } = useOsStore();
   const [loading, setLoading] = useState(false);
 
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["fobidden-apps"],
+    queryFn: () => getForbiddenApps(),
+  });
 
   async function killApps(apps: App[], os: string) {
     setLoading(true);
@@ -37,6 +46,7 @@ export default function Video() {
     setLoading(false);
   }
 
+  console.log("data", data)
   async function getLocalApps() {
     let commandName: string = "";
     if (os === "darwin") {
@@ -51,7 +61,7 @@ export default function Video() {
     }
     const command = new Command(commandName);
     const output = await command.execute();
-    const found = forbiddenApps.filter((item: App) =>
+    const found = data.filter((item: App) =>
       output.stdout.includes(item.process_name)
     );
     setFoundApps(found);
@@ -62,7 +72,10 @@ export default function Video() {
         getLocalApps();
       }, 1500);
       return () => clearInterval(intervalId);
-  }, [foundApps, forbiddenApps]);
+  }, [foundApps, data]);
+
+  console.log("found", foundApps)
+
 
   const {
     data: video,
@@ -90,6 +103,8 @@ export default function Video() {
   }
   if (isErrorVideos) return <>Error</>;
   if (isErrorCurrentVideo) return <>Error</>;
+  if (isLoading) return <p>...</p>
+  if (isError) return <p>Error</p>
 
   return (
     <div className="grid grid-cols-6 lg:grid-cols-12 gap-4">
