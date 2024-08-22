@@ -1,5 +1,13 @@
 import { authAxios, noAuthAxios } from "@/lib/axiosInstances";
 
+export const makeSpecialAppUser = async (
+  user_id: number,
+  special_apps: boolean
+) => {
+  const response = await authAxios.put(`/make/special/apps/user/${user_id}/${special_apps}`);
+  return response.data;
+};
+
 export const deactivateCourseForAllUsers = async(id:number) => {
   const response = await authAxios.put(`/deactivate/course/for/all/users/${id}`);
   return response.data;

@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListFilter, Loader, Search, Trash } from "lucide-react";
+import { ListFilter, Loader, Plus, Search, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,12 +44,12 @@ import { ErrorResponse } from "@/types";
 import {
   adminUsers,
   deleteAccountAtRegister,
+  makeSpecialAppUser,
   updateActiveStatus,
 } from "@/api/users";
 import AddCouseToUser from "@/components/admin/users/add-course-to-user";
 import Deactivate from "@/components/admin/users/deactivate";
-import SpecialApps from "@/components/admin/users/special-apps";
-import TrueSpecialApps from "@/components/admin/users/true-special-apps";
+import UserApps from "@/components/admin/users/user-apps";
 
 export default function AdminUsers() {
   const [activeDeleteId, setActiveDeleteId] = useState(0);
@@ -119,6 +119,16 @@ export default function AdminUsers() {
     mutationFn: (user_id: number) => updateActiveStatus(user_id),
     onSuccess: () => {
       invalidateQuery();
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+    },
+  });
+
+  const makeSpecialAppUserMutation = useMutation({
+    mutationFn: ({userId, specialApp}:{userId: number, specialApp: boolean}) => makeSpecialAppUser(userId, specialApp),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -335,19 +345,26 @@ export default function AdminUsers() {
                                 <Checkbox checked={course.verified} />
                               </TableCell>
 
-                              <TableCell>
-                                <Checkbox checked={course.special_apps} />
-                                {course.special_apps ? (
-                                  <TrueSpecialApps
-                                    specialApps={course.special_apps}
-                                    userId={course.id}
-                                  />
+                              <TableCell className="flex items-center gap-1">
+                                {makeSpecialAppUserMutation.isPending ? (
+                                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />  
                                 ) : (
-                                  <SpecialApps
-                                    specialApps={course.special_apps}
-                                    userId={course.id}
-                                  />
+
+                                <Checkbox 
+                                onClick={() => {
+                                  makeSpecialAppUserMutation.mutate({
+                                    userId: course.id,
+                                    specialApp: !course.special_apps
+                                  })
+                                }}
+                                checked={course.special_apps} />
                                 )}
+                                <UserApps 
+                                  email={course.email}
+                                  name={course.name}
+                                  surname={course.surname}
+                                  userId={course.id}
+                                  />
                               </TableCell>
 
                               <TableCell>{course.email}</TableCell>
