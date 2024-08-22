@@ -1,6 +1,7 @@
 import { userCourses } from "@/api/courses";
 import CourseCard from "@/components/course-card";
 import { Input } from "@/components/ui/input";
+import { useAuthStore } from "@/store/auth";
 import { useQuery } from "@tanstack/react-query";
 import { Loader, Search } from "lucide-react";
 import { useEffect, useState, ChangeEvent } from "react";
@@ -8,10 +9,11 @@ import { useEffect, useState, ChangeEvent } from "react";
 export default function Home() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const { userId } = useAuthStore()
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["home-courses", debouncedSearchTerm],
-    queryFn: () => userCourses(debouncedSearchTerm),
+    queryFn: () => userCourses(debouncedSearchTerm, userId),
   });
 
   useEffect(() => {

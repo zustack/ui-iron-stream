@@ -322,6 +322,7 @@ export default function AdminUsers() {
                                   onClick={() =>
                                     updateActiveMutation.mutate(course.id)
                                   }
+                                  disabled={course.id === 1}
                                   checked={course.is_active}
                                 />
                               </TableCell>

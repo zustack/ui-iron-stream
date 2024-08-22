@@ -36,11 +36,10 @@ export default function AddCouseToUser({
   surname,
 }: Props) {
   const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false);
   const [activeUpdateId, setActiveUpdateId] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  const { data, isFetching, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["user-courses", userId],
     // is "" because we dont want to search a course here! or do we?
     queryFn: () => userCourses("", userId),
@@ -50,8 +49,8 @@ export default function AddCouseToUser({
   const createUserCourseMutation = useMutation({
     mutationFn: ({ userId, courseId }: { userId: number; courseId: number }) =>
       createUserCourse(userId, courseId),
-    onSuccess: () => {
-      invalidateQuery();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["user-courses"] });
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -64,8 +63,8 @@ export default function AddCouseToUser({
   const deleteUserCoursesByCourseIdAndUserIdMutation = useMutation({
     mutationFn: ({ userId, courseId }: { userId: number; courseId: number }) =>
       deleteUserCoursesByCourseIdAndUserId(userId, courseId),
-    onSuccess: () => {
-      invalidateQuery();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["user-courses"] });
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -74,17 +73,6 @@ export default function AddCouseToUser({
       toast.error(error.response.data.error);
     },
   });
-
-  const invalidateQuery = () => {
-    setLoading(true);
-    queryClient.invalidateQueries({ queryKey: ["user-courses"] });
-  };
-
-  useEffect(() => {
-    if (!isFetching && loading) {
-      setLoading(false);
-    }
-  }, [isFetching, loading]);
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -127,8 +115,7 @@ export default function AddCouseToUser({
                   <div className="flex items-center space-x-2 py-2">
                     {course.id === activeUpdateId &&
                     (createUserCourseMutation.isPending ||
-                      deleteUserCoursesByCourseIdAndUserIdMutation.isPending ||
-                      loading) ? (
+                      deleteUserCoursesByCourseIdAndUserIdMutation.isPending) ? (
                       <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
                     ) : (
                       <Checkbox

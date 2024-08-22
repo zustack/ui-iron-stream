@@ -11,6 +11,7 @@ export const deactivateAllCourses = async() => {
 }
 
 export const updateActiveStatusAllUser = async(isActive: boolean) => {
+  // Podria mandar la param en la url
   const formData = new FormData();
   formData.append("isActive", isActive.toString());
   const response = await authAxios.put("/update/active/status", formData, {
