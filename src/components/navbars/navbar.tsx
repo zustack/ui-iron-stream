@@ -86,6 +86,12 @@ export default function Navbar() {
                   >
                   Cursos
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                  onClick={() => handleNavigation("/testing/hls")}
+                  >
+                    Hls
+                  </DropdownMenuItem>
                 <DropdownMenuItem>Historial</DropdownMenuItem>
                 <DropdownMenuItem>Configuraciones</DropdownMenuItem>
                 <DropdownMenuItem>Feedback</DropdownMenuItem>

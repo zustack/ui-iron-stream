@@ -26,6 +26,7 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
   const { isChangePageRequested, setResume:setResumeZustand, setHistoryId } = useVideoResumeStore();
 
   useEffect(() => {
+
     let videoSrc = `${import.meta.env.VITE_BACKEND_URL}${src}`;
     const video = document.getElementById("video") as HTMLMediaElement;
     videoRef.current = video;
@@ -37,6 +38,7 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
         startLevel: -1,
         capLevelToPlayerSize: true,
       });
+
       hls.loadSource(videoSrc);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, function (_event, _data) {

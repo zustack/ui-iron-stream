@@ -1,4 +1,13 @@
 import { authAxios, noAuthAxios } from "@/lib/axiosInstances";
+import { SearchParam, UserResponse } from "@/types";
+
+export const updateAdminStatus = async (
+  userId: number,
+  isAdmin: boolean
+) => {
+  const response = await authAxios.put(`/users/update/admin/status/${userId}/${isAdmin}`);
+  return response.data;
+};
 
 export const makeSpecialAppUser = async (
   user_id: number,
@@ -35,37 +44,6 @@ export const updateActiveStatus = async (
   return response.data;
 };
 
-
-type User = {
-  id: number;
-  email: string;
-  name: string;
-  surname: string;
-  thumbnail: string;
-  is_admin: boolean;
-  special_apps: boolean;
-  is_active: boolean;
-  verified: boolean;
-  pc: string;
-  os: string;
-  created_at: string;
-};
-
-type UserResponse = {
-  data: User[];
-  totalCount: number;
-  previousId: number | null;
-  nextId: number | null;
-}
-
-type SearchParam = {
-  searchParam: string;
-  pageParam: number;
-  active: number | string;
-  admin: number | string;
-  special: number | string;
-  verified: number | string;
-}
 
 export const adminUsers = async ({
   pageParam = 0,

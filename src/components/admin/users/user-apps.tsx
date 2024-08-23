@@ -1,4 +1,8 @@
-import { createUserApp, deleteUserAppsByAppIdAndUserId, getUserApps } from "@/api/user-apps";
+import {
+  createUserApp,
+  deleteUserAppsByAppIdAndUserId,
+  getUserApps,
+} from "@/api/user-apps";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
@@ -17,6 +21,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorResponse } from "@/types";
 import toast from "react-hot-toast";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Props = {
   userId: number;
@@ -75,36 +88,47 @@ export default function UserApps({ userId, email, name, surname }: Props) {
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>Agrega apps al usuario</AlertDialogTitle>
+          <AlertDialogTitle>Add apps to user</AlertDialogTitle>
           <AlertDialogDescription>
             <div className="flex flex-col py-2 pb-4">
               <p>
-                Nombre: {name} {surname}
+                Name: {name} {surname}
               </p>
               <p>Email: {email}</p>
             </div>
-            <ScrollArea className="h-[200px] w-[350px]p-4">
-              {data && data.data.length === 0 && (
-                <div className="text-center text-zinc-400">
-                  No se encontraron resultados
-                </div>
-              )}
+            <ScrollArea className="h-[300px]">
+              <Table className="p-1">
+                <TableCaption>
+                  {data && data.data.length === 0 && (
+                    <div className="text-center text-zinc-400">
+                      No results found.
+                    </div>
+                  )}
 
-              {isLoading && (
-                <div className="h-[100px] flex justify-center items-center">
-                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                </div>
-              )}
+                  {isLoading && (
+                    <div className="h-[100px] flex justify-center items-center">
+                      <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                    </div>
+                  )}
 
-              {isError && (
-                <div className="h-[100px] flex justify-center items-center">
-                  Error: {error.message}
-                </div>
-              )}
-
+                  {isError && (
+                    <div className="h-[100px] flex justify-center items-center">
+                      Error: {error.message}
+                    </div>
+                  )}
+                </TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">Status</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Process name</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
               {data &&
                 data.data.map((app: any) => (
-                  <div className="flex items-center space-x-2 py-2">
+                  <TableRow>
+                    <TableCell>
                     {app.id === activeUpdateId &&
                     (createUserAppMutation.isPending ||
                       deleteUserAppMutation.isPending) ? (
@@ -115,28 +139,28 @@ export default function UserApps({ userId, email, name, surname }: Props) {
                         onClick={() => {
                           setActiveUpdateId(app.id);
                           if (app.exists) {
-                          deleteUserAppMutation.mutate({
-                            userId,
-                            appId: app.id,
-                          });
+                            deleteUserAppMutation.mutate({
+                              userId,
+                              appId: app.id,
+                            });
                           } else {
-                          createUserAppMutation.mutate({
-                            userId,
-                            appId: app.id,
-                          });
+                            createUserAppMutation.mutate({
+                              userId,
+                              appId: app.id,
+                            });
                           }
                         }}
                         id="terms"
                       />
                     )}
-                    <label
-                      htmlFor="terms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {app.name} {app.id}
-                    </label>
-                  </div>
+                    </TableCell>
+                    <TableCell>{app.name}</TableCell>
+                    <TableCell>{app.process_name}</TableCell>
+                  </TableRow>
                 ))}
+                </TableBody>
+
+              </Table>
             </ScrollArea>
           </AlertDialogDescription>
         </AlertDialogHeader>

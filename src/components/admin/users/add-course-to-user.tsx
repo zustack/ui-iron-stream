@@ -21,6 +21,15 @@ import {
   deleteUserCoursesByCourseIdAndUserId,
 } from "@/api/user-courses";
 import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Props = {
   userId: number;
@@ -83,70 +92,78 @@ export default function AddCouseToUser({
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>Agrega cursos al usuario</AlertDialogTitle>
+          <AlertDialogTitle>Add courses to user</AlertDialogTitle>
           <AlertDialogDescription>
             <div className="flex flex-col py-2 pb-4">
               <p>
-                Nombre: {name} {surname}
+                Name: {name} {surname}
               </p>
               <p>Email: {email}</p>
             </div>
-            <ScrollArea className="h-[200px] w-[350px]p-4">
-              {data && data.data.length === 0 && (
-                <div className="text-center text-zinc-400">
-                  No se encontraron resultados
-                </div>
-              )}
+            <ScrollArea className="h-[300px]">
+              <Table className="p-1">
+                <TableCaption>
+                  {data && data.data.length === 0 && (
+                    <div className="text-center text-zinc-400">
+                      No results found.
+                    </div>
+                  )}
 
-              {isLoading && (
-                <div className="h-[100px] flex justify-center items-center">
-                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                </div>
-              )}
+                  {isLoading && (
+                    <div className="h-[100px] flex justify-center items-center">
+                      <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                    </div>
+                  )}
 
-              {isError && (
-                <div className="h-[100px] flex justify-center items-center">
-                  Error: {error.message}
-                </div>
-              )}
-
-              {data &&
-                data.data.map((course: any) => (
-                  <div className="flex items-center space-x-2 py-2">
-                    {course.id === activeUpdateId &&
-                    (createUserCourseMutation.isPending ||
-                      deleteUserCoursesByCourseIdAndUserIdMutation.isPending) ? (
-                      <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
-                    ) : (
-                      <Checkbox
-                        checked={course.allowed}
-                        onClick={() => {
-                          setActiveUpdateId(course.id);
-                          if (course.allowed) {
-                            deleteUserCoursesByCourseIdAndUserIdMutation.mutate(
-                              {
-                                userId: userId,
-                                courseId: course.id,
-                              }
-                            );
-                          } else {
-                            createUserCourseMutation.mutate({
-                              userId: userId,
-                              courseId: course.id,
-                            });
-                          }
-                        }}
-                        id="terms"
-                      />
-                    )}
-                    <label
-                      htmlFor="terms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {course.title} {course.id}
-                    </label>
-                  </div>
-                ))}
+                  {isError && (
+                    <div className="h-[100px] flex justify-center items-center">
+                      Error: {error.message}
+                    </div>
+                  )}
+                </TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">Status</TableHead>
+                    <TableHead>Course title</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data &&
+                    data.data.map((course: any) => (
+                      <TableRow>
+                        <TableCell>
+                          {course.id === activeUpdateId &&
+                          (createUserCourseMutation.isPending ||
+                            deleteUserCoursesByCourseIdAndUserIdMutation.isPending) ? (
+                            <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
+                          ) : (
+                            <Checkbox
+                              checked={course.allowed}
+                              onClick={() => {
+                                setActiveUpdateId(course.id);
+                                if (course.allowed) {
+                                  deleteUserCoursesByCourseIdAndUserIdMutation.mutate(
+                                    {
+                                      userId: userId,
+                                      courseId: course.id,
+                                    }
+                                  );
+                                } else {
+                                  createUserCourseMutation.mutate({
+                                    userId: userId,
+                                    courseId: course.id,
+                                  });
+                                }
+                              }}
+                              id="terms"
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell>{course.title}</TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
             </ScrollArea>
           </AlertDialogDescription>
         </AlertDialogHeader>

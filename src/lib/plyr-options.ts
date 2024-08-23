@@ -10,11 +10,10 @@ export const plyrOptions = {
         "duration",
         "mute",
         "volume",
-        "captions",
         "settings",
         "fullscreen",
       ],
-      settings: ["captions", "quality", "speed"],
+      settings: ["quality", "speed"],
       i18n: {
         restart: "Restart",
         rewind: "Rewind {seektime}s",

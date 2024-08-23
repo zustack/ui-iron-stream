@@ -15,23 +15,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { ErrorResponse } from "@/types";
 import toast from "react-hot-toast";
-import { useInView } from "react-intersection-observer";
-import { adminCourses, coursesByUserId } from "@/api/courses";
+import { adminCourses } from "@/api/courses";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Loader, Menu } from "lucide-react";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -42,6 +34,16 @@ import {
   deleteAllUserCourses,
   deleteUserCourseByCourseId,
 } from "@/api/user-courses";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Course } from "@/types";
 
 export default function Deactivate() {
   return (
@@ -50,12 +52,12 @@ export default function Deactivate() {
         <Button variant="outline" size="sm" className="h-8 gap-1">
           <Menu className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Acciones
+            Actions
           </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="flex flex-col" align="end">
-        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DeactivateAllUsers />
         <ActivateAllUsers />
@@ -67,21 +69,19 @@ export default function Deactivate() {
 }
 
 const DeactivateAllUsers = () => {
-
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  // update the queryKey de users
   const updateActiveStatusAllUserMutation = useMutation({
     mutationFn: () => updateActiveStatusAllUser(false),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setIsOpen(false);
-      toast.success("Todos los usuarios fueron desactivados");
+      toast.success("All users deactivated successfully");
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
+        toast.error("An error occurred, please try again later");
       }
       toast.error(error.response.data.error);
     },
@@ -96,28 +96,33 @@ const DeactivateAllUsers = () => {
             event.preventDefault();
           }}
         >
-          Desactivar todos los usuarios
+          Deactivate all users
         </DropdownMenuItem>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Desactivar todos los usuarios</AlertDialogTitle>
+          <AlertDialogTitle>Deactivate all users</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta operación no se puede deshacer. Procede con cuidado
+            This will deactivate all users, proceed with caution.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          {updateActiveStatusAllUserMutation.isPending ? (
-            <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-          ) : (
-            <Button
-              variant={"destructive"}
-              onClick={() => updateActiveStatusAllUserMutation.mutate()}
-            >
-              Confirmar
-            </Button>
-          )}
+          <AlertDialogCancel
+            disabled={updateActiveStatusAllUserMutation.isPending}
+          >
+            Cancel
+          </AlertDialogCancel>
+          <Button
+            variant={"destructive"}
+            onClick={() => updateActiveStatusAllUserMutation.mutate()}
+            disabled={updateActiveStatusAllUserMutation.isPending}
+            className="flex gap-2"
+          >
+            {updateActiveStatusAllUserMutation.isPending && (
+              <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+            )}
+            Confirm
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -125,7 +130,6 @@ const DeactivateAllUsers = () => {
 };
 
 const ActivateAllUsers = () => {
-// updateActiveStatusAllUser 
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -133,12 +137,12 @@ const ActivateAllUsers = () => {
     mutationFn: () => updateActiveStatusAllUser(true),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast.success("Todos los usuarios fueron activados");
+      toast.success("All users activated successfully");
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
+        toast.error("An error occurred, please try again later");
       }
       toast.error(error.response.data.error);
     },
@@ -153,26 +157,34 @@ const ActivateAllUsers = () => {
             event.preventDefault();
           }}
         >
-          Activar todos los usuarios
+          Activate all users
         </DropdownMenuItem>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Desactivar todos los usuarios</AlertDialogTitle>
+          <AlertDialogTitle>Activate all users</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta operación no se puede deshacer. Procede con cuidado
+            This will activate all users, proceed with caution.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel
+            disabled={updateActiveStatusAllUserMutation.isPending}
+          >
+            Cancel
+          </AlertDialogCancel>
           {updateActiveStatusAllUserMutation.isPending ? (
             <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
           ) : (
             <Button
               variant={"destructive"}
+              disabled={updateActiveStatusAllUserMutation.isPending}
               onClick={() => updateActiveStatusAllUserMutation.mutate()}
             >
-              Confirmar
+              {updateActiveStatusAllUserMutation.isPending && (
+                <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+              )}
+              Confirm
             </Button>
           )}
         </AlertDialogFooter>
@@ -187,12 +199,12 @@ const DeactivateAllCourses = () => {
   const deleteAllUserCoursesMutation = useMutation({
     mutationFn: () => deleteAllUserCourses(),
     onSuccess: () => {
-      toast.success("Cursos desactivados");
+      toast.success("All courses deactivated successfully");
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
+        toast.error("An error occurred, please try again later");
       }
       toast.error(error.response.data.error);
     },
@@ -207,28 +219,29 @@ const DeactivateAllCourses = () => {
             event.preventDefault();
           }}
         >
-          Desactivar todos los cursos
+          Deactivate all courses
         </DropdownMenuItem>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Desactivar todos los cursos</AlertDialogTitle>
+          <AlertDialogTitle>Deactivate all courses</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta operación no se puede deshacer. Procede con cuidado
+            This operation will deactivate all courses, proceed with caution
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          {deleteAllUserCoursesMutation.isPending ? (
-            <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-          ) : (
-            <Button
-              variant={"destructive"}
-              onClick={() => deleteAllUserCoursesMutation.mutate()}
-            >
-              Confirmar
-            </Button>
-          )}
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <Button
+            variant={"destructive"}
+            onClick={() => deleteAllUserCoursesMutation.mutate()}
+            disabled={deleteAllUserCoursesMutation.isPending}
+            className="flex gap-2"
+          >
+            {deleteAllUserCoursesMutation.isPending && (
+              <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+            )}
+            Confirm
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -252,7 +265,7 @@ const DeactivateIndividualCourses = () => {
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
+        toast.error("An error occurred, please try again later");
       }
       toast.error(error.response.data.error);
     },
@@ -267,87 +280,109 @@ const DeactivateIndividualCourses = () => {
             event.preventDefault();
           }}
         >
-          Desactivar cursos individuales
+          Deactivate individual courses
         </DropdownMenuItem>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="min-w-[600px]">
         <AlertDialogHeader>
-          <AlertDialogTitle>Desactivar cursos individuales</AlertDialogTitle>
+          <AlertDialogTitle>Deactivate individual courses</AlertDialogTitle>
           <AlertDialogDescription>
-            <ScrollArea className="h-[200px] w-[350px]p-4">
-              {data && data.length === 0 && (
-                <div className="text-center text-zinc-400">
-                  No se encontraron resultados
-                </div>
-              )}
+            <p className="pb-2">
+              This operation will deactivate the selected course to all the
+              users, proceed with caution.
+            </p>
 
-              {isLoading && (
-                <div className="h-[100px] flex justify-center items-center">
-                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                </div>
-              )}
+            <ScrollArea className="h-[300px]">
+              <Table className="p-1">
+                <TableCaption>
+                  {data && data.length === 0 && (
+                    <div className="text-center text-zinc-400">
+                      No results found.
+                    </div>
+                  )}
 
-              {isError && (
-                <div className="h-[100px] flex justify-center items-center">
-                  Error: {error.message}
-                </div>
-              )}
+                  {isLoading && (
+                    <div className="h-[100px] flex justify-center items-center">
+                      <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                    </div>
+                  )}
 
-              {data &&
-                data.map((course: any) => (
-                  <div className="flex items-center gap-2 space-x-2 py-2">
-                    {confirmId === course.id ? (
-                      <>
-                        {deleteUserCourseByCourseIdMutation.isPending ? (
-                          <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                        ) : (
-                          <>
+                  {isError && (
+                    <div className="h-[100px] flex justify-center items-center">
+                      Error: {error.message}
+                    </div>
+                  )}
+                </TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Course title</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data &&
+                    data.map((course: Course) => (
+                      <TableRow>
+                        <TableCell>{course.title}</TableCell>
+                        <TableCell className="text-right">
+                          {confirmId === course.id ? (
+                            <>
+                              <div className="">
+                                <Button
+                                  onClick={() => setConfirmId(0)}
+                                  disabled={
+                                    deleteUserCourseByCourseIdMutation.isPending
+                                  }
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 gap-1 w-[100px] mr-2"
+                                >
+                                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                    Cancel
+                                  </span>
+                                </Button>
+                                <Button
+                                  disabled={
+                                    deleteUserCourseByCourseIdMutation.isPending
+                                  }
+                                  onClick={() => {
+                                    deleteUserCourseByCourseIdMutation.mutate();
+                                  }}
+                                  variant="destructive"
+                                  size="sm"
+                                  className="h-8 gap-1 w-[100px]"
+                                >
+                                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                    Confirm
+                                  </span>
+                                  {deleteUserCourseByCourseIdMutation.isPending && (
+                                    <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                                  )}
+                                </Button>
+                              </div>
+                            </>
+                          ) : (
                             <Button
-                              onClick={() => setConfirmId(0)}
+                              onClick={() => setConfirmId(course.id)}
                               variant="outline"
                               size="sm"
-                              className="h-8 gap-1 w-[100px]"
+                              className="h-8 gap-1"
                             >
                               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                Cancelar
+                                Deactivate
                               </span>
                             </Button>
-                            <Button
-                              onClick={() => {
-                                deleteUserCourseByCourseIdMutation.mutate();
-                                // make mutation
-                              }}
-                              variant="destructive"
-                              size="sm"
-                              className="h-8 gap-1 w-[100px]"
-                            >
-                              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                Confirmar
-                              </span>
-                            </Button>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <Button
-                        onClick={() => setConfirmId(course.id)}
-                        variant="outline"
-                        size="sm"
-                        className="h-8 gap-1"
-                      >
-                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                          Desactivar
-                        </span>
-                      </Button>
-                    )}
-                    {course.title}
-                  </div>
-                ))}
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
             </ScrollArea>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cerrar</AlertDialogCancel>
+          <AlertDialogCancel>Close</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

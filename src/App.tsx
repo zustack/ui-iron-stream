@@ -24,6 +24,7 @@ import { useVideoResumeStore } from "./store/video-resume";
 import { appWindow } from "@tauri-apps/api/window";
 import { Loader } from "lucide-react";
 import Preview from "./pages/preview";
+import TestingHls from "./pages/testing-hls";
 
 function App() {
   const { setOs } = useOsStore();
@@ -78,6 +79,7 @@ function App() {
             <Route path="home" element={<Home />} />
             <Route path="video/:courseId" element={<Video />} />
             <Route path="preview/:courseId" element={<Preview />} />
+            <Route path="testing/hls" element={<TestingHls />} />
           </Route>
         </Route>
 
