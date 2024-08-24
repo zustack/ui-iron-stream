@@ -6,12 +6,11 @@ import { Textarea } from "./ui/textarea";
 
 export default function VideoNotes() {
   return (
-    <div className="h-[750px]">
-      <div className="rounded-[0.75rem] p-4">
-        <h1 className="text-zinc-300 text-2xl font-bold">Notes</h1>
+      <div className="rounded-[0.75rem]">
+        <h1 className="text-zinc-300 text-2xl font-bold py-4">Notes</h1>
         <Separator className="my-4" />
         <ScrollArea className="h-[540px] w-full pr-4">
-          <div className="hover:bg-zinc-950/30 p-4 rounded-[0.75rem]">
+          <div className="hover:bg-zinc-950/30 pr-2 rounded-[0.75rem]">
             <div className="flex justify-between pb-2">
               <p className="text-zinc-200 font-semibold">Bubble Sort</p>
               <div className="flex gap-2">
@@ -39,7 +38,24 @@ export default function VideoNotes() {
             </p>
           </div>
 
-          <div className="hover:bg-zinc-950/30 p-4 rounded-[0.75rem]">
+        </ScrollArea>
+
+        <div className="flex gap-2 mt-[25px]">
+          <Textarea rows={4} placeholder="Write a note" className="flex-grow" />
+          <Button variant="outline" className="self-end">
+            Save Note
+          </Button>
+        </div>
+      </div>
+  );
+}
+
+/*
+      <div className="rounded-[0.75rem] pb-4">
+        <h1 className="text-zinc-300 text-2xl font-bold">Notes</h1>
+        <Separator className="my-4" />
+        <ScrollArea className="h-[540px] w-full pr-4">
+          <div className="hover:bg-zinc-950/30 pr-2 rounded-[0.75rem]">
             <div className="flex justify-between pb-2">
               <p className="text-zinc-200 font-semibold">Bubble Sort</p>
               <div className="flex gap-2">
@@ -66,6 +82,7 @@ export default function VideoNotes() {
               dependencia de la tecnología
             </p>
           </div>
+
         </ScrollArea>
 
         <div className="flex gap-2 mt-[15px]">
@@ -75,6 +92,4 @@ export default function VideoNotes() {
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
+*/

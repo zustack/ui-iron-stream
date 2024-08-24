@@ -3,11 +3,11 @@ import Navbar from "../navbars/navbar";
 
 export default function Layout() {
   return (
-    <>
+    <div className="min-h-screen">
       <Navbar />
-      <div className="mt-[20px]">
+      <div className="">
         <Outlet />
       </div>
-    </>
+    </div>
   );
 }

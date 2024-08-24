@@ -7,9 +7,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Command } from "@tauri-apps/api/shell";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Loader } from "lucide-react";
+import { File, Loader, Pencil, Search, Trash } from "lucide-react";
 import { getForbiddenApps } from "@/api/apps";
 import VideoNotes from "@/components/video-notes";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 
 type App = {
   name: string;
@@ -40,7 +43,6 @@ export default function Video() {
     setLoading(false);
   }
 
-  console.log("data", data);
   async function getLocalApps() {
     let commandName: string = "";
     if (os === "darwin") {
@@ -67,8 +69,6 @@ export default function Video() {
     }, 1500);
     return () => clearInterval(intervalId);
   }, [foundApps, data]);
-
-  console.log("found", foundApps);
 
   const {
     data: video,
@@ -100,8 +100,138 @@ export default function Video() {
   if (isError) return <p>Error</p>;
 
   return (
-    <>
-      <div className="grid grid-cols-12 gap-4 px-4 h-[750px]">
+    <div className="lg:h-[calc(100vh-60px)] flex flex-col lg:flex-row overflow-hidden pt-[10px] px-[10px] gap-[10px] mx-auto">
+      {/* Contenedor notas */}
+      <div className="flex-1 w-full lg:flex-auto xl:w-[30%]">
+        <div className=" h-[140px] flex flex-col justify-between">
+          <h1 className="text-zinc-300 text-2xl font-bold">Notes</h1>
+          <div className="flex gap-2">
+            <Textarea
+              rows={4}
+              placeholder="Write a note"
+              className="flex-grow"
+            />
+            <Button variant="outline" className="self-end">
+              Save Note
+            </Button>
+          </div>
+        </div>
+        <div className="bg-zinc-900 rounded-[0.75rem] mt-[10px] overflow-auto h-[calc(100vh-60px-140px-30px)]">
+          <div className="h-full p-2">
+            <div className="hover:bg-zinc-800 p-4 rounded-[0.75rem]">
+              <div className="flex justify-between">
+                <h1 className="text-zinc-200 font-semibold">Bubble Sort</h1>
+                <div className="flex gap-2">
+                  <div className="flex gap-2">
+                    <Trash className="h-5 w-5 text-red-500 hover:text-red-600 cursor-pointer" />
+                    <Pencil className="h-5 w-5 text-indigo-500 hover:text-indigo-600 cursor-pointer" />
+                  </div>
+                  <p className="text-indigo-500">4:20</p>
+                </div>
+              </div>
+              <p className="text-zinc-200">
+                La tecnología ha transformado la vida cotidiana de maneras
+                inimaginables hace solo unas décadas. Desde la forma en que nos
+                comunicamos hasta cómo trabajamos y nos entretenemos, la
+                tecnología ha permeado todos los aspectos de nuestra existencia.
+                Los dispositivos móviles, como teléfonos inteligentes y
+                tabletas, nos permiten estar conectados en cualquier lugar y en
+                cualquier momento, lo que facilita la comunicación instantánea y
+                el acceso a la información. Además, el auge de las redes
+                sociales ha cambiado la manera en que interactuamos con amigos y
+                familiares, creando nuevas formas de relaciones humanas. Sin
+                embargo, este avance también ha traído consigo desafíos, como la
+                sobrecarga de información, la disminución de la privacidad y el
+                aumento de la dependencia de la tecnología
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenedor central */}
+      <div className="flex-1 lg:flex-auto w-full">
+        <VideoHls
+          setResume={setResumeState}
+          resume={video.resume}
+          src={video.video.video_hls}
+          history_id={video && video.history_id}
+          isPaused={foundApps && foundApps.length > 0}
+        />
+        <div className="flex justify-between mt-2">
+          <h1 className="text-zinc-200 text-2xl font-semibold">
+            {video.video.title}
+          </h1>
+          <Button variant="outline" className="flex gap-1" size={"sm"}>
+            <File className="h-4 w-4" />
+            Ver archivos
+          </Button>
+        </div>
+        <p className="text-zinc-400 mt-2">{video.video.description}</p>
+      </div>
+
+      {/* Contenedor playlist */}
+      <div className="flex-1 w-full lg:flex-auto xl:w-[30%]">
+        <form className="ml-auto flex-1 sm:flex-initial h-[50px]">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Busca un video..."
+              className="pl-8 w-full"
+            />
+          </div>
+        </form>
+
+        <div className="overflow-auto h-[calc(100vh-60px-50px-20px)]">
+          <div className="h-full">
+            <div
+              className={`
+  mb-2 p-1 hover:bg-zinc-800 rounded-[0.75rem] cursor-pointer 
+  transition-colors duration-200 border-indigo-600
+`}
+            >
+              <div className="relative">
+                <div
+                  className="
+                      relative overflow-hidden rounded-[0.75rem]"
+                >
+                  <img
+                    src="https://framerusercontent.com/images/WR98JzQivDxO6VDNu8E39vrsqg.png"
+                    alt=""
+                    className="w-full"
+                  />
+                  <div
+                    className={`absolute 
+                    bottom-0 left-0 
+                    h-[6px] bg-indigo-600 rounded-b-[0.75rem]`}
+                  ></div>
+                </div>
+              </div>
+              <div className="flex-col mx-2">
+                <h4 className="font-semibold mt-2">Title</h4>
+                <p className="text-sm text-zinc-200 mt-2">
+                  Descriptionkasnfsdkl
+                </p>
+                <div className="flex gap-2 mt-2">
+                  <p className="text-sm text-zinc-400">35 minutes</p>
+                  <p className="text-sm text-zinc-400">•</p>
+                  <p className="text-sm text-zinc-400">1287 views</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  );
+}
+
+/*
+
+      <div className="grid grid-cols-12 gap-4 px-4 h-auto">
         <div className="col-span-3">
           <VideoNotes />
         </div>
@@ -153,11 +283,9 @@ export default function Video() {
           />
         </div>
       </div>
-    </>
-  );
-}
-
-/*
+  *
+  *
+  *
 function viewFiles() {
   const webview = new WebviewWindow('theUniqueLabel', {
     url: 'notes',

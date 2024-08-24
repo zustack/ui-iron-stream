@@ -23,10 +23,10 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
   });
 
   const videoRef = useRef<HTMLMediaElement | null>(null);
+
   const { isChangePageRequested, setResume:setResumeZustand, setHistoryId } = useVideoResumeStore();
 
   useEffect(() => {
-
     let videoSrc = `${import.meta.env.VITE_BACKEND_URL}${src}`;
     const video = document.getElementById("video") as HTMLMediaElement;
     videoRef.current = video;
@@ -67,16 +67,10 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
       videoRef.current.currentTime = Number(resume);
     }
 
-    setHistoryId(history_id)
+    localStorage.setItem('historyId', history_id);
+    // setHistoryId(history_id)
 
   }, [resume, src]);
-
-  useEffect(() => {
-    if (isChangePageRequested) {
-      console.log("historuuuuuu")
-      updateHistoryMutation.mutate(videoRef.current.currentTime);
-    }
-  }, [isChangePageRequested]);
 
   useEffect(() => {
     if (isPaused) {
@@ -85,12 +79,6 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
       videoRef.current?.play();
     }
   }, [isPaused]);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      setResumeZustand(videoRef.current?.currentTime);
-    }
-  }, [videoRef.current?.currentTime]);
 
   setResume(videoRef.current?.currentTime || 0);
 

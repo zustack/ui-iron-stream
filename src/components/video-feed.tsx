@@ -47,6 +47,8 @@ export default function VideoFeed({
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const sectionRef = useRef(null);
 
+  // asi se puede saltar hasta donde esta el video actual que el usuario esta viendo, se debe ejecutar
+  // cuando se desmonta el componente
   const scrollToId = () => {
     const element = document.getElementById(current_video_id);
     if (element) {
@@ -103,7 +105,96 @@ export default function VideoFeed({
   };
 
   return (
-    <div className="h-[750px]">
+    <div className="">
+      <form className="ml-auto flex-1 sm:flex-initial mb-4 mr-4">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={searchInput}
+            onChange={handleInputChange}
+            type="search"
+            placeholder="Busca un video..."
+            className="pl-8 w-full"
+          />
+        </div>
+      </form>
+      <ScrollArea className="h-[704px] w-full pr-4">
+        {status === "pending" ? (
+          <div className="h-[100px] flex justify-center items-center">
+            <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+          </div>
+        ) : null}
+
+        {status === "error" ? <span>Error: {error.message}</span> : null}
+        {status != "pending" &&
+          status != "error" &&
+          data &&
+          data.pages.map((page) => (
+            <React.Fragment key={page.nextId}>
+              {page.data != null &&
+                page.data.map((v) => (
+                  <div
+                    id={String(v.id)}
+                    onClick={() => newVideoMutation.mutate(String(v.id))}
+                    className={`
+  ${v.id === current_video_id ? "bg-zinc-800" : ""}
+  mb-2 p-1 hover:bg-zinc-800 rounded-[0.75rem] cursor-pointer 
+  transition-colors duration-200 border-indigo-600
+`}
+                  >
+                    <div className="relative">
+                      <div
+                        className="
+                      relative overflow-hidden rounded-[0.75rem]"
+                      >
+                        <img
+                          src={`${import.meta.env.VITE_BACKEND_URL}${v.thumbnail}`}
+                          alt=""
+                          className="w-full"
+                        />
+                        <div
+                          style={{ width: `${v.video_resume}%` }}
+                          className={`absolute 
+                    bottom-0 left-0 
+                    h-[6px] bg-indigo-600 rounded-b-[0.75rem]`}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="flex-col mx-2">
+                      <h4 className="font-semibold mt-2">{v.title}</h4>
+                      <p className="text-sm text-zinc-200 mt-2">
+                        {v.description}
+                        {v.id === current_video_id && (
+                          <span className="text-indigo-600"> (playing)</span>
+                        )}
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        <p className="text-sm text-zinc-400">{v.duration}</p>
+                        <p className="text-sm text-zinc-400">•</p>
+                        <p className="text-sm text-zinc-400">{v.views} views</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </React.Fragment>
+          ))}
+
+        <div ref={ref} onClick={() => fetchNextPage()}>
+          {isFetchingNextPage ? (
+            <div className="h-[100px] flex justify-center items-center">
+              <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+            </div>
+          ) : hasNextPage ? (
+            ""
+          ) : (
+            ""
+          )}
+        </div>
+      </ScrollArea>
+        </div>
+  );
+}
+/*
       <form className="ml-auto flex-1 sm:flex-initial mb-4 mr-4">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -189,6 +280,4 @@ export default function VideoFeed({
           )}
         </div>
       </ScrollArea>
-    </div>
-  );
-}
+*/
