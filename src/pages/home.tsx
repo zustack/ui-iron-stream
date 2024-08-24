@@ -5,11 +5,12 @@ import { useAuthStore } from "@/store/auth";
 import { useQuery } from "@tanstack/react-query";
 import { Loader, Search } from "lucide-react";
 import { useEffect, useState, ChangeEvent } from "react";
+import { Course } from "@/types";
 
 export default function Home() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const { userId } = useAuthStore()
+  const { userId } = useAuthStore();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["home-courses", debouncedSearchTerm],
@@ -20,7 +21,6 @@ export default function Home() {
     const timerId = setTimeout(() => {
       setDebouncedSearchTerm(searchInput);
     }, 800);
-
     return () => {
       clearTimeout(timerId);
     };
@@ -32,7 +32,7 @@ export default function Home() {
   };
 
   return (
-    <section className="">
+      <section className="container mx-auto">
       <form className="ml-auto flex-1 sm:flex-initial mb-8 mr-4 flex justify-center">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -47,9 +47,7 @@ export default function Home() {
       </form>
 
       {data && data.data.length === 0 && (
-        <div className="text-center text-zinc-400">
-          No se encontraron resultados
-        </div>
+        <div className="text-center text-zinc-400">No courses found.</div>
       )}
 
       {isLoading && (
@@ -65,7 +63,7 @@ export default function Home() {
       )}
 
       {data &&
-        data.data.map((course: any) => (
+        data.data.map((course: Course) => (
           <CourseCard key={course.id} course={course} />
         ))}
     </section>

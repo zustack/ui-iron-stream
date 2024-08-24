@@ -47,69 +47,69 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 flex h-16 items-center border-b bg-background px-4 md:px-6">
-      <div className="container mx-auto flex items-center justify-between gap-4">
-        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <a
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavigation("/");
-            }}
-            href="/"
-            className="flex gap-1 font-semibold text-xl text-foreground transition-colors hover:text-white cursor-pointer"
-          >
-            <Package2 className="h-6 w-6" />
-            <span>Acme</span>
-            <span>Inc</span>
-          </a>
-          <p className="text-red-400">resume: {resume}</p>
-          <p className="text-blue-400">history_id: {history_id}</p>
-        </nav>
-        <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-          <div className="ml-auto flex-1 sm:flex-initial">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="rounded-full"
-                >
-                  <CircleUser className="h-5 w-5" />
-                  <span className="sr-only">Toggle user menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Hola, Agustin Fricke</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                  onClick={() => handleNavigation("/admin/courses")}
-                  >
-                  Cursos
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                  onClick={() => handleNavigation("/testing/hls")}
-                  >
-                    Hls
-                  </DropdownMenuItem>
-                <DropdownMenuItem>Historial</DropdownMenuItem>
-                <DropdownMenuItem>Configuraciones</DropdownMenuItem>
-                <DropdownMenuItem>Feedback</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    logout();
-                    handleNavigation("/login");
-                  }}
-                >
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <p className="text-sm text-muted-foreground">Version 4.2.0</p>
+<header className="sticky top-0 flex h-16 items-center border-b bg-background px-4 md:px-6 z-10">
+    <div className="container mx-auto flex items-center justify-between gap-4">
+      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+        <a
+          onClick={(e) => {
+            e.preventDefault();
+            handleNavigation("/");
+          }}
+          href="/"
+          className="flex gap-1 font-semibold text-xl text-foreground transition-colors hover:text-white cursor-pointer"
+        >
+          <Package2 className="h-6 w-6" />
+          <span>Acme</span>
+          <span>Inc</span>
+        </a>
+        <p className="text-red-400">resume: {resume}</p>
+        <p className="text-blue-400">history_id: {history_id}</p>
+      </nav>
+      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <div className="ml-auto flex-1 sm:flex-initial">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="rounded-full"
+              >
+                <CircleUser className="h-5 w-5" />
+                <span className="sr-only">Toggle user menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Hola, Agustin Fricke</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleNavigation("/admin/courses")}
+              >
+                Cursos
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleNavigation("/testing/hls")}
+              >
+                Hls
+              </DropdownMenuItem>
+              <DropdownMenuItem>Historial</DropdownMenuItem>
+              <DropdownMenuItem>Configuraciones</DropdownMenuItem>
+              <DropdownMenuItem>Feedback</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  logout();
+                  handleNavigation("/login");
+                }}
+              >
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+        <p className="text-sm text-muted-foreground">Version 4.2.0</p>
       </div>
-    </header>
+    </div>
+  </header>
+  
   );
 }

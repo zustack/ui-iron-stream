@@ -50,6 +50,6 @@ export type Course = {
   duration: string;
   is_active: boolean;
   sort_order: number;
-  on: boolean;
+  allowed: boolean;
   created_at: string;
 };

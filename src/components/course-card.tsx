@@ -1,39 +1,21 @@
 import { Link, useNavigate } from "react-router-dom";
-import Image from "../assets/image.png";
 import { Button } from "./ui/button";
 import Rating from "@mui/material/Rating";
 import StarIcon from "@mui/icons-material/Star";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Lock,
-  MessageSquareMore,
-  Video,
-} from "lucide-react";
+import { ChevronRight, Lock, MessageSquareMore, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import { useVideoResumeStore } from "@/store/video-resume";
+import { Course } from "@/types";
 
-type CourseProp = {
-  id: number;
-  title: string;
-  description: string;
-  author: string;
-  thumbnail: string;
-  rating: number;
-  duration: string;
-  allowed: boolean;
-  preview: string;
-};
-
-export default function CourseCard({ course }: { course: CourseProp }) {
+export default function CourseCard({ course }: { course: Course }) {
   const navigate = useNavigate();
-  const { changePage, setHistoryId, setResume } = useVideoResumeStore()
+  const { changePage, setHistoryId, setResume } = useVideoResumeStore();
 
   return (
     <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-2 min-h-[300px] border mb-8">
       <img
         src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
-        alt=""
+        alt={`Image for ${course.title}`}
         className="p-1 rounded-[0.75rem]"
       />
       <div className="flex flex-col justify-between p-4">
@@ -59,7 +41,7 @@ export default function CourseCard({ course }: { course: CourseProp }) {
             />
             <p>{course.rating}</p>
             <Link to="/reviews" className="underline">
-              Leer resenas
+              Read reviews
             </Link>
           </div>
 
@@ -72,14 +54,14 @@ export default function CourseCard({ course }: { course: CourseProp }) {
             <>
               <Button
                 onClick={() => {
-                  changePage(false)
-                  setHistoryId("")
-                  setResume(0)
-                  navigate(`/video/${course.id}`)
-                  }}
+                  changePage(false);
+                  setHistoryId("");
+                  setResume(0);
+                  navigate(`/video/${course.id}`);
+                }}
                 className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
               >
-                Ingresar
+                Watch
                 <ChevronRight className="h-5 w-5" />
               </Button>
 
@@ -87,7 +69,7 @@ export default function CourseCard({ course }: { course: CourseProp }) {
                 onClick={() => navigate(`/reviews/create/${course.id}`)}
                 className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
               >
-                Crear resena
+                Create review
                 <MessageSquareMore className="h-5 w-5 ml-2" />
               </Button>
             </>
@@ -96,7 +78,7 @@ export default function CourseCard({ course }: { course: CourseProp }) {
               onClick={() => toast.error("No tienes acceso a este curso")}
               className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
             >
-              No tienes acceso a este curso
+              You don't have access to this course
               <Lock className="h-5 w-5 ml-2" />
             </Button>
           )}
@@ -106,7 +88,7 @@ export default function CourseCard({ course }: { course: CourseProp }) {
               onClick={() => navigate(`/preview/${course.id}`)}
               className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
             >
-              Ver preview gratuita
+              Watch free preview
               <Video className="h-5 w-5 ml-2" />
             </Button>
           )}

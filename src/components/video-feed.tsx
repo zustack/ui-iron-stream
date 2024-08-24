@@ -103,7 +103,7 @@ export default function VideoFeed({
   };
 
   return (
-    <>
+    <div className="h-[750px]">
       <form className="ml-auto flex-1 sm:flex-initial mb-4 mr-4">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -116,7 +116,7 @@ export default function VideoFeed({
           />
         </div>
       </form>
-      <ScrollArea className="h-[715px] w-full pr-4">
+      <ScrollArea className="h-[701px] w-full pr-4">
         {status === "pending" ? (
           <div className="h-[100px] flex justify-center items-center">
             <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
@@ -145,9 +145,11 @@ export default function VideoFeed({
                         className="
                       relative overflow-hidden rounded-[0.75rem]"
                       >
-                        <img 
-      src={`${import.meta.env.VITE_BACKEND_URL}${v.thumbnail}`}
-                        alt="" className="w-full" />
+                        <img
+                          src={`${import.meta.env.VITE_BACKEND_URL}${v.thumbnail}`}
+                          alt=""
+                          className="w-full"
+                        />
                         <div
                           style={{ width: `${v.video_resume}%` }}
                           className={`absolute 
@@ -186,8 +188,7 @@ export default function VideoFeed({
             ""
           )}
         </div>
-
       </ScrollArea>
-    </>
+    </div>
   );
 }

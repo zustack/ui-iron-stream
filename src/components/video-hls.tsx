@@ -95,11 +95,8 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
   setResume(videoRef.current?.currentTime || 0);
 
   return (
-    <div className="relative">
-    <p className="text-red-400">{isChangePageRequested  ? "yess" : "nop"}</p>
-    <p className="text-red-400">{videoRef.current?.currentTime}</p>
-    <p className="text-red-400">Historu: id:  {history_id}</p>
-    <button onClick={() => updateHistoryMutation.mutate(videoRef.current.currentTime)}>Save</button>
+    <div 
+    className="relative">
       <video
         className="player"
         autoPlay={true}

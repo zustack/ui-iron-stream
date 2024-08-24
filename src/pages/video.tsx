@@ -1,7 +1,4 @@
-import {
-  getCurrentVideo,
-  getVideosByCourseId,
-} from "@/api/videos";
+import { getCurrentVideo, getVideosByCourseId } from "@/api/videos";
 import { Button } from "@/components/ui/button";
 import VideoFeed from "@/components/video-feed";
 import VideoHls from "@/components/video-hls";
@@ -12,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { getForbiddenApps } from "@/api/apps";
+import VideoNotes from "@/components/video-notes";
 
 type App = {
   name: string;
@@ -27,11 +25,7 @@ export default function Video() {
   const { os } = useOsStore();
   const [loading, setLoading] = useState(false);
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["fobidden-apps"],
     queryFn: () => getForbiddenApps(),
   });
@@ -46,7 +40,7 @@ export default function Video() {
     setLoading(false);
   }
 
-  console.log("data", data)
+  console.log("data", data);
   async function getLocalApps() {
     let commandName: string = "";
     if (os === "darwin") {
@@ -68,14 +62,13 @@ export default function Video() {
   }
 
   useEffect(() => {
-      const intervalId = setInterval(() => {
-        getLocalApps();
-      }, 1500);
-      return () => clearInterval(intervalId);
+    const intervalId = setInterval(() => {
+      getLocalApps();
+    }, 1500);
+    return () => clearInterval(intervalId);
   }, [foundApps, data]);
 
-  console.log("found", foundApps)
-
+  console.log("found", foundApps);
 
   const {
     data: video,
@@ -103,55 +96,64 @@ export default function Video() {
   }
   if (isErrorVideos) return <>Error</>;
   if (isErrorCurrentVideo) return <>Error</>;
-  if (isLoading) return <p>...</p>
-  if (isError) return <p>Error</p>
+  if (isLoading) return <p>...</p>;
+  if (isError) return <p>Error</p>;
 
   return (
-    <div className="grid grid-cols-6 lg:grid-cols-12 gap-4">
-      <div className="col-span-6 lg:col-span-8">
-        <VideoHls
-          setResume={setResumeState}
-          resume={video.resume}
-          src={video.video.video_hls}
-          history_id={video && video.history_id}
-          isPaused={foundApps && foundApps.length > 0 }
-        />
-        <h1 className="text-zinc-200 mt-4 text-xl font-semibold">
-          {video.video.title}
-        </h1>
+    <>
+      <div className="grid grid-cols-12 gap-4 px-4 h-[750px]">
+        <div className="col-span-3">
+          <VideoNotes />
+        </div>
 
-        {foundApps && foundApps.length > 0 && (
-          <div className="z-10 fixed top-0 left-0 bg-zinc-900/80 backdrop-blur-lg w-full h-full flex justify-center items-center">
-          <p className="text-zinc-400 mt-2">
-            {foundApps.map((app: any) => (
-              <ul>
-                <li className="text-red-500">{app.name}</li>
-              </ul>
-            ))}
-            {loading ? (
-              <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" /> 
-            ) : (
-              <Button onClick={() => killApps(foundApps, "linux")}>Kill</Button>
-            )}
-          </p>
+        <div className="col-span-6">
+          <VideoHls
+            setResume={setResumeState}
+            resume={video.resume}
+            src={video.video.video_hls}
+            history_id={video && video.history_id}
+            isPaused={foundApps && foundApps.length > 0}
+          />
+          <h1 className="text-zinc-200 mt-4 text-xl font-semibold">
+            {video.video.title}
+          </h1>
+
+          <p className="text-zinc-400 mt-2">{video.video.description}</p>
+          <div className="mt-2 flex gap-2">
+            <Button>Ver archivos</Button>
+            <Button>Abrir notas</Button>
           </div>
-        )}
 
-        <p className="text-zinc-400 mt-2">{video.video.description}</p>
-        <div className="mt-2 flex gap-2">
-          <Button>Ver archivos</Button>
-          <Button>Abrir notas</Button>
+          {foundApps && foundApps.length > 0 && (
+            <div className="z-10 fixed top-0 left-0 bg-zinc-900/80 backdrop-blur-lg w-full h-full flex justify-center items-center">
+              <p className="text-zinc-400 mt-2">
+                {foundApps.map((app: any) => (
+                  <ul>
+                    <li className="text-red-500">{app.name}</li>
+                  </ul>
+                ))}
+                {loading ? (
+                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                ) : (
+                  <Button onClick={() => killApps(foundApps, "linux")}>
+                    Kill
+                  </Button>
+                )}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="col-span-3">
+          <VideoFeed
+            history_id={video && video.history_id}
+            resume={resumeState}
+            videos={videos}
+            current_video_id={video.video.id}
+          />
         </div>
       </div>
-      <div className="col-span-6 lg:col-span-4">
-        <VideoFeed
-          history_id={video && video.history_id}
-          resume={resumeState}
-          videos={videos}
-          current_video_id={video.video.id}
-        />
-      </div>
-    </div>
+    </>
   );
 }
 

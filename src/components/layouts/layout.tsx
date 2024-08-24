@@ -5,7 +5,7 @@ export default function Layout() {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto mt-[50px]">
+      <div className="mt-[20px]">
         <Outlet />
       </div>
     </>

@@ -1,4 +1,5 @@
 @charset "UTF-8";
+
 @keyframes plyr-progress {
   to {
     background-position: 25px 0;
@@ -6,7 +7,7 @@
   }
 }
 .player {
-  --plyr-color-main: #394fa0;
+  --plyr-color-main: #00b3ff;
 }
 @keyframes plyr-popup {
   0% {
