@@ -1,7 +1,6 @@
 import Plyr from "plyr";
 import Hls from "hls.js";
 import { useEffect, useRef } from "react";
-import { useVideoResumeStore } from "@/store/video-resume";
 import { updateHistory } from "@/api/videos";
 import { useMutation } from "@tanstack/react-query";
 import { appWindow } from "@tauri-apps/api/window";
@@ -10,17 +9,11 @@ import { plyrOptions } from "@/lib/plyr-options";
 type Props = {
   src: string;
   resume: string;
-  setResume: (num: number) => void;
   history_id: string;
   isPaused: boolean;
 };
 
-const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
-
-  const updateHistoryMutation = useMutation({
-    mutationFn: (resumeState: number) =>
-      updateHistory(String(history_id), String(resumeState)),
-  });
+const VideoHls = ({ src, resume, history_id, isPaused }: Props) => {
 
   const videoRef = useRef<HTMLMediaElement | null>(null);
 
@@ -79,8 +72,6 @@ const VideoHls = ({ src, resume, setResume, history_id, isPaused }: Props) => {
       videoRef.current?.play();
     }
   }, [isPaused]);
-
-  setResume(videoRef.current?.currentTime || 0);
 
   return (
     <div 

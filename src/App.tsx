@@ -20,13 +20,13 @@ import { useOsStore } from "./store/os";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { updateHistory } from "./api/videos";
-import { useVideoResumeStore } from "./store/video-resume";
 import { appWindow } from "@tauri-apps/api/window";
 import { Loader } from "lucide-react";
 import Preview from "./pages/preview";
 import TestingHls from "./pages/testing-hls";
 
 function App() {
+  // make this with localStorage
   const { setOs } = useOsStore();
 
   useEffect(() => {
@@ -37,10 +37,10 @@ function App() {
     getPlaform();
   }, []);
 
-  const { resume, history_id } = useVideoResumeStore();
+  // const { resume, history_id } = useVideoResumeStore();
 
   const updateHistoryMutation = useMutation({
-    mutationFn: () => updateHistory(String(history_id), String(resume)),
+    mutationFn: () => updateHistory("history_id", "resume"),
     onSettled: () => {
       appWindow.close();
     }

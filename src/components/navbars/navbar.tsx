@@ -10,7 +10,6 @@ import {
 import { Button } from "../ui/button";
 import { CircleUser, Package2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
-import { useVideoResumeStore } from "@/store/video-resume";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateHistory } from "@/api/videos";
 
@@ -18,11 +17,9 @@ export default function Navbar() {
   const { logout, isAdmin } = useAuthStore();
   const navigate = useNavigate();
 
-  // const { changePage, resume, history_id } = useVideoResumeStore();
   const queryClient = useQueryClient();
 
   const updateHistoryMutation = useMutation({
-    // como puedo mejorar el history_id???
     mutationFn: ({resume, historyId}:{resume: number, historyId: string}) => updateHistory(historyId, String(resume)),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["current-video"] });
@@ -33,12 +30,9 @@ export default function Navbar() {
     if (location.pathname.includes("video")) {
       const video = document.getElementById("video") as HTMLMediaElement;
       const historyId = localStorage.getItem("historyId");
-      console.log("CURRENT TIME BROOOOOO", video.currentTime)
       updateHistoryMutation.mutate({resume: video.currentTime, historyId: historyId || ""});
       navigate(path);
       return;
-      // update the history here
-      // poner en course card = false
     }
     navigate(path);
   };
@@ -54,11 +48,9 @@ export default function Navbar() {
           className="flex gap-1 font-semibold text-xl text-foreground transition-colors hover:text-white cursor-pointer"
         >
           <Package2 className="h-6 w-6" />
-          <span>Acmeiii</span>
+          <span>Acme</span>
           <span>Inc</span>
         </button>
-        <p className="text-red-400">resume:</p>
-        <p className="text-blue-400">history_id: {localStorage.getItem('historyId')}</p>
       </nav>
       <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <div className="ml-auto flex-1 sm:flex-initial">
@@ -77,18 +69,26 @@ export default function Navbar() {
               <DropdownMenuLabel>Hola, Agustin Fricke</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
+              onClick={() => handleNavigation("/testing/hls")}
+              >Historial(hls)</DropdownMenuItem>
+              <DropdownMenuItem>Configuraciones</DropdownMenuItem>
+              <DropdownMenuItem>Feedback</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+              onClick={() => handleNavigation("/admin/users")}
+              >
+              Users
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() => handleNavigation("/admin/courses")}
               >
                 Cursos
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleNavigation("/testing/hls")}
+                onClick={() => handleNavigation("/admin/apps")}
               >
-                Hls
+                Apps
               </DropdownMenuItem>
-              <DropdownMenuItem>Historial</DropdownMenuItem>
-              <DropdownMenuItem>Configuraciones</DropdownMenuItem>
-              <DropdownMenuItem>Feedback</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {

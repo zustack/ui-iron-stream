@@ -129,8 +129,8 @@ export const userVideos = async ({
   return response.data;
 };
 
-export const getVideosByCourseId = async (courseId: string) => {
-  const response = await authAxios.get(`/videos/${courseId}`);
+export const getVideosByCourseId = async (courseId: string, searchParam: string) => {
+  const response = await authAxios.get(`/videos/feed/${courseId}?q=${searchParam}`);
   return response.data;
 };
 

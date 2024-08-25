@@ -4,12 +4,10 @@ import Rating from "@mui/material/Rating";
 import StarIcon from "@mui/icons-material/Star";
 import { ChevronRight, Lock, MessageSquareMore, Video } from "lucide-react";
 import toast from "react-hot-toast";
-import { useVideoResumeStore } from "@/store/video-resume";
 import { Course } from "@/types";
 
 export default function CourseCard({ course }: { course: Course }) {
   const navigate = useNavigate();
-  const { changePage, setHistoryId, setResume } = useVideoResumeStore();
 
   return (
     <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-2 min-h-[300px] border mb-8">
@@ -54,9 +52,6 @@ export default function CourseCard({ course }: { course: Course }) {
             <>
               <Button
                 onClick={() => {
-                  changePage(false);
-                  setHistoryId("");
-                  setResume(0);
                   navigate(`/video/${course.id}`);
                 }}
                 className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
