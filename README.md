@@ -1,30 +1,5 @@
-# iron stream frontend
+# Iron Stream UI
 
-// https://codesandbox.io/embed/excalidraw-ehlz3?codemirror=1
-
-- [x] basic setup
-
-- [ ] login 
-- [ ] register
-- [ ] verify account
-- [ ] recover password
-
-- [ ] landing 
-- [ ] home 
-
-- [ ] video 
-- [ ] view files
-- [ ] video feed
-
-- [ ] user profil
-- [ ] user settings
-- [ ] user history
-- [ ] user % of course watch
-
-- [ ] admin users 
-- [ ] admin videos
-- [ ] admin courses
-- [ ] admin files
-- [ ] admin apps
-
-
+## Overview
+This project uses Tauri with React and hls.js under the hood to provide a fully video streaming experience. 
+The project is under active development so there may be some functionality missing or broken.

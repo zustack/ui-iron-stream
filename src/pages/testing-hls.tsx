@@ -48,9 +48,11 @@ const TestingHls: React.FC = () => {
         setIsLoading(!isLoading)
         console.log("is loading", isLoading)
       }}>change state</button>
+      <div className="flex justify-center">
       <video ref={videoRef} 
       style={{display: isLoading ? "none" : "block"}}
       className={`${isLoading ? "hidden" : "block"}`} />
+    </div>
     </div>
   );
 };
