@@ -32,8 +32,8 @@ export default function Home() {
   };
 
   return (
-      <section className="container mx-auto">
-      <form className="ml-auto flex-1 sm:flex-initial mb-8 mr-4 flex justify-center">
+      <section className="container mx-auto mt-[10px]">
+      <form className="ml-auto flex-1 sm:flex-initial mb-[10px] mr-4 flex justify-center">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input

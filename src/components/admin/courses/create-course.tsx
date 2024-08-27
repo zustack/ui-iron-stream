@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCourse, uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
@@ -25,15 +25,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export default function CreateCourse({
-  invalidate,
-  isLoading,
-}: {
-  invalidate: () => void;
-  isLoading: boolean;
-}) {
+export default function CreateCourse() {
+
   const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("Creado por ");
+  const [author, setAuthor] = useState("Created by ");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [active, setActive] = useState(false);
@@ -42,6 +37,8 @@ export default function CreateCourse({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -67,26 +64,21 @@ export default function CreateCourse({
     preview_tmp: string;
   };
 
-  useEffect(() => {
-    if (!isLoading) {
+  const createCourseMutation = useMutation({
+    mutationFn: (courseData: CourseData) => createCourse(courseData),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
       setIsOpen(false);
       setTitle("");
       setDescription("");
-      setAuthor("Creado por")
+      setAuthor("Created by ");
       setActive(false)
       setDuration("");
       setThumbnail(undefined);
       setVideo(undefined);
-    }
-  }, [isLoading]);
-
-  const createCourseMutation = useMutation({
-    mutationFn: (courseData: CourseData) => createCourse(courseData),
-    onSuccess: () => {
-      invalidate();
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+      toast.error(error.response?.data?.error || "An unexpected error occurred.");
     },
   });
 
@@ -150,14 +142,14 @@ export default function CreateCourse({
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Crear curso
+            Create course
           </span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
-            Crea un nuevo curso
+            Create course
           </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
@@ -166,45 +158,45 @@ export default function CreateCourse({
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Titulo</Label>
+                        <Label htmlFor="title">Title</Label>
                         <Input
-                          id="first-name"
+                          id="title"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
-                          placeholder="Titulo"
+                          placeholder="Title"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="last-name">Autor</Label>
+                        <Label htmlFor="author">Author</Label>
                         <Input
                           value={author}
                           onChange={(e) => setAuthor(e.target.value)}
-                          id="last-name"
-                          placeholder="Robinson"
+                          id="author"
+                          placeholder="Author"
                           required
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="email">Descripción</Label>
+                        <Label htmlFor="description">Description</Label>
                         <Textarea
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
-                          id="email"
+                          id="description"
                           rows={5}
-                          placeholder="Descripcion"
+                          placeholder="Description"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="last-name">Duracion</Label>
+                        <Label htmlFor="Duration">Duration</Label>
                         <Input
-                          id="last-name"
+                          id="duration"
                           value={duration}
                           onChange={(e) => setDuration(e.target.value)}
-                          placeholder="Duracion"
+                          placeholder="Duration"
                           required
                         />
                       </div>
@@ -218,9 +210,15 @@ export default function CreateCourse({
                           className="flex justify-start gap-4"
                         >
                           <Paperclip className="size-4" />
-                          <span className="">
-                            Resolucion 1920x1080
-                            {thumbnail?.name}
+                          <span>
+                            {thumbnail?.name ? (
+                              <>{thumbnail?.name.slice(0, 40)}</>
+                            ) : (
+                              <>
+                                Recomended aspect ratio 16:9 (PNG, JPG, JPEG,
+                                SVG)
+                              </>
+                            )}
                           </span>
                         </Button>
                         <Input
@@ -230,12 +228,12 @@ export default function CreateCourse({
                           id="thumbnail"
                           type="file"
                           className="hidden"
-                          accept="image/png, image/jpeg, image/svg"
+                          accept="image/png, image/jpg, image/jpeg, image/svg"
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="video">Video</Label>
+                        <Label htmlFor="video">Video Preview</Label>
                         <Button
                           variant="outline"
                           className="flex justify-start gap-4"
@@ -243,9 +241,12 @@ export default function CreateCourse({
                         >
                           <Paperclip className="size-4" />
                           <span>
-                            Seleccione un video (MP4)
-                            {video?.name}
-                          </span>
+                            {video?.name ? (
+                              <>{video?.name.slice(0, 40)}</>
+                            ) : (
+                              <>Recomended aspect ratio 16:9 (MP4, MOV, MKV)</>
+                            )}
+                            </span>
                         </Button>
                         <Input
                           ref={videoRef}
@@ -253,7 +254,7 @@ export default function CreateCourse({
                           onChange={handleVideoChange}
                           id="video"
                           type="file"
-                          accept="video/mp4"
+                          accept="video/mp4,video/mov,video/mkv"
                           className="hidden"
                         />
                       </div>
@@ -264,13 +265,13 @@ export default function CreateCourse({
                           onCheckedChange={(active: boolean) =>
                             setActive(active)
                           }
-                          id="terms"
+                          id="active"
                         />
                         <label
-                          htmlFor="terms"
+                          htmlFor="active"
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
-                          Estado {active ? "Activo" : "Inactivo"}
+                          {active ? "Active" : "Non active"}
                         </label>
                       </div>
                     </div>
@@ -281,19 +282,20 @@ export default function CreateCourse({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cerrar</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button
-            className="w-[100px]"
+            className="flex gap-2"
             disabled={
-              createCourseMutation.isPending || uploadChunkMutation.isPending || isLoading 
+              createCourseMutation.isPending || uploadChunkMutation.isPending
             }
             onClick={detonateChain}
           >
-            {createCourseMutation.isPending || uploadChunkMutation.isPending || isLoading ? (
-              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
-            ) : (
-              <span>Crear curso</span>
-            )}
+              <span>
+              Create course
+              </span>
+              {(createCourseMutation.isPending || uploadChunkMutation.isPending) && (
+                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
+              )}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

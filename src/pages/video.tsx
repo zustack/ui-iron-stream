@@ -249,7 +249,9 @@ export default function Video() {
         )}
 
         <div style={{ display: isFetching ? "none" : "block" }}>
-          <video ref={videoRef} autoPlay={true} />
+          <video 
+          id="video"
+          ref={videoRef} autoPlay={true} />
           <div className="flex justify-between mt-2">
             <h1 className="text-zinc-200 text-2xl font-semibold">
               {currentVideo && currentVideo.video.title}

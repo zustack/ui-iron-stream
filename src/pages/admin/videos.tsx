@@ -35,7 +35,7 @@ import { adminVideos } from "@/api/videos";
 import CreateVideo from "@/components/admin/videos/create-video";
 import UpdateVideo from "@/components/admin/videos/update-video";
 import DeleteVideo from "@/components/admin/videos/delete-video";
-import VideoHls from "@/components/admin/videos/video-hls";
+// import VideoHls from "@/components/admin/videos/video-hls";
 import { WebviewWindow } from "@tauri-apps/api/window";
 
 export default function AdminVideos() {

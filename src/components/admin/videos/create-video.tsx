@@ -1,11 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Loader,
-  Paperclip,
-  PlusCircle,
-} from "lucide-react";
+import { FileImage, Loader, Paperclip, PlusCircle, Video } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, ChangeEvent, useRef, useEffect } from "react";
@@ -42,7 +38,7 @@ export default function CreateVideo({
   const videoRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const { courseId, courseTitle } = useParams()
+  const { courseId, courseTitle } = useParams();
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -129,12 +125,15 @@ export default function CreateVideo({
       uploadChunkMutation.mutate(video);
     } else {
       toast.error("Por favor, selecciona un video");
-      return
+      return;
     }
   }
 
   return (
-    <AlertDialog onOpenChange={(open: boolean) => setIsOpen(open)} open={isOpen}>
+    <AlertDialog
+      onOpenChange={(open: boolean) => setIsOpen(open)}
+      open={isOpen}
+    >
       <AlertDialogTrigger>
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
@@ -146,8 +145,7 @@ export default function CreateVideo({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
-            Crear video para curso: {" "}
-                {courseTitle}
+            Crear video para curso: {courseTitle}
           </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
@@ -156,35 +154,35 @@ export default function CreateVideo({
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Titulo</Label>
+                        <Label htmlFor="title">Titulo</Label>
                         <Input
-                          id="first-name"
+                          id="title"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
-                          placeholder="Titulo"
+                          placeholder="Title"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="email">Descripción</Label>
+                        <Label htmlFor="description">Description</Label>
                         <Textarea
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
-                          id="email"
+                          id="desctiption"
                           rows={5}
-                          placeholder="Descripcion"
+                          placeholder="Description"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="last-name">Duracion</Label>
+                        <Label htmlFor="duration">Duration</Label>
                         <Input
-                          id="last-name"
+                          id="duration"
                           value={duration}
                           onChange={(e) => setDuration(e.target.value)}
-                          placeholder="Duracion"
+                          placeholder="Duration"
                           required
                         />
                       </div>
@@ -197,10 +195,16 @@ export default function CreateVideo({
                           variant="outline"
                           className="flex justify-start gap-4"
                         >
-                          <Paperclip className="size-4" />
+                          <FileImage className="size-4" />
                           <span className="">
-                            Resolucion 1920x1080
-                            {thumbnail?.name}
+                            {thumbnail?.name ? (
+                              <>{thumbnail?.name.slice(0, 40)}</>
+                            ) : (
+                              <>
+                                Recomended aspect ratio 16:9 (PNG, JPG, JPEG,
+                                SVG)
+                              </>
+                            )}
                           </span>
                         </Button>
                         <Input
@@ -210,7 +214,7 @@ export default function CreateVideo({
                           id="thumbnail"
                           type="file"
                           className="hidden"
-                          accept="image/png, image/jpeg, image/svg"
+                          accept="image/png, image/jpg, image/jpeg, image/svg"
                         />
                       </div>
 
@@ -221,10 +225,13 @@ export default function CreateVideo({
                           className="flex justify-start gap-4"
                           onClick={() => videoRef.current?.click()}
                         >
-                          <Paperclip className="size-4" />
+                          <Video className="size-4" />
                           <span>
-                            Seleccione un video (MP4)
-                            {video?.name}
+                            {video?.name ? (
+                              <>{video?.name.slice(0, 40)}</>
+                            ) : (
+                              <>Recomended aspect ratio 16:9 (MP4, MOV, MKV)</>
+                            )}
                           </span>
                         </Button>
                         <Input
@@ -233,11 +240,10 @@ export default function CreateVideo({
                           onChange={handleVideoChange}
                           id="video"
                           type="file"
-                          accept="video/mp4"
+                          accept="video/mp4,video/mov,video/mkv"
                           className="hidden"
                         />
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -250,14 +256,18 @@ export default function CreateVideo({
           <Button
             className="w-[100px]"
             disabled={
-              createVideoMutation.isPending || uploadChunkMutation.isPending || isLoading
+              createVideoMutation.isPending ||
+              uploadChunkMutation.isPending ||
+              isLoading
             }
             onClick={detonateChain}
           >
-            {createVideoMutation.isPending || uploadChunkMutation.isPending || isLoading ? (
+            {createVideoMutation.isPending ||
+            uploadChunkMutation.isPending ||
+            isLoading ? (
               <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             ) : (
-              <span>Crear video</span>
+              <span>Create video</span>
             )}
           </Button>
         </AlertDialogFooter>

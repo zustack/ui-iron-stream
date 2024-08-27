@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Loader, Paperclip, Pencil } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCourse, uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
@@ -20,28 +20,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Course } from "@/types";
 
-type CourseProp = {
-  id: number;
-  title: string;
-  description: string;
-  author: string;
-  duration: string;
-  is_active: boolean;
-  thumbnail: string;
-  preview: string;
-  sort_order: number;
-};
-
-export default function UpdateCourse({
-  isLoading,
-  invalidate,
-  course,
-}: {
-  isLoading: boolean;
-  invalidate: () => void;
-  course: CourseProp;
-}) {
+export default function UpdateCourse({ course }: { course: Course }) {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [description, setDescription] = useState("");
@@ -54,7 +35,7 @@ export default function UpdateCourse({
   const [video, setVideo] = useState<File>();
   const [oldVideo, setOldVideo] = useState("");
   const [isVideo, setIsVideo] = useState(false);
-
+  const queryClient = useQueryClient();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
 
@@ -72,15 +53,7 @@ export default function UpdateCourse({
     }
   }, [course]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      setIsOpen(false);
-      setThumbnail(undefined);
-      setVideo(undefined);
-    }
-  }, [isLoading]);
-
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
     if (file) {
       setThumbnail(file);
@@ -112,11 +85,16 @@ export default function UpdateCourse({
 
   const updateCourseMutation = useMutation({
     mutationFn: (courseData: CourseData) => updateCourse(courseData),
-    onSuccess: () => {
-      invalidate();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      setIsOpen(false);
+      setThumbnail(undefined);
+      setVideo(undefined);
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -152,7 +130,9 @@ export default function UpdateCourse({
       });
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -191,7 +171,7 @@ export default function UpdateCourse({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
-            Actualiza el curso {course.title}
+            Update the course {course.title}
           </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
@@ -200,52 +180,51 @@ export default function UpdateCourse({
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Titulo</Label>
+                        <Label htmlFor="title">Title</Label>
                         <Input
-                          id="first-name"
+                          id="title"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
-                          placeholder="Titulo"
+                          placeholder="Title"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="last-name">Autor</Label>
+                        <Label htmlFor="author">Author</Label>
                         <Input
                           value={author}
                           onChange={(e) => setAuthor(e.target.value)}
-                          id="last-name"
-                          placeholder="Robinson"
+                          id="author"
+                          placeholder="Author"
                           required
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="email">Descripción</Label>
+                        <Label htmlFor="description">Description</Label>
                         <Textarea
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
-                          id="email"
+                          id="description"
                           rows={5}
-                          placeholder="Descripcion"
+                          placeholder="Description"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="last-name">Duracion</Label>
+                        <Label htmlFor="Duration">Duration</Label>
                         <Input
-                          id="last-name"
+                          id="duration"
                           value={duration}
                           onChange={(e) => setDuration(e.target.value)}
-                          placeholder="Duracion"
+                          placeholder="Duration"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
                         <Label htmlFor="thumbnail">Thumbnail</Label>
-
                         <Button
                           id="thumbnail"
                           onClick={() => inputRef.current?.click()}
@@ -253,43 +232,30 @@ export default function UpdateCourse({
                           className="flex justify-start gap-4"
                         >
                           <Paperclip className="size-4" />
-                          <span className="">
-                            Resolucion 1920x1080
-                            {thumbnail?.name}
+                          <span>
+                            {thumbnail?.name ? (
+                              <>{thumbnail?.name.slice(0, 40)}</>
+                            ) : (
+                              <>
+                                Recomended aspect ratio 16:9 (PNG, JPG, JPEG,
+                                SVG)
+                              </>
+                            )}
                           </span>
                         </Button>
                         <Input
                           ref={inputRef}
                           required
-                          onChange={handleFileChange}
+                          onChange={handleThumbnailChange}
                           id="thumbnail"
                           type="file"
                           className="hidden"
-                          accept="image/png, image/jpeg, image/svg"
+                          accept="image/png, image/jpg, image/jpeg, image/svg"
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        {isVideo ? (
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              checked={isVideo}
-                              onCheckedChange={(active: boolean) =>
-                                setIsVideo(active)
-                              }
-                              id="terms"
-                            />
-                            <label
-                              htmlFor="terms"
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              Video preview
-                            </label>
-                          </div>
-                        ) : (
-                          <Label htmlFor="video">Video</Label>
-                        )}
-
+                        <Label htmlFor="video">Video Preview</Label>
                         <Button
                           variant="outline"
                           className="flex justify-start gap-4"
@@ -297,8 +263,11 @@ export default function UpdateCourse({
                         >
                           <Paperclip className="size-4" />
                           <span>
-                            Seleccione un video (MP4)
-                            {video?.name}
+                            {video?.name ? (
+                              <>{video?.name.slice(0, 40)}</>
+                            ) : (
+                              <>Recomended aspect ratio 16:9 (MP4, MOV, MKV)</>
+                            )}
                           </span>
                         </Button>
                         <Input
@@ -307,19 +276,8 @@ export default function UpdateCourse({
                           onChange={handleVideoChange}
                           id="video"
                           type="file"
-                          accept="video/mp4"
+                          accept="video/mp4,video/mov,video/mkv"
                           className="hidden"
-                        />
-                      </div>
-
-                      <div className="grid gap-2">
-                        <Label htmlFor="sort">Sort order</Label>
-                        <Input
-                          id="sort"
-                          value={sortOrder}
-                          onChange={(e) => setSortOrder(e.target.value)}
-                          placeholder="Sort"
-                          required
                         />
                       </div>
 
@@ -329,13 +287,13 @@ export default function UpdateCourse({
                           onCheckedChange={(active: boolean) =>
                             setActive(active)
                           }
-                          id="terms"
+                          id="active"
                         />
                         <label
-                          htmlFor="terms"
+                          htmlFor="active"
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
-                          Estado {active ? "Activo" : "Inactivo"}
+                          {active ? "Active" : "Non active"}
                         </label>
                       </div>
                     </div>
@@ -348,20 +306,16 @@ export default function UpdateCourse({
         <AlertDialogFooter>
           <AlertDialogCancel>Cerrar</AlertDialogCancel>
           <Button
-            className="w-[150px]"
+            className="flex gap-2"
             disabled={
-              updateCourseMutation.isPending ||
-              uploadChunkMutation.isPending ||
-              isLoading
+              updateCourseMutation.isPending || uploadChunkMutation.isPending
             }
             onClick={detonateChain}
           >
-            {updateCourseMutation.isPending ||
-            uploadChunkMutation.isPending ||
-            isLoading ? (
-              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
-            ) : (
-              <span>Actualizar curso</span>
+            <span>Update course</span>
+            {(updateCourseMutation.isPending ||
+              uploadChunkMutation.isPending) && (
+            <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             )}
           </Button>
         </AlertDialogFooter>

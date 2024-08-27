@@ -1,4 +1,4 @@
-import { Home as H, Package, Pickaxe, User } from "lucide-react";
+import { AppWindow, GalleryVerticalEnd, Home as H, ListVideo, Package, Pickaxe, Star, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
@@ -35,7 +35,7 @@ export default function Sidebar() {
             </Link>
 
             <Link to="/admin/apps" className={getLinkClass("/admin/apps")}>
-              <H className="h-4 w-4" />
+              <AppWindow className="h-4 w-4" />
               Apps
             </Link>
 
@@ -43,9 +43,9 @@ export default function Sidebar() {
               to="/admin/reviews"
               className={getLinkClass("/admin/reviews")}
             >
-              <H className="h-4 w-4" />
+              <Star className="h-4 w-4" />
               <span className="font-semibold text-xs text-indigo-400">
-                Reseñas
+                Reviews
               </span>
               <span className="ml-auto font-semibold text-xs text-indigo-400">
                 2
@@ -56,16 +56,16 @@ export default function Sidebar() {
               to="/admin/courses"
               className={getLinkClass("/admin/courses")}
             >
-              <Pickaxe className="h-4 w-4" />
-              Cursos
+              <ListVideo className="h-4 w-4" />
+                Courses
             </Link>
 
             <Link
               to="/admin/historial"
               className={getLinkClass("/admin/historial")}
             >
-              <H className="h-4 w-4" />
-              Historial
+              <GalleryVerticalEnd className="h-4 w-4" />
+              History 
             </Link>
           </nav>
         </div>
