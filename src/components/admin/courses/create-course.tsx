@@ -8,7 +8,7 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState, ChangeEvent, useEffect } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCourse, uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
@@ -111,7 +111,7 @@ export default function CreateCourse() {
       }
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+      toast.error(error.response?.data?.error || "An unexpected error occurred.");
     },
   });
 
@@ -130,7 +130,7 @@ export default function CreateCourse() {
           preview_tmp: "",
         });
       } else {
-        toast.error("Debe adjuntar un archivo para el thumbnail");
+        toast.error("The thumbnail is required");
         return
       }
     }
@@ -282,7 +282,11 @@ export default function CreateCourse() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel
+          disabled={
+            createCourseMutation.isPending || uploadChunkMutation.isPending
+          }
+          >Cancel</AlertDialogCancel>
           <Button
             className="flex gap-2"
             disabled={

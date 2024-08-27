@@ -11,29 +11,33 @@ import {
 import { Loader, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteVideo } from "@/api/videos";
 import { ErrorResponse } from "@/types";
 import toast from "react-hot-toast";
 import { useState } from "react";
+import { deleteApp } from "@/api/apps";
 
-export default function DeleteVideo({
-  title,
+export default function DeleteApp({
+  name,
+  process_name,
   id,
 }: {
-  title: string;
+  name: string;
+  process_name: string;
   id: number;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const deleteVideoMutation = useMutation({
-    mutationFn: () => deleteVideo(id),
+  const deleteAppMutation = useMutation({
+    mutationFn: () => deleteApp(id),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -46,27 +50,33 @@ export default function DeleteVideo({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Are you sure you want to delete {title}?
-          </AlertDialogTitle>
+          <AlertDialogTitle>Are you sure to delete this app?</AlertDialogTitle>
           <AlertDialogDescription>
-            <p>This operation cannot be reverted, proceed with caution.</p>
+            <div className="flex flex-col pb-4">
+              <p>
+                Name: {name} 
+              </p>
+              <p>Process name: {process_name}</p>
+              <p className="pt-2">
+                This action cannot be undone. Proceed with caution.
+              </p>
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-          disabled={deleteVideoMutation.isPending}
+          disabled={deleteAppMutation.isPending}
           >Cerrar</AlertDialogCancel>
           <Button
             onClick={() => {
-              deleteVideoMutation.mutate();
+              deleteAppMutation.mutate();
             }}
             variant={"destructive"}
-            disabled={deleteVideoMutation.isPending}
+            disabled={deleteAppMutation.isPending}
             className="flex gap-2"
           >
             Delete
-            {deleteVideoMutation.isPending && (
+            {deleteAppMutation.isPending && (
               <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
             )}
           </Button>

@@ -1,15 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Loader,
-  Paperclip,
-  Pencil,
-} from "lucide-react";
+import { FileImage, Loader, Pencil, Video } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, ChangeEvent, useRef, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
@@ -35,47 +31,27 @@ type VideoProp = {
   video_hls: string;
 };
 
-export default function UpdateVideo({
-  invalidate,
-  data,
-  isLoading,
-}: {
-  invalidate: () => void;
-  data: VideoProp;
-  isLoading: boolean
-}) {
-
+export default function UpdateVideo({ data }: { data: VideoProp }) {
+  const queryClient = useQueryClient();
   const { courseId } = useParams();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [thumbnail, setThumbnail] = useState<File>();
   const [video, setVideo] = useState<File>();
-
   const [oldThumbnail, setOldThumbnail] = useState("");
   const [oldVideo, setOldVideo] = useState("");
-
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-      setTitle(data.title);
-      setDescription(data.description);
-      setDuration(data.duration);
-      setOldThumbnail(data.thumbnail);
-      setOldVideo(data.video_hls);
+    setTitle(data.title);
+    setDescription(data.description);
+    setDuration(data.duration);
+    setOldThumbnail(data.thumbnail);
+    setOldVideo(data.video_hls);
   }, [data]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      setIsOpen(false);
-      setThumbnail(undefined);
-      setVideo(undefined);
-      // setOldThumbnail("");
-      // setOldVideo("");
-    }
-  }, [isLoading]);
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -97,7 +73,7 @@ export default function UpdateVideo({
     description: string;
     course_id: string;
     duration: string;
-    thumbnail: File;
+    thumbnail?: File;
     video_tmp: string;
     old_thumbnail: string;
     old_video: string;
@@ -105,8 +81,11 @@ export default function UpdateVideo({
 
   const updateVideoMutation = useMutation({
     mutationFn: (videoPayload: VideoPayload) => updateVideo(videoPayload),
-    onSuccess: () => {
-      invalidate();
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
+      setIsOpen(false);
+      setThumbnail(undefined);
+      setVideo(undefined);
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -129,17 +108,17 @@ export default function UpdateVideo({
       return finalResponse;
     },
     onSuccess: (response) => {
-        updateVideoMutation.mutate({
-          id: data.id,
-          title,
-          description,
-          course_id: courseId,
-          duration,
-          thumbnail,
-          video_tmp: response,
-          old_thumbnail: oldThumbnail,
-          old_video: oldVideo,
-        });
+      updateVideoMutation.mutate({
+        id: data.id,
+        title,
+        description,
+        course_id: courseId || "",
+        duration,
+        thumbnail,
+        video_tmp: response,
+        old_thumbnail: oldThumbnail,
+        old_video: oldVideo,
+      });
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
@@ -154,20 +133,21 @@ export default function UpdateVideo({
         id: data.id,
         title,
         description,
-        course_id: courseId,
+        course_id: courseId || "",
         duration,
         thumbnail,
         video_tmp: "",
         old_thumbnail: oldThumbnail,
         old_video: oldVideo,
-      })
-      console.log(oldThumbnail)
-      console.log(oldVideo)
+      });
     }
   }
 
   return (
-    <AlertDialog onOpenChange={(open: boolean) => setIsOpen(open)} open={isOpen}>
+    <AlertDialog
+      onOpenChange={(open: boolean) => setIsOpen(open)}
+      open={isOpen}
+    >
       <AlertDialogTrigger>
         <Button variant="outline" size="icon" className="h-8 gap-1 mx-1">
           <Pencil className="h-5 w-5 text-indigo-500" />
@@ -176,7 +156,7 @@ export default function UpdateVideo({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
-            Actualiza el video {data.title}
+            Update the video {data.title}.
           </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
@@ -185,35 +165,35 @@ export default function UpdateVideo({
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Titulo</Label>
+                        <Label htmlFor="title">Title</Label>
                         <Input
-                          id="first-name"
+                          id="title"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
-                          placeholder="Titulo"
+                          placeholder="Title"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="email">Descripción</Label>
+                        <Label htmlFor="description">Description</Label>
                         <Textarea
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
-                          id="email"
+                          id="desctiption"
                           rows={5}
-                          placeholder="Descripcion"
+                          placeholder="Description"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="last-name">Duracion</Label>
+                        <Label htmlFor="duration">Duration</Label>
                         <Input
-                          id="last-name"
+                          id="duration"
                           value={duration}
                           onChange={(e) => setDuration(e.target.value)}
-                          placeholder="Duracion"
+                          placeholder="Duration"
                           required
                         />
                       </div>
@@ -226,10 +206,16 @@ export default function UpdateVideo({
                           variant="outline"
                           className="flex justify-start gap-4"
                         >
-                          <Paperclip className="size-4" />
-                          <span className="">
-                            Resolucion 1920x1080
-                            {thumbnail?.name}
+                          <FileImage className="size-4" />
+                          <span>
+                            {thumbnail?.name ? (
+                              <>{thumbnail?.name.slice(0, 40)}</>
+                            ) : (
+                              <>
+                                Recomended aspect ratio 16:9 (PNG, JPG, JPEG,
+                                SVG)
+                              </>
+                            )}
                           </span>
                         </Button>
                         <Input
@@ -239,7 +225,7 @@ export default function UpdateVideo({
                           id="thumbnail"
                           type="file"
                           className="hidden"
-                          accept="image/png, image/jpeg, image/svg"
+                          accept="image/png, image/jpg, image/jpeg, image/svg"
                         />
                       </div>
 
@@ -250,10 +236,13 @@ export default function UpdateVideo({
                           className="flex justify-start gap-4"
                           onClick={() => videoRef.current?.click()}
                         >
-                          <Paperclip className="size-4" />
+                          <Video className="size-4" />
                           <span>
-                            Seleccione un video (MP4)
-                            {video?.name}
+                            {video?.name ? (
+                              <>{video?.name.slice(0, 40)}</>
+                            ) : (
+                              <>Recomended aspect ratio 16:9 (MP4, MOV, MKV)</>
+                            )}
                           </span>
                         </Button>
                         <Input
@@ -262,7 +251,7 @@ export default function UpdateVideo({
                           onChange={handleVideoChange}
                           id="video"
                           type="file"
-                          accept="video/mp4"
+                          accept="video/mp4,video/mov,video/mkv"
                           className="hidden"
                         />
                       </div>
@@ -274,18 +263,22 @@ export default function UpdateVideo({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cerrar</AlertDialogCancel>
+          <AlertDialogCancel
+          disabled={
+            updateVideoMutation.isPending || uploadChunkMutation.isPending
+          }
+          >Cerrar</AlertDialogCancel>
           <Button
-            className="w-[100px]"
+            className="flex gap-2"
             disabled={
-              updateVideoMutation.isPending || uploadChunkMutation.isPending || isLoading
+              updateVideoMutation.isPending || uploadChunkMutation.isPending
             }
             onClick={detonateChain}
           >
-            {updateVideoMutation.isPending || uploadChunkMutation.isPending || isLoading ? (
+            <span>Update video</span>
+            {(updateVideoMutation.isPending ||
+              uploadChunkMutation.isPending) && (
               <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
-            ) : (
-              <span>Actualizar</span>
             )}
           </Button>
         </AlertDialogFooter>

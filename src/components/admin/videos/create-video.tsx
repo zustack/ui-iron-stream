@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileImage, Loader, Paperclip, PlusCircle, Video } from "lucide-react";
+import { FileImage, Loader, PlusCircle, Video } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, ChangeEvent, useRef, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, ChangeEvent, useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadChunk } from "@/api/courses";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
@@ -22,13 +22,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createVideo } from "@/api/videos";
 
-export default function CreateVideo({
-  invalidate,
-  isLoading,
-}: {
-  invalidate: () => void;
-  isLoading: boolean;
-}) {
+export default function CreateVideo() {
+  const queryClient = useQueryClient();
+  const { courseId, courseTitle } = useParams();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
@@ -38,7 +34,6 @@ export default function CreateVideo({
   const videoRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const { courseId, courseTitle } = useParams();
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -65,24 +60,19 @@ export default function CreateVideo({
 
   const createVideoMutation = useMutation({
     mutationFn: (videoPayload: VideoPayload) => createVideo(videoPayload),
-    onSuccess: () => {
-      invalidate();
-    },
-    onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
-    },
-  });
-
-  useEffect(() => {
-    if (!isLoading) {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
       setIsOpen(false);
       setTitle("");
       setDescription("");
       setDuration("");
       setThumbnail(undefined);
       setVideo(undefined);
-    }
-  }, [isLoading]);
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(error.response?.data?.error || "An unexpected error occurred.");
+    },
+  });
 
   const uploadChunkMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -112,19 +102,19 @@ export default function CreateVideo({
       }
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+      toast.error(error.response?.data?.error || "An unexpected error occurred.");
     },
   });
 
   function detonateChain() {
     if (video) {
       if (!thumbnail) {
-        toast.error("Por favor, selecciona un thumbnail");
+        toast.error("The thumbnail is required");
         return;
       }
       uploadChunkMutation.mutate(video);
     } else {
-      toast.error("Por favor, selecciona un video");
+      toast.error("The video is required");
       return;
     }
   }
@@ -138,14 +128,14 @@ export default function CreateVideo({
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Crear video
+            Create video
           </span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
-            Crear video para curso: {courseTitle}
+            Create video for the course {courseTitle}.
           </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
@@ -154,7 +144,7 @@ export default function CreateVideo({
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="title">Titulo</Label>
+                        <Label htmlFor="title">Title</Label>
                         <Input
                           id="title"
                           value={title}
@@ -196,7 +186,7 @@ export default function CreateVideo({
                           className="flex justify-start gap-4"
                         >
                           <FileImage className="size-4" />
-                          <span className="">
+                          <span>
                             {thumbnail?.name ? (
                               <>{thumbnail?.name.slice(0, 40)}</>
                             ) : (
@@ -252,23 +242,25 @@ export default function CreateVideo({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cerrar</AlertDialogCancel>
+          <AlertDialogCancel
+          disabled={
+            createVideoMutation.isPending || uploadChunkMutation.isPending
+          }
+          >Cerrar</AlertDialogCancel>
           <Button
-            className="w-[100px]"
+            className="flex gap-2"
             disabled={
               createVideoMutation.isPending ||
-              uploadChunkMutation.isPending ||
-              isLoading
+              uploadChunkMutation.isPending
             }
             onClick={detonateChain}
           >
-            {createVideoMutation.isPending ||
-            uploadChunkMutation.isPending ||
-            isLoading ? (
-              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
-            ) : (
-              <span>Create video</span>
-            )}
+              <span>
+              Create video
+              </span>
+              {(createVideoMutation.isPending || uploadChunkMutation.isPending) && (
+                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
+              )}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

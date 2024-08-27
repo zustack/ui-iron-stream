@@ -55,7 +55,9 @@ export default function DeleteCourse({ id, title }: Props) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel
+          disabled={deleteCourseMutation.isPending}
+          >Cancel</AlertDialogCancel>
           <Button
             onClick={() => {
               deleteCourseMutation.mutate();

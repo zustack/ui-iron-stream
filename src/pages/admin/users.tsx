@@ -28,7 +28,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { ErrorResponse } from "@/types";
+import { ErrorResponse, User } from "@/types";
 import {
   adminUsers,
   makeSpecialAppUser,
@@ -162,7 +162,7 @@ export default function AdminUsers() {
                 value={searchInput}
                 onChange={handleInputChange}
                 type="search"
-                placeholder="Search for users with a name, email, etc."
+                placeholder="Search for users"
                 className="pl-8 w-[450px]"
               />
             </div>
@@ -170,15 +170,18 @@ export default function AdminUsers() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+
           <p className="text-sm text-muted-foreground">
-            {status !== "pending" && status !== "error" ? (
-              <span>
-                {data?.pages[0].totalCount}
-                {data?.pages[0].totalCount === 1
-                  ? " user found."
-                  : " users found."}
-              </span>
-            ) : null}
+            {data?.pages[0].data === null ? (
+                <span>No users found.</span>
+            ) : (
+            <span>
+              {data?.pages[0].totalCount}{" "}
+              {data?.pages[0].totalCount === 1
+                ? " user found."
+                : " users found."}
+            </span>
+            )}
           </p>
 
           <DropdownMenu>
@@ -340,7 +343,7 @@ export default function AdminUsers() {
           <Deactivate />
         </div>
       </div>
-      <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
+      <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
         <Table>
           <TableCaption>
             {status === "pending" && (
@@ -349,7 +352,11 @@ export default function AdminUsers() {
               </div>
             )}
 
-            {status === "error" && <span>Error: {error.message}</span>}
+            {status === "error" && (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>An unexpected error occurred: {error.message}</span>
+              </div>
+            )}
 
             <div ref={ref} onClick={() => fetchNextPage()}>
               {isFetchingNextPage && (
@@ -376,106 +383,102 @@ export default function AdminUsers() {
           </TableHeader>
 
           <TableBody>
-            {status != "pending" &&
-              status != "error" &&
-              data &&
-              data.pages.map((page) => (
-                <React.Fragment key={page.nextId}>
-                  {page.data != null &&
-                    page.data.map((user) => (
-                      <>
-                        <TableRow>
-                          <TableCell>
-                            {activeId === user.id &&
-                            updateActiveMutation.isPending ? (
-                              <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
-                            ) : (
-                              <Checkbox
-                                onClick={() => {
-                                  updateActiveMutation.mutate(user.id);
-                                  setActiveId(user.id);
-                                }}
-                                disabled={user.id === 1}
-                                checked={user.is_active}
-                              />
-                            )}
-                          </TableCell>
+            {data?.pages?.map((page) => (
+              <React.Fragment key={page.nextId}>
+                {page?.data?.map((user: User) => (
+                  <>
+                    <TableRow>
+                      <TableCell>
+                        {activeId === user.id &&
+                        updateActiveMutation.isPending ? (
+                          <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+                        ) : (
+                          <Checkbox
+                            onClick={() => {
+                              updateActiveMutation.mutate(user.id);
+                              setActiveId(user.id);
+                            }}
+                            disabled={user.id === 1}
+                            checked={user.is_active}
+                          />
+                        )}
+                      </TableCell>
 
-                          <TableCell>
-                            {activeId === user.id &&
-                            updateAdminStatusMutation.isPending ? (
-                              <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
-                            ) : (
-                              <Checkbox
-                                onClick={() => {
-                                  setActiveId(user.id);
-                                  updateAdminStatusMutation.mutate({
-                                    userId: user.id,
-                                    isAdmin: !user.is_admin,
-                                  });
-                                }}
-                                disabled={user.id === 1}
-                                checked={user.is_admin}
-                              />
-                            )}
-                          </TableCell>
+                      <TableCell>
+                        {activeId === user.id &&
+                        updateAdminStatusMutation.isPending ? (
+                          <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+                        ) : (
+                          <Checkbox
+                            onClick={() => {
+                              setActiveId(user.id);
+                              updateAdminStatusMutation.mutate({
+                                userId: user.id,
+                                isAdmin: !user.is_admin,
+                              });
+                            }}
+                            disabled={user.id === 1}
+                            checked={user.is_admin}
+                          />
+                        )}
+                      </TableCell>
 
-                          <TableCell>
-                            <Checkbox
-                              className="cursor-not-allowed"
-                              checked={user.verified}
-                            />
-                          </TableCell>
+                      <TableCell>
+                        <Checkbox
+                          className="cursor-not-allowed"
+                          checked={user.verified}
+                        />
+                      </TableCell>
 
-                          <TableCell className="flex items-center gap-1">
-                            {activeId === user.id &&
-                            makeSpecialAppUserMutation.isPending ? (
-                              <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
-                            ) : (
-                              <Checkbox
-                                onClick={() => {
-                                  makeSpecialAppUserMutation.mutate({
-                                    userId: user.id,
-                                    specialApp: !user.special_apps,
-                                  });
-                                  setActiveId(user.id);
-                                }}
-                                checked={user.special_apps}
-                              />
-                            )}
-                            <UserApps
-                              email={user.email}
-                              name={user.name}
-                              surname={user.surname}
-                              userId={user.id}
-                            />
-                          </TableCell>
+                      <TableCell className="flex items-center gap-1">
+                        {activeId === user.id &&
+                        makeSpecialAppUserMutation.isPending ? (
+                          <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+                        ) : (
+                          <Checkbox
+                            onClick={() => {
+                              makeSpecialAppUserMutation.mutate({
+                                userId: user.id,
+                                specialApp: !user.special_apps,
+                              });
+                              setActiveId(user.id);
+                            }}
+                            checked={user.special_apps}
+                          />
+                        )}
+                        <UserApps
+                          email={user.email}
+                          name={user.name}
+                          surname={user.surname}
+                          userId={user.id}
+                        />
+                      </TableCell>
 
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>{user.name}</TableCell>
-                          <TableCell>{user.surname}</TableCell>
-                          <TableCell>{user.pc}</TableCell>
-                          <TableCell>{user.os}</TableCell>
-                          <TableCell>{user.created_at}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.surname}</TableCell>
+                      <TableCell>{user.pc}</TableCell>
+                      <TableCell>{user.os}</TableCell>
+                      <TableCell>{user.created_at}</TableCell>
 
-                          <TableCell className="text-right">
-                            <AddCouseToUser
-                              email={user.email}
-                              name={user.name}
-                              surname={user.surname}
-                              userId={user.id}
-                            />
-                            <DeleteUser
-                              email={user.email}
-                              name={user.name}
-                              surname={user.surname}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      </>
-                    ))}
-                </React.Fragment>
-              ))}
+                      <TableCell className="text-right">
+                        <AddCouseToUser
+                          email={user.email}
+                          name={user.name}
+                          surname={user.surname}
+                          userId={user.id}
+                        />
+                        <DeleteUser
+                          email={user.email}
+                          name={user.name}
+                          surname={user.surname}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ))}
+              </React.Fragment>
+            ))}
           </TableBody>
         </Table>
       </ScrollArea>

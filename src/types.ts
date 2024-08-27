@@ -6,6 +6,14 @@ export type ErrorResponse = {
   };
 }
 
+export type App = {
+  id: number
+  name: string
+  process_name: string
+  is_active: boolean
+  created_at: string
+}
+
 export type User = {
   id: number;
   email: string;
@@ -37,7 +45,6 @@ export type SearchParam = {
   verified: number | string;
 }
 
-
 export type Course = {
   id: number;
   title: string;
@@ -53,3 +60,15 @@ export type Course = {
   allowed: boolean;
   created_at: string;
 };
+
+export type Video = {
+  id: number;
+  title: string;
+  description: string;
+  views: number;
+  thumbnail: string;
+  duration: string;
+  video_hls: string;
+  created_at: string;
+};
+

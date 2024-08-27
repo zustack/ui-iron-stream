@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Eye, ListFilter, Loader, Search, VideoIcon } from "lucide-react";
+import { ListFilter, Loader, Search, VideoIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,16 +29,6 @@ import {
   updateCourseActiveStatus,
 } from "@/api/courses";
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -48,7 +38,6 @@ import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import UpdateCourse from "@/components/admin/courses/update-course";
 import { Link } from "react-router-dom";
-import VideoHls from "@/components/admin/videos/video-hls";
 import { Course } from "@/types";
 import DeleteCourse from "@/components/admin/courses/delete-course";
 import ImageDialog from "@/components/admin/image-dialog";
@@ -253,7 +242,7 @@ export default function AdminCourses() {
                 <TableCell>
                   {course.id === activeUpdateStatusId &&
                   updateCourseStatusMutation.isPending ? (
-                    <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
+                    <Loader className="h-5 w-5 text-zinc-300 animate-spin slower" />
                   ) : (
                     <Checkbox
                       onClick={() => {

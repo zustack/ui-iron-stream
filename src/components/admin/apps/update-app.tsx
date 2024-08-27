@@ -18,18 +18,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { updateApp } from "@/api/apps";
+import { App } from "@/types";
 
-type Props = {
-  id: number;
-  name: string;
-  process_name: string;
-  os: string;
-  is_active: boolean;
-  invalidate: () => void;
-  isLoading: boolean;
-};
 
-export default function UpdateApp({ app }: { app: Props }) {
+export default function UpdateApp({ app }: { app: App }) {
   const [name, setName] = useState("");
   const [titleName, setTitleName] = useState("");
   const [processName, setProcessName] = useState("");
@@ -52,11 +44,10 @@ export default function UpdateApp({ app }: { app: Props }) {
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
-    },
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
+    }
   });
 
   return (
@@ -72,7 +63,7 @@ export default function UpdateApp({ app }: { app: Props }) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
-            Actualizar app {titleName}
+            Update app {titleName}
           </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
@@ -81,23 +72,23 @@ export default function UpdateApp({ app }: { app: Props }) {
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Nombre de la app</Label>
+                        <Label htmlFor="name">Name</Label>
                         <Input
-                          id="first-name"
+                          id="name"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          placeholder="Nombre de la app"
+                          placeholder="Name"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Nombre del proceso</Label>
+                        <Label htmlFor="process_name">Process name</Label>
                         <Input
-                          id="first-name"
+                          id="process_name"
                           value={processName}
                           onChange={(e) => setProcessName(e.target.value)}
-                          placeholder="Nombre del proceso"
+                          placeholder="Process name"
                           required
                         />
                       </div>
@@ -108,13 +99,13 @@ export default function UpdateApp({ app }: { app: Props }) {
                           onCheckedChange={(active: boolean) =>
                             setActive(active)
                           }
-                          id="terms"
+                          id="is_active"
                         />
                         <label
-                          htmlFor="terms"
+                          htmlFor="is_active"
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
-                          Estado {active ? "Activo" : "Inactivo"}
+                          {active ? "Active" : "Non active"}
                         </label>
                       </div>
                     </div>
@@ -125,15 +116,20 @@ export default function UpdateApp({ app }: { app: Props }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cerrar</AlertDialogCancel>
+          <AlertDialogCancel
+          disabled={updateAppMutation.isPending}
+          >Close</AlertDialogCancel>
           <Button
+            className="flex gap-2"
+            disabled={updateAppMutation.isPending}
             onClick={() => updateAppMutation.mutate()}
-            className="w-[100px]"
           >
-            {updateAppMutation.isPending && (
-              <Loader className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            <span>Editar app</span>
+              <span>
+                Update app
+              </span>
+              {updateAppMutation.isPending && (
+                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
+              )}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -14,7 +14,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { createApp } from "@/api/apps";
@@ -37,10 +36,9 @@ export default function CreateApp() {
       setActive(true);
     },
     onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -53,15 +51,12 @@ export default function CreateApp() {
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Crear apps
+            Create app
           </span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-center">
-            Agrega una nueva app
-          </AlertDialogTitle>
           <AlertDialogDescription>
             <div className="">
               <div className="flex items-center justify-center p-2">
@@ -69,23 +64,23 @@ export default function CreateApp() {
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Nombre de la app</Label>
+                        <Label htmlFor="name">Name</Label>
                         <Input
-                          id="first-name"
+                          id="name"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          placeholder="Nombre de la app"
+                          placeholder="Name"
                           required
                         />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label htmlFor="first-name">Nombre del proceso</Label>
+                        <Label htmlFor="process_name">Process name</Label>
                         <Input
-                          id="first-name"
+                          id="process_name"
                           value={processName}
                           onChange={(e) => setProcessName(e.target.value)}
-                          placeholder="Nombre del proceso"
+                          placeholder="Process name"
                           required
                         />
                       </div>
@@ -96,13 +91,13 @@ export default function CreateApp() {
                           onCheckedChange={(active: boolean) =>
                             setActive(active)
                           }
-                          id="terms"
+                          id="is_active"
                         />
                         <label
-                          htmlFor="terms"
+                          htmlFor="is_active"
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
-                          Estado {active ? "Activo" : "Inactivo"}
+                          {active ? "Active" : "Non active"}
                         </label>
                       </div>
                     </div>
@@ -113,15 +108,18 @@ export default function CreateApp() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cerrar</AlertDialogCancel>
+          <AlertDialogCancel disabled={createAppMutation.isPending}>
+            Close
+          </AlertDialogCancel>
           <Button
+            className="flex gap-2"
+            disabled={createAppMutation.isPending}
             onClick={() => createAppMutation.mutate()}
-            className="w-[100px]"
           >
+            <span>Create app</span>
             {createAppMutation.isPending && (
-              <Loader className="mr-2 h-4 w-4 animate-spin" />
+              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
             )}
-            <span>Crear app</span>
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

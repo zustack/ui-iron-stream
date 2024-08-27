@@ -150,7 +150,7 @@ export default function Video() {
   } = useQuery({
     queryKey: ["videos", debouncedSearchTerm],
     queryFn: () => getVideosByCourseId(courseId || "", debouncedSearchTerm),
-    enabled: !!currentVideo,
+    enabled: !!data,
   });
 
   useEffect(() => {
@@ -329,8 +329,7 @@ The following apps are open
               </div>
             ) : (
               <>
-                {videos &&
-                  videos.map((v: any) => (
+              {videos?.map((v: any) => (
                     <div
                       onClick={() => {
                         newVideoMutation.mutate(String(v.id));

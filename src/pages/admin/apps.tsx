@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListFilter, Loader, Search, Trash } from "lucide-react";
+import { ListFilter, Loader, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,27 +23,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CreateApp from "@/components/admin/apps/create-app";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, ChangeEvent, useEffect } from "react";
-import { deleteApp, getAdminApps, updateAppStatus } from "@/api/apps";
+import { getAdminApps, updateAppStatus } from "@/api/apps";
 import UpdateApp from "@/components/admin/apps/update-app";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { App } from "@/types";
+import DeleteApp from "@/components/admin/apps/delete-app";
 
 export default function AdminApps() {
   const [searchParam, setSearchParam] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [active, setActive] = useState<string>("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [activeAppId, setActiveAppId] = useState<number>(0);
 
   const queryClient = useQueryClient();
 
@@ -61,32 +52,16 @@ export default function AdminApps() {
     };
   }, [searchParam]);
 
-  const deleteAppMutation = useMutation({
-    mutationFn: (id: number) => deleteApp(id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
-      setIsOpen(false);
-    },
-    onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
-    },
-  });
-
   const updateAppStatusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       updateAppStatus(id, isActive),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
-      setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -114,8 +89,16 @@ export default function AdminApps() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+
           <p className="text-sm text-muted-foreground">
-            <span>{data && data.length} apps.</span>
+          {data == null ? (
+              <span>No apps found.</span>
+          ) : (
+            <span>
+              {data?.length}{" "}
+              {data?.length === 1 ? " app found." : " apps found."}
+            </span>
+          )}
           </p>
 
           <DropdownMenu>
@@ -123,28 +106,28 @@ export default function AdminApps() {
               <Button variant="outline" size="sm" className="h-8 gap-1">
                 <ListFilter className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Filtrar
+                  Filter
                 </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
+              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuCheckboxItem
                 asChild={false}
                 onSelect={(event) => {
                   event.preventDefault();
                 }}
-                checked={active === ""}
+                checked={active === "1"}
                 onClick={() => {
-                  if (active === "") {
+                  if (active === "1") {
                     setActive("");
                   } else {
-                    setActive("");
+                    setActive("1");
                   }
                 }}
               >
-                Ninguno
+                Active
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 asChild={false}
@@ -160,23 +143,7 @@ export default function AdminApps() {
                   }
                 }}
               >
-                No Activo
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                asChild={false}
-                onSelect={(event) => {
-                  event.preventDefault();
-                }}
-                checked={active === "1"}
-                onClick={() => {
-                  if (active === "1") {
-                    setActive("");
-                  } else {
-                    setActive("1");
-                  }
-                }}
-              >
-                Activo
+                Non active
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -184,7 +151,7 @@ export default function AdminApps() {
         </div>
       </div>
 
-      <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
+      <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
         <Table>
           <TableCaption>
             {data == null && (
@@ -192,6 +159,7 @@ export default function AdminApps() {
                 No apps found
               </div>
             )}
+
             {status === "pending" ? (
               <div className="h-[100px] flex justify-center items-center">
                 <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
@@ -202,82 +170,47 @@ export default function AdminApps() {
           </TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>Activo</TableHead>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Process Name</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>State</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Process name</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {data &&
-              data.map((app: any) => (
-                <TableRow>
-                  <TableCell>
-                    {updateAppStatusMutation.isPending ? (
-                      <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                    ) : (
-                      <Checkbox
-                        onClick={() => {
-                          updateAppStatusMutation.mutate({
-                            id: app.id,
-                            isActive: !app.is_active,
-                          });
-                        }}
-                        checked={app.is_active}
-                      />
-                    )}
-                  </TableCell>
-                  <TableCell>{app.name}</TableCell>
-                  <TableCell>{app.process_name}</TableCell>
-                  <TableCell>{app.created_at}</TableCell>
-                  <TableCell className="text-right">
-                    <AlertDialog
-                      onOpenChange={(open: boolean) => setIsOpen(open)}
-                      open={isOpen}
-                    >
-                      <AlertDialogTrigger>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 gap-1 mx-1"
-                        >
-                          <Trash className="h-5 w-5 text-red-500" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Estas seguro de eliminar el curso {app.name}?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            <p>
-                              Esta operación no se puede deshacer. Procede con
-                              cuidado
-                            </p>
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cerrar</AlertDialogCancel>
-                          <Button
-                            onClick={() => {
-                              deleteAppMutation.mutate(app.id);
-                            }}
-                            variant={"destructive"}
-                          >
-                            {deleteAppMutation.isPending && (
-                              <Loader className="mr-2 h-4 w-4 animate-spin" />
-                            )}
-                            Eliminar
-                          </Button>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    <UpdateApp app={app} />
-                  </TableCell>
-                </TableRow>
-              ))}
+            {data?.map((app: App) => (
+              <TableRow>
+                <TableCell>
+                  {updateAppStatusMutation.isPending &&
+                  activeAppId === app.id ? (
+                    <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+                  ) : (
+                    <Checkbox
+                      onClick={() => {
+                        updateAppStatusMutation.mutate({
+                          id: app.id,
+                          isActive: !app.is_active,
+                        });
+                        setActiveAppId(app.id);
+                      }}
+                      checked={app.is_active}
+                    />
+                  )}
+                </TableCell>
+                <TableCell>{app.name}</TableCell>
+                <TableCell>{app.process_name}</TableCell>
+                <TableCell>{app.created_at}</TableCell>
+                <TableCell className="text-right">
+                  <UpdateApp app={app} />
+                  <DeleteApp
+                    id={app.id}
+                    name={app.name}
+                    process_name={app.process_name}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </ScrollArea>

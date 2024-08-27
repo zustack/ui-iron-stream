@@ -44,6 +44,9 @@ function App() {
   });
 
   useEffect(() => {
+    // if location is === '/login' or '/register' or '/reset-password' or '/files' do not listen
+    // if location is === '/video' listen for updateHistoryMutation && logout && close requested
+    // if location is !== '/video' listen for logout && close requested
     const unlisten = appWindow.listen("tauri://close-requested", async () => {
       updateHistoryMutation.mutate();
       console.log("mut executed");

@@ -11,19 +11,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, Loader, Paperclip, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState, ChangeEvent } from "react";
-import { useInView } from "react-intersection-observer";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { useEffect, useState, ChangeEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Tooltip,
   TooltipContent,
@@ -35,57 +24,20 @@ import { adminVideos } from "@/api/videos";
 import CreateVideo from "@/components/admin/videos/create-video";
 import UpdateVideo from "@/components/admin/videos/update-video";
 import DeleteVideo from "@/components/admin/videos/delete-video";
-// import VideoHls from "@/components/admin/videos/video-hls";
 import { WebviewWindow } from "@tauri-apps/api/window";
+import VideoDialog from "@/components/admin/video-dialog";
+import { Video } from "@/types";
+import ImageDialog from "@/components/admin/image-dialog";
 
 export default function AdminVideos() {
   const { courseId, courseTitle } = useParams();
-
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  const invalidateQuery = () => {
-    setIsLoading(true);
-    queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
-  };
-
-  const { ref, inView } = useInView();
-
-  const {
-    status,
-    data,
-    error,
-    isFetchingNextPage,
-    isFetching,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
+  const { data, isFetching, isError, error } = useQuery({
     queryKey: ["admin-videos", debouncedSearchTerm],
-    queryFn: async ({ pageParam }) => {
-      return adminVideos({
-        pageParam: pageParam ?? 0,
-        searchParam: debouncedSearchTerm,
-        courseId: courseId || "",
-      });
-    },
-    getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
-    initialPageParam: 0,
+    queryFn: () => adminVideos(debouncedSearchTerm, courseId),
   });
-
-  useEffect(() => {
-    if (!isFetching && isLoading) {
-      setIsLoading(false);
-    }
-  }, [isFetching, isLoading]);
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -101,7 +53,7 @@ export default function AdminVideos() {
     setSearchInput(value);
   };
 
-  const openWindowFile = async (id:number) => {
+  const openWindowFile = async (id: number) => {
     try {
       // Crea una instancia de WebviewWindow
       const webview = new WebviewWindow("theUniqueLabel", {
@@ -127,27 +79,24 @@ export default function AdminVideos() {
 
   return (
     <>
-      <div className="bg-muted/40 flex justify-between pt-2 pb-[10px] px-11 border border-b">
+      <div className="bg-muted/40 flex justify-between items-center px-[10px] h-[60px] border border-b">
         <Link
           to="/admin/courses"
           className="underline cursor-pointer flex text-zinc-200 items-center mr-9"
         >
           <ChevronLeft />
-          <span>Volver atras</span>
+          <span>Go back</span>
         </Link>
 
-        <p className="flex text-zinc-200 items-center mr-9 font-semibold">
-          <span>Curso: {courseTitle}</span>
-        </p>
         <div>
           <form className="ml-auto flex-1 sm:flex-initial mr-9">
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 value={searchInput}
                 onChange={handleInputChange}
                 type="search"
-                placeholder="Busca un curso por nombre, descripción, autor, etc ..."
+                placeholder="Search videos"
                 className="pl-8 w-[450px]"
               />
             </div>
@@ -156,145 +105,118 @@ export default function AdminVideos() {
 
         <div className="ml-auto flex items-center gap-9">
           <p className="text-sm text-muted-foreground">
-            {status !== "pending" && status !== "error" ? (
-              <span>
-                {data?.pages[0].totalCount}
-                {data?.pages[0].totalCount == 1
-                  ? " video encontrado"
-                  : " videos encontrados"}
-              </span>
-            ) : null}
+            Videos for the course{" "}
+            <span className="font-semibold text-zinc-200">{courseTitle}</span>.
           </p>
-          <CreateVideo isLoading={isLoading} invalidate={invalidateQuery} />
+
+          <p className="text-sm text-muted-foreground">
+            {data == null ? (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>No videos found.</span>
+              </div>
+            ) : (
+              <span>
+                {data?.length}{" "}
+                {data?.length === 1 ? " course found." : " courses found."}
+              </span>
+            )}
+          </p>
+
+          <CreateVideo />
         </div>
       </div>
-      <ScrollArea className="h-full max-h-[calc(100vh-4rem)] w-full p-11">
+      <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
         <Table>
           <TableCaption>
-            {status === "pending" ? (
+            {isFetching && (
               <div className="h-[100px] flex justify-center items-center">
                 <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
               </div>
-            ) : null}
+            )}
 
-            {status === "error" ? <span>Error: {error.message}</span> : null}
+            {data == null && (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>No videos found.</span>
+              </div>
+            )}
 
-            <div ref={ref} onClick={() => fetchNextPage()}>
-              {isFetchingNextPage ? (
-                <div className="h-[100px] flex justify-center items-center">
-                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                </div>
-              ) : hasNextPage ? (
-                ""
-              ) : (
-                ""
-              )}
-            </div>
+            {isFetching && (
+              <div className="h-[100px] flex justify-center items-center">
+                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+              </div>
+            )}
+
+            {isError && (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>An unexpected error occurred: {error.message}</span>
+              </div>
+            )}
           </TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>Titulo</TableHead>
-              <TableHead>Descripcion</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Description</TableHead>
               <TableHead>Views</TableHead>
               <TableHead>Duration</TableHead>
-              <TableHead>Video</TableHead>
               <TableHead>Thumbnail</TableHead>
-              <TableHead>Fecha de creación</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>Video</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {status != "pending" &&
-              status != "error" &&
-              data &&
-              data.pages.map((page) => (
-                <React.Fragment key={page.nextId}>
-                  {page.data != null &&
-                    page.data.map((course) => (
-                      <TableRow>
-                        <TableCell>{course.title}</TableCell>
-                        <TableCell>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                {course.description.length > 20 ? (
-                                  <>
-                                    {course.description.slice(0, 20)}
-                                    <span className="text-blue-500 cursor-pointer">
-                                      ...ver mas
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>{course.description}</>
-                                )}
-                              </TooltipTrigger>
-                              <TooltipContent className="w-[400px]">
-                                <p>{course.description}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </TableCell>
-                        <TableCell>{course.views}</TableCell>
-                        <TableCell>{course.duration}</TableCell>
-                        <TableCell>
-                          <VideoHls
-                            src={`${import.meta.env.VITE_BACKEND_URL}${course.video_hls}`}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <AlertDialog>
-                            <AlertDialogTrigger>
-                              <Button size="sm" className="h-8 gap-1">
-                                Ver imagen
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="max-w-5xl">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Imagen del curso {course.title}.
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  <img
-                                    className="rounded-lg"
-                                    src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
-                                  />
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cerrar</AlertDialogCancel>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </TableCell>
-                        <TableCell>{course.created_at}</TableCell>
+            {data?.map((video: Video) => (
+              <TableRow>
+                <TableCell>{video.title}</TableCell>
+                <TableCell>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        {video.description.length > 20 ? (
+                          <>{video.description.slice(0, 20)} ...</>
+                        ) : (
+                          <>{video.description}</>
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent className="w-[400px]">
+                        <p>{video.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>
+                <TableCell>{video.views}</TableCell>
+                <TableCell>{video.duration}</TableCell>
+                <TableCell>
+                  <VideoDialog
+                    src={`${import.meta.env.VITE_BACKEND_URL}${video.video_hls}`}
+                    title={video.title}
+                  />
+                </TableCell>
+                <TableCell>
+                  <ImageDialog
+                    title={video.title}
+                    src={`${import.meta.env.VITE_BACKEND_URL}${video.thumbnail}`}
+                  />
+                </TableCell>
+                <TableCell>{video.created_at}</TableCell>
 
-                        <TableCell className="text-right">
-                          <Button
-                            onClick={() => openWindowFile(course.id)}
-                            variant="outline"
-                            size="icon"
-                            className="h-8 gap-1 mx-1"
-                          >
-                            <Paperclip className="h-5 w-5 text-zinc-200" />
-                          </Button>
+                <TableCell className="text-right">
+                  <Button
+                    onClick={() => openWindowFile(video.id)}
+                    variant="outline"
+                    size="icon"
+                    className="h-8 gap-1 mx-1"
+                  >
+                    <Paperclip className="h-5 w-5 text-zinc-200" />
+                  </Button>
 
-                          <UpdateVideo
-                            isLoading={isLoading}
-                            data={course}
-                            invalidate={invalidateQuery}
-                          />
+                  <UpdateVideo data={video} />
 
-                          <DeleteVideo
-                            isLoading={isLoading}
-                            id={course.id}
-                            invalidate={invalidateQuery}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </React.Fragment>
-              ))}
+                  <DeleteVideo title={video.title} id={video.id} />
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </ScrollArea>
