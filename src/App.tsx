@@ -8,22 +8,19 @@ import AdminUsers from "./pages/admin/users";
 import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
 import Video from "./pages/video";
-import Notes from "./pages/notes";
 import ResetPassword from "./pages/auth/reset-password";
 import AdminCourses from "./pages/admin/courses";
 import AdminVideos from "./pages/admin/videos";
+import Preview from "./pages/preview";
 
 import WindowFiles from "./components/admin/videos/window-files";
 import AdminApps from "./pages/admin/apps";
 import { platform } from "@tauri-apps/api/os";
 import { useOsStore } from "./store/os";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { updateHistory } from "./api/videos";
 import { appWindow } from "@tauri-apps/api/window";
-import { Loader } from "lucide-react";
-import Preview from "./pages/preview";
-import TestingHls from "./pages/testing-hls";
 
 function App() {
   // make this with localStorage
@@ -72,14 +69,11 @@ function App() {
         <Route path="register" element={<Register />} />
         <Route path="reset-password" element={<ResetPassword />} />
 
-        <Route path="notes" element={<Notes />} />
-
         <Route path="/" element={<Layout />}>
           <Route element={<PrivateRoute />}>
             <Route path="home" element={<Home />} />
             <Route path="video/:courseId" element={<Video />} />
             <Route path="preview/:courseId" element={<Preview />} />
-            <Route path="testing/hls" element={<TestingHls />} />
           </Route>
         </Route>
 
