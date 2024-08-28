@@ -6,6 +6,11 @@ export type ErrorResponse = {
   };
 }
 
+export type FileResponse = {
+  id: number;
+  path: string;
+}
+
 export type App = {
   id: number
   name: string

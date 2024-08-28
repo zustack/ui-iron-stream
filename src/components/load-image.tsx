@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function LoadImage({ src }: { src: string }) {
+export default function LoadImage({ src, cn }: { src: string, cn: string }) {
   const [loading, setLoading] = useState(true);
 
   return (
-    <div className="p-1">
+    <>
       <Skeleton
         style={{ display: !loading ? "none" : "block" }}
-        className="w-full h-full rounded-[0.75rem]"
+        className={cn}
       />
       <img
         src={src}
-        alt={""}
+        alt={"Image"}
         className="rounded-[0.75rem]"
         style={{ display: loading ? "none" : "block" }}
         onLoad={() => setLoading(false)}
       />
-    </div>
+    </>
   );
 }

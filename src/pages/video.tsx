@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import LoadImage from "@/components/load-image";
 
 type App = {
   name: string;
@@ -354,10 +355,9 @@ export default function Video() {
                         className="
                       relative overflow-hidden rounded-[0.75rem]"
                       >
-                        <img
+                        <LoadImage
+                          cn="h-[189px] rounded-[0.75rem]"
                           src={`${import.meta.env.VITE_BACKEND_URL}${v.thumbnail}`}
-                          alt=""
-                          className="w-full"
                         />
                         <div
                           style={{ width: `${v.video_resume}%` }}

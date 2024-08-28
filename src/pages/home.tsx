@@ -69,7 +69,11 @@ export default function Home() {
 
       {data?.data.map((course: Course) => (
         <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-2 min-h-[379px] border mb-8">
-          <LoadImage src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`} />
+        <div className="p-1">
+          <LoadImage 
+          cn="rounded-[0.75rem] w-full h-full"
+          src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`} />
+          </div>
           <div className="flex flex-col justify-between p-4">
             <div>
               <h1 className="max-w-2xl text-4xl font-bold tracking-tight leading-none text-zinc-200 mb-6">

@@ -19,7 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { adminVideos } from "@/api/videos";
 import CreateVideo from "@/components/admin/videos/create-video";
 import UpdateVideo from "@/components/admin/videos/update-video";
@@ -33,6 +33,7 @@ export default function AdminVideos() {
   const { courseId, courseTitle } = useParams();
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const navigate = useNavigate()
 
   const { data, isFetching, isError, error } = useQuery({
     queryKey: ["admin-videos", debouncedSearchTerm],
@@ -51,30 +52,6 @@ export default function AdminVideos() {
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setSearchInput(value);
-  };
-
-  const openWindowFile = async (id: number) => {
-    try {
-      // Crea una instancia de WebviewWindow
-      const webview = new WebviewWindow("theUniqueLabel", {
-        url: `new/window/admin/videos/files/${id}`,
-      });
-
-      // Escucha el evento 'tauri://created' para manejar el éxito
-      webview.once("tauri://created", () => {
-        console.log("Webview window successfully created");
-      });
-
-      // Escucha el evento 'tauri://error' para manejar errores
-      webview.once("tauri://error", (error) => {
-        console.error(
-          "An error occurred during webview window creation:",
-          error
-        );
-      });
-    } catch (error) {
-      console.error("Error creating webview window:", error);
-    }
   };
 
   return (
@@ -140,12 +117,6 @@ export default function AdminVideos() {
               </div>
             )}
 
-            {isFetching && (
-              <div className="h-[100px] flex justify-center items-center">
-                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-              </div>
-            )}
-
             {isError && (
               <div className="h-[100px] flex justify-center items-center">
                 <span>An unexpected error occurred: {error.message}</span>
@@ -203,7 +174,7 @@ export default function AdminVideos() {
 
                 <TableCell className="text-right">
                   <Button
-                    onClick={() => openWindowFile(video.id)}
+                  onClick={() =>  navigate(`/admin/files/${courseId}/${courseTitle}/${video.id}/${video.title}`)}
                     variant="outline"
                     size="icon"
                     className="h-8 gap-1 mx-1"

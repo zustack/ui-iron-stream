@@ -1,49 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { ErrorResponse } from "@/types";
+import { ErrorResponse, FileResponse } from "@/types";
 import { deleteFile, getFiles, uploadFile } from "@/api/files";
-import { useState, ChangeEvent } from "react";
-import { useParams } from "react-router-dom";
-import { Trash } from "lucide-react";
+import { useState, ChangeEvent, useRef } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ChevronLeft, FileImage, Loader, Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 
 export default function WindowFiles() {
-  const { videoId } = useParams();
-
- const [page, setPage] = useState({
-    pages: [1], // Array de números
-    currentPage: 0
-  });
-  // Función para agregar una nueva página (número)
-  const addPage = () => {
-    setPage(prevState => ({
-      pages: [...prevState.pages, prevState.pages.length + 1],
-      currentPage: prevState.pages.length // Actualiza a la nueva página
-    }));
-  };
-
-  // Función para cambiar a la página siguiente
-  const nextPage = () => {
-    if (page.currentPage < page.pages.length - 1) {
-      setPage(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage + 1
-      }));
-    }
-  };
-
-  // Función para cambiar a la página anterior
-  const prevPage = () => {
-    if (page.currentPage > 0) {
-      setPage(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage - 1
-      }));
-    }
-  };
+  const { courseId, courseTitle, videoId, videoTitle } = useParams();
   const [file, setFile] = useState<File>();
-
+  const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+  const [currentFileId, setCurrentFileId] = useState<number>(0);
+  const [page, setPage] = useState({
+    pages: [1],
+    currentPage: 0,
+  });
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["files", page],
+    queryFn: () => getFiles(page.pages[page.currentPage], videoId),
+  });
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
@@ -53,89 +41,225 @@ export default function WindowFiles() {
   };
 
   const uploadFileMutation = useMutation({
-    mutationFn: () => uploadFile(file, page.pages[page.currentPage], videoId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["files"] });
+    mutationFn: () => {
+      if (!file || !videoId) {
+        throw new Error("File or videoId not found");
+      }
+      return uploadFile(file, page.pages[page.currentPage], videoId);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["files"] });
+      toast.success("File uploaded successfully");
+      setFile(undefined);
     },
     onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
-  });
-
-  // mutation to upload files
-  // current files
-  function uploadFiles() {
-    if (!file) {
-      toast.error("No files selected");
-      return;
-    }
-    uploadFileMutation.mutate();
-  }
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["files", page],
-    queryFn: () => getFiles(page.pages[page.currentPage], videoId),
   });
 
   const deleteFileMutation = useMutation({
     mutationFn: (id: number) => deleteFile(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["files"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["files"] });
+      toast.success("File deleted successfully");
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "Ocurrió un error inesperado");
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
-  console.log(data);
+  const addPage = () => {
+    setPage((prevState) => ({
+      pages: [...prevState.pages, prevState.pages.length + 1],
+      currentPage: prevState.pages.length,
+    }));
+  };
+  const nextPage = () => {
+    if (page.currentPage < page.pages.length - 1) {
+      setPage((prevState) => ({
+        ...prevState,
+        currentPage: prevState.currentPage + 1,
+      }));
+    }
+  };
+  const prevPage = () => {
+    if (page.currentPage > 0) {
+      setPage((prevState) => ({
+        ...prevState,
+        currentPage: prevState.currentPage - 1,
+      }));
+    }
+  };
 
   return (
     <div>
-      <h1 className="text-3xl">Select the files for the video (x)</h1>
-  <div>
-      <h1>Gestor de Páginas</h1>
-      <div>
-        <button onClick={prevPage} disabled={page.currentPage === 0}>
-          Página Anterior
-        </button>
-        <button onClick={nextPage} disabled={page.currentPage === page.pages.length - 1}>
-          Página Siguiente
-        </button>
+      <div className="bg-muted/40 flex justify-between items-center px-[10px] h-[60px] border border-b">
+        <Link
+          to={`/admin/videos/${courseId}/${courseTitle}`}
+          className="underline cursor-pointer flex text-zinc-200 items-center mr-9"
+        >
+          <ChevronLeft />
+          <span>Go back</span>
+        </Link>
+
+        <div className="ml-auto flex items-center gap-9">
+          <p className="text-sm text-muted-foreground">
+            Files for the video{" "}
+            <span className="font-semibold text-zinc-200">{videoTitle}</span>.
+          </p>
+
+          <p className="text-sm text-muted-foreground">
+            {data == null ? (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>No files found in page {page.currentPage + 1}.</span>
+              </div>
+            ) : (
+              <span>
+                {data?.length}{" "}
+                {data?.length === 1 ? " file found." : " files found."}
+              </span>
+            )}
+          </p>
+        </div>
       </div>
-      <button onClick={addPage}>Agregar Nueva Página</button>
-      <p>Página Actual: {page.pages[page.currentPage]}</p>
-      <p>Número Total de Páginas: {page.pages.length}</p>
-    </div>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={uploadFiles}>Upload</button>
-      {data &&
-        data.map((file) => (
-          <div key={file.id} className="bg-white py-2">
-            <div
-              key={file.id}
-              className="container mx-auto border border-zinc-400/50 rounded-lg shadow-md"
+
+      <div className="grid grid-cols-6 gap-4 items-center px-[10px] h-[60px]">
+        <div className="flex gap-2 col-start-1 col-end-3">
+          <div className="grid gap-2 w-[400px]">
+            <Button
+              id="file"
+              onClick={() => inputRef.current?.click()}
+              variant="outline"
+              className="flex justify-start gap-4"
             >
+              <FileImage className="size-4" />
+              <span>
+                {file?.name ? (
+                  <>{file?.name.slice(0, 40)}</>
+                ) : (
+                  <>SVG recommended</>
+                )}
+              </span>
+            </Button>
+            <Input
+              ref={inputRef}
+              required
+              onChange={handleFileChange}
+              id="file"
+              type="file"
+              className="hidden"
+              accept=".svg,image/svg+xml"
+            />
+          </div>
+          <Button
+            disabled={!file || uploadFileMutation.isPending}
+            onClick={() => {
+              uploadFileMutation.mutate();
+            }}
+            variant="default"
+            className="flex gap-2"
+          >
+            <span>Upload file</span>
+            {uploadFileMutation.isPending && (
+              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
+            )}
+          </Button>
+        </div>
+
+        <div className="col-start-3 col-end-5 flex">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => prevPage()}
+                  className={
+                    page.currentPage === 0
+                      ? "disabled cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>{page.pages[page.currentPage]}</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>... {page.pages.length}</PaginationItem>
+
+              <PaginationItem>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 gap-1 mx-1"
+                  onClick={addPage}
+                >
+                  <Plus className="h-4 w-4 text-zinc-200" />
+                </Button>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  onClick={nextPage}
+                  className={
+                    page.currentPage === page.pages.length - 1
+                      ? "disabled cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
+
+      <ScrollArea className="h-full max-h-[calc(100vh-60px-60px)] w-full px-[10px]">
+        {isLoading && (
+          <div className="h-[100px] flex justify-center items-center">
+            <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+          </div>
+        )}
+
+        {data == null && (
+          <div className="h-[100px] flex justify-center items-center">
+            <span>No files found in page {page.currentPage + 1}.</span>
+          </div>
+        )}
+
+        {isError && (
+          <div className="h-[100px] flex justify-center items-center">
+            <span>An unexpected error occurred: {error.message}</span>
+          </div>
+        )}
+
+        {data?.map((file: FileResponse) => (
+          <div key={file.id} className="bg-white rounded-[0.75rem]">
+            <div key={file.id} className="">
               <div className="flex justify-end">
                 <Button
-                  onClick={() => deleteFileMutation.mutate(file.id)}
+                  onClick={() => {
+                    setCurrentFileId(file.id);
+                    deleteFileMutation.mutate(file.id);
+                  }}
                   variant="ghost"
                   size="icon"
-                  className="h-12 gap-1 mt-7 hover:bg-zinc-200 "
+                  className="h-18 w-18 gap-1 hover:bg-white"
                 >
-                  <Trash className="h-12 w-12 text-red-500" />
+                  {deleteFileMutation.isPending && file.id === currentFileId ? (
+                    <Loader className="h-12 w-12 text-zinc-600 animate-spin slower" />
+                  ) : (
+                    <Trash className="h-12 w-12 text-red-600 hover:text-red-700" />
+                  )}
                 </Button>
               </div>
               <img
                 src={`${import.meta.env.VITE_BACKEND_URL}${file.path}`}
                 className="w-full h-full"
               />
-              {file.path}
             </div>
           </div>
         ))}
+      </ScrollArea>
     </div>
   );
 }

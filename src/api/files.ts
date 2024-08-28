@@ -30,7 +30,7 @@ curl -X GET "http://localhost:8081/files?page=1&videoID=2" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjUxMjQ0OTYsImlhdCI6MTcyMjUzMjQ5NiwibmJmIjoxNzIyNTMyNDk2LCJzdWIiOjF9.ENH-zsDg-s1Z4aKOMP6tnV7Wg91-qaRJHlXvKhc_Uik" \
   */
 
-export const getFiles = async (page: number, videoID: string) => {
+export const getFiles = async (page: number, videoID?: string) => {
   const response = await authAxios.get(`/files?page=${page}&videoID=${videoID}`);
   return response.data;
 }

@@ -88,12 +88,12 @@ function App() {
             element={<AdminVideos />}
           />
           <Route path="apps" element={<AdminApps />} />
+          <Route
+            path="files/:courseId/:courseTitle/:videoId/:videoTitle"
+          element={<WindowFiles />}
+          />
         </Route>
 
-        <Route
-          path="new/window/admin/videos/files/:videoId"
-          element={<WindowFiles />}
-        />
         <Route element={<AdminRoute />}></Route>
 
         <Route path="latter-admin" element={<AdminLayout />}></Route>
