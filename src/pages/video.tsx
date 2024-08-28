@@ -43,6 +43,8 @@ export default function Video() {
     queryFn: () => getForbiddenApps(),
   });
 
+    console.log(data)
+
   async function killApps(apps: App[]) {
     setLoading(true);
     if (os === "darwin") {
@@ -271,7 +273,7 @@ export default function Video() {
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>
-The following apps are open
+                    The following apps are open
                   </AlertDialogTitle>
                   <AlertDialogDescription>
                   <p>To continue watching the video, you need to close the applications</p>
