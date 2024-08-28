@@ -22,6 +22,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import LoadImage from "@/components/load-image";
+import { WebviewWindow } from "@tauri-apps/api/window";
+import toast from "react-hot-toast";
 
 type App = {
   name: string;
@@ -190,6 +192,19 @@ export default function Video() {
     },
   });
 
+  const openFiles = async (videoId: number, videoTitle: string) => {
+    try {
+      const webview = new WebviewWindow("Files", {
+        url: `files/${courseId}/${videoId}/${videoTitle}`,
+      });
+      webview.once("tauri://error", (error) => {
+        toast.error("Error creating window to preview the files: " + error);
+      });
+    } catch (error) {
+      toast.error("Error creating window to preview the files: " + error);
+    }
+  };
+
   if (isErrorVideos || isErrorCurrentVideo || isError) {
     return (
       <div className="text-center flex justify-center text-3xl">
@@ -257,9 +272,11 @@ export default function Video() {
             <h1 className="text-zinc-200 text-2xl font-semibold">
               {currentVideo?.video.title}
             </h1>
-            <Button variant="outline" className="flex gap-1" size={"sm"}>
+            <Button 
+            onClick={() => openFiles(currentVideo?.video.id, currentVideo?.video.title)}
+            variant="outline" className="flex gap-1" size={"sm"}>
               <File className="h-4 w-4" />
-              Ver archivos
+                View files
             </Button>
           </div>
           <p className="text-zinc-400 mt-2">
@@ -376,6 +393,7 @@ export default function Video() {
                         <p className="text-sm text-zinc-400">{v.duration}</p>
                         <p className="text-sm text-zinc-400">•</p>
                         <p className="text-sm text-zinc-400">{v.views} views</p>
+                        {v.id}
                       </div>
                     </div>
                   </div>

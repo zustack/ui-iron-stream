@@ -23,14 +23,12 @@ export default function WindowFiles() {
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const [currentFileId, setCurrentFileId] = useState<number>(0);
-  const [page, setPage] = useState({
-    pages: [1],
-    currentPage: 0,
-  });
+  const [newPage, setNewPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["files", page],
-    queryFn: () => getFiles(page.pages[page.currentPage], videoId),
+    queryKey: ["files", currentPage, videoId],
+    queryFn: () => getFiles(currentPage, videoId),
   });
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -45,12 +43,14 @@ export default function WindowFiles() {
       if (!file || !videoId) {
         throw new Error("File or videoId not found");
       }
-      return uploadFile(file, page.pages[page.currentPage], videoId);
+      return uploadFile(file, newPage, videoId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["files"] });
       toast.success("File uploaded successfully");
       setFile(undefined);
+      setCurrentPage(newPage);
+      setNewPage(0);
     },
     onError: (error: ErrorResponse) => {
       toast.error(
@@ -72,29 +72,6 @@ export default function WindowFiles() {
     },
   });
 
-  const addPage = () => {
-    setPage((prevState) => ({
-      pages: [...prevState.pages, prevState.pages.length + 1],
-      currentPage: prevState.pages.length,
-    }));
-  };
-  const nextPage = () => {
-    if (page.currentPage < page.pages.length - 1) {
-      setPage((prevState) => ({
-        ...prevState,
-        currentPage: prevState.currentPage + 1,
-      }));
-    }
-  };
-  const prevPage = () => {
-    if (page.currentPage > 0) {
-      setPage((prevState) => ({
-        ...prevState,
-        currentPage: prevState.currentPage - 1,
-      }));
-    }
-  };
-
   return (
     <div>
       <div className="bg-muted/40 flex justify-between items-center px-[10px] h-[60px] border border-b">
@@ -115,7 +92,7 @@ export default function WindowFiles() {
           <p className="text-sm text-muted-foreground">
             {data == null ? (
               <div className="h-[100px] flex justify-center items-center">
-                <span>No files found in page {page.currentPage + 1}.</span>
+                <span>No files found in page {data?.pageCount}.</span>
               </div>
             ) : (
               <span>
@@ -175,34 +152,48 @@ export default function WindowFiles() {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => prevPage()}
+                  onClick={() => {
+                    if (currentPage === 1) {
+                      return;
+                    }
+                    setCurrentPage(currentPage - 1);
+                  }}
                   className={
-                    page.currentPage === 0
+                    currentPage === 1
                       ? "disabled cursor-not-allowed"
                       : "cursor-pointer"
                   }
                 />
               </PaginationItem>
               <PaginationItem>
-                <PaginationLink>{page.pages[page.currentPage]}</PaginationLink>
+                <PaginationLink>
+                  {newPage != 0 ? `${newPage}` : `${currentPage}`}
+                </PaginationLink>
               </PaginationItem>
-              <PaginationItem>... {page.pages.length}</PaginationItem>
+              <PaginationItem>... {data?.pageCount}</PaginationItem>
 
               <PaginationItem>
                 <Button
                   variant="outline"
                   size="icon"
                   className="h-8 gap-1 mx-1"
-                  onClick={addPage}
+                  onClick={() => {
+                    setNewPage(data?.pageCount + 1);
+                  }}
                 >
                   <Plus className="h-4 w-4 text-zinc-200" />
                 </Button>
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
-                  onClick={nextPage}
+                  onClick={() => {
+                    if (currentPage >= data?.pageCount) {
+                      return;
+                    }
+                    setCurrentPage(currentPage + 1);
+                  }}
                   className={
-                    page.currentPage === page.pages.length - 1
+                    currentPage >= data?.pageCount
                       ? "disabled cursor-not-allowed"
                       : "cursor-pointer"
                   }
@@ -214,51 +205,58 @@ export default function WindowFiles() {
       </div>
 
       <ScrollArea className="h-full max-h-[calc(100vh-60px-60px)] w-full px-[10px]">
-        {isLoading && (
-          <div className="h-[100px] flex justify-center items-center">
-            <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-          </div>
-        )}
-
-        {data == null && (
-          <div className="h-[100px] flex justify-center items-center">
-            <span>No files found in page {page.currentPage + 1}.</span>
-          </div>
-        )}
-
-        {isError && (
-          <div className="h-[100px] flex justify-center items-center">
-            <span>An unexpected error occurred: {error.message}</span>
-          </div>
-        )}
-
-        {data?.map((file: FileResponse) => (
-          <div key={file.id} className="bg-white rounded-[0.75rem]">
-            <div key={file.id} className="">
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => {
-                    setCurrentFileId(file.id);
-                    deleteFileMutation.mutate(file.id);
-                  }}
-                  variant="ghost"
-                  size="icon"
-                  className="h-18 w-18 gap-1 hover:bg-white"
-                >
-                  {deleteFileMutation.isPending && file.id === currentFileId ? (
-                    <Loader className="h-12 w-12 text-zinc-600 animate-spin slower" />
-                  ) : (
-                    <Trash className="h-12 w-12 text-red-600 hover:text-red-700" />
-                  )}
-                </Button>
+        {newPage != 0 ? (
+          <p></p>
+        ) : (
+          <>
+            {isLoading && (
+              <div className="h-[100px] flex justify-center items-center">
+                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
               </div>
-              <img
-                src={`${import.meta.env.VITE_BACKEND_URL}${file.path}`}
-                className="w-full h-full"
-              />
-            </div>
-          </div>
-        ))}
+            )}
+
+            {!isLoading && data == null && (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>No files found in page {data.pageCount}.</span>
+              </div>
+            )}
+
+            {isError && (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>An unexpected error occurred: {error.message}</span>
+              </div>
+            )}
+
+            {data?.files?.map((file: FileResponse) => (
+              <div key={file.id} className="bg-white rounded-[0.75rem]">
+                <div key={file.id} className="">
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={() => {
+                        setCurrentFileId(file.id);
+                        deleteFileMutation.mutate(file.id);
+                      }}
+                      variant="ghost"
+                      size="icon"
+                      className="h-18 w-18 gap-1 hover:bg-white"
+                    >
+                      {deleteFileMutation.isPending &&
+                      file.id === currentFileId ? (
+                        <Loader className="h-12 w-12 text-zinc-600 animate-spin slower" />
+                      ) : (
+                        <Trash className="h-12 w-12 text-red-600 hover:text-red-700" />
+                      )}
+                    </Button>
+                  </div>
+                  <img
+                    src={`${import.meta.env.VITE_BACKEND_URL}${file.path}`}
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </ScrollArea>
     </div>
   );

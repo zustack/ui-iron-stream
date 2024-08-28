@@ -21,6 +21,7 @@ import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { updateHistory } from "./api/videos";
 import { appWindow } from "@tauri-apps/api/window";
+import Files from "./pages/files";
 
 function App() {
   // make this with localStorage
@@ -72,12 +73,13 @@ function App() {
         <Route path="register" element={<Register />} />
         <Route path="reset-password" element={<ResetPassword />} />
 
-        <Route path="/" element={<Layout />}>
           <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Layout />}>
             <Route path="home" element={<Home />} />
             <Route path="video/:courseId" element={<Video />} />
             <Route path="preview/:courseId" element={<Preview />} />
           </Route>
+          <Route path="files/:courseId/:videoId/:videoTitle" element={<Files />} />
         </Route>
 
         <Route path="admin" element={<AdminLayout />}>
