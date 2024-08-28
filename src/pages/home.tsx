@@ -2,7 +2,15 @@ import { userCourses } from "@/api/courses";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, Loader, MessageSquareMore, Search, StarIcon, Video, Lock } from "lucide-react";
+import {
+  ChevronRight,
+  Loader,
+  MessageSquareMore,
+  Search,
+  StarIcon,
+  Video,
+  Lock,
+} from "lucide-react";
 import { useEffect, useState, ChangeEvent } from "react";
 import { Course } from "@/types";
 import { Rating } from "@mui/material";
@@ -66,13 +74,13 @@ export default function Home() {
           Error: {error.message}
         </div>
       )}
-
       {data?.data.map((course: Course) => (
-        <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-2 min-h-[379px] border mb-8">
-        <div className="p-1">
-          <LoadImage 
-          cn="rounded-[0.75rem] w-full h-full"
-          src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`} />
+        <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-1 xl:grid-cols-2 min-h-[379px] border mb-8">
+          <div className="p-1">
+            <LoadImage
+              cn="rounded-[0.75rem] w-full h-full"
+              src={`${import.meta.env.VITE_BACKEND_URL}${course.thumbnail}`}
+            />
           </div>
           <div className="flex flex-col justify-between p-4">
             <div>
@@ -136,9 +144,7 @@ export default function Home() {
               )}
 
               {course.preview != "" && (
-                <Button
-                  onClick={() => navigate(`/preview/${course.id}`)}
-                >
+                <Button onClick={() => navigate(`/preview/${course.id}`)}>
                   Watch free preview
                   <Video className="h-5 w-5 ml-2" />
                 </Button>

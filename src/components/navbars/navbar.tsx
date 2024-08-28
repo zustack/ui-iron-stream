@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { CircleUser, Eclipse, Package2 } from "lucide-react";
+import { CircleUser, Eclipse } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateHistory } from "@/api/videos";

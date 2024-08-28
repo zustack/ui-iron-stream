@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AdminRoute, PrivateRoute } from "./lib/private-routes";
 import Layout from "./components/layouts/layout";
 import AdminLayout from "./components/layouts/admin-layout";
@@ -22,10 +22,11 @@ import { useMutation } from "@tanstack/react-query";
 import { updateHistory } from "./api/videos";
 import { appWindow } from "@tauri-apps/api/window";
 import Files from "./pages/files";
+import { Loader } from "lucide-react";
 
 function App() {
-  // make this with localStorage
   const { setOs } = useOsStore();
+  const location = useLocation();
 
   useEffect(() => {
     async function getPlaform() {
@@ -35,73 +36,92 @@ function App() {
     getPlaform();
   }, []);
 
-  // const { resume, history_id } = useVideoResumeStore();
-
   const updateHistoryMutation = useMutation({
-    mutationFn: () => updateHistory("history_id", "resume"),
+    mutationFn: ({
+      resume,
+      historyId,
+    }: {
+      resume: number;
+      historyId: string;
+    }) => updateHistory(historyId, String(resume)),
     onSettled: () => {
       appWindow.close();
-    }
+    },
   });
 
   useEffect(() => {
-    // if location is === '/login' or '/register' or '/reset-password' or '/files' do not listen
-    // if location is === '/video' listen for updateHistoryMutation && logout && close requested
-    // if location is !== '/video' listen for logout && close requested
     const unlisten = appWindow.listen("tauri://close-requested", async () => {
-      updateHistoryMutation.mutate();
-      console.log("mut executed");
+      if (location.pathname.includes("video")) {
+        const video = document.getElementById("video") as HTMLMediaElement;
+        const historyId = localStorage.getItem("historyId");
+        updateHistoryMutation.mutate({
+          resume: video.currentTime,
+          historyId: historyId || "",
+        });
+        // not authenticated or the user opens a new window aka not need to logout
+      } else if (
+        location.pathname === "/login" ||
+        location.pathname === "/register" ||
+        location.pathname === "/reset-password" ||
+        location.pathname.includes("files")
+        
+      ) {
+        appWindow.close();
+        // authenticated aka need to logout
+      } else {
+        appWindow.close();
+        console.log("bye")
+      }
     });
-
-    // Cleanup the listener when the component is unmounted
     return () => {
       unlisten.then((dispose) => dispose());
     };
-  }, []);
+  }, [location]);
 
   return (
     <>
-    {updateHistoryMutation.isPending ? (
-      <div className="text-red-500 text-4xl">
-        Loading to close!
-      </div>
-    ) : (
-    <BrowserRouter>
-      <Routes>
-        <Route index element={<Landing />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="reset-password" element={<ResetPassword />} />
+      {updateHistoryMutation.isPending ? (
+        <div className="flex justify-center items-center h-screen">
+          <Loader className="w-8 h-8 animate-spin slower" />
+        </div>
+      ) : (
+        <Routes>
+          <Route index element={<Landing />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="reset-password" element={<ResetPassword />} />
 
           <Route element={<PrivateRoute />}>
-          <Route path="/" element={<Layout />}>
-            <Route path="home" element={<Home />} />
-            <Route path="video/:courseId" element={<Video />} />
-            <Route path="preview/:courseId" element={<Preview />} />
+            <Route path="/" element={<Layout />}>
+              <Route path="home" element={<Home />} />
+              <Route path="video/:courseId" element={<Video />} />
+              <Route path="preview/:courseId" element={<Preview />} />
+            </Route>
+            <Route
+              path="files/:courseId/:videoId/:videoTitle"
+              element={<Files />}
+            />
           </Route>
-          <Route path="files/:courseId/:videoId/:videoTitle" element={<Files />} />
-        </Route>
 
-        <Route path="admin" element={<AdminLayout />}>
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="courses" element={<AdminCourses />} />
-          <Route
-            path="videos/:courseId/:courseTitle"
-            element={<AdminVideos />}
-          />
-          <Route path="apps" element={<AdminApps />} />
-          <Route
-            path="files/:courseId/:courseTitle/:videoId/:videoTitle"
-          element={<WindowFiles />}
-          />
-        </Route>
+          <Route path="admin" element={<AdminLayout />}>
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="courses" element={<AdminCourses />} />
+            <Route
+              path="videos/:courseId/:courseTitle"
+              element={<AdminVideos />}
+            />
+            <Route path="apps" element={<AdminApps />} />
+            <Route
+              path="files/:courseId/:courseTitle/:videoId/:videoTitle"
+              element={<WindowFiles />}
+            />
+          </Route>
 
-        <Route element={<AdminRoute />}></Route>
+          <Route element={<AdminRoute />}></Route>
 
-        <Route path="latter-admin" element={<AdminLayout />}></Route>
-      </Routes>
-    </BrowserRouter>
-    )}
+          <Route path="latter-admin" element={<AdminLayout />}></Route>
+        </Routes>
+      )}
     </>
   );
 }
