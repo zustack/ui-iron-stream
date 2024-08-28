@@ -8,13 +8,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { CircleUser, Package2 } from "lucide-react";
+import { CircleUser, Eclipse, Package2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateHistory } from "@/api/videos";
 
 export default function Navbar() {
-  const { logout, isAdmin } = useAuthStore();
+  const { logout, isAdmin, fullName } = useAuthStore();
   const navigate = useNavigate();
 
   const queryClient = useQueryClient();
@@ -54,11 +54,11 @@ export default function Navbar() {
             onClick={() => {
               handleNavigation("/home");
             }}
-            className="flex gap-1 font-semibold text-xl text-foreground transition-colors hover:text-white cursor-pointer"
+            className="flex gap-2 font-semibold text-xl text-foreground transition-colors hover:text-white cursor-pointer"
           >
-            <Package2 className="h-6 w-6" />
-            <span>Acme</span>
-            <span>Inc</span>
+            <Eclipse className="h-6 w-6" />
+            <span>Iron</span>
+            <span>Stream</span>
           </button>
         </nav>
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
@@ -75,26 +75,27 @@ export default function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Hola, Agustin Fricke</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Configuraciones</DropdownMenuItem>
-                <DropdownMenuItem>Feedback</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => handleNavigation("/admin/users")}
-                >
-                  Users
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleNavigation("/admin/courses")}
-                >
-                  Cursos
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleNavigation("/admin/apps")}
-                >
-                  Apps
-                </DropdownMenuItem>
+                <DropdownMenuLabel>Hola, {fullName}</DropdownMenuLabel>
+                {isAdmin && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => handleNavigation("/admin/users")}
+                    >
+                      Users
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleNavigation("/admin/courses")}
+                    >
+                      Cursos
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleNavigation("/admin/apps")}
+                    >
+                      Apps
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {

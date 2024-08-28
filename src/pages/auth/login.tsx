@@ -63,7 +63,7 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: () => login(email, password, pc),
     onSuccess: (response) => {
-      setAuthState(response.token, response.userId, response.isAdmin, response.exp);
+      setAuthState(response.token, response.userId, response.isAdmin, response.exp, response.fullName);
       navigate("/home");
     },
     onError: (error: ErrorResponse) => {

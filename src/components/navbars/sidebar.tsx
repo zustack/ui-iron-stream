@@ -1,8 +1,11 @@
+import { useAuthStore } from "@/store/auth";
 import { AppWindow, GalleryVerticalEnd, Home as H, ListVideo, Package, Pickaxe, Star, User } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate()
+  const { logout } = useAuthStore()
 
   const getLinkClass = (path: string) => {
     return location.pathname === path
@@ -76,10 +79,15 @@ export default function Sidebar() {
             Configuraciones
           </Link>
 
-          <Link to="/" className={getLinkClass("/")}>
+          <button 
+          onClick={() => {
+            navigate("/")
+            logout()
+          }}
+          className={getLinkClass("/")}>
             <H className="h-4 w-4" />
             Logout
-          </Link>
+          </button>
           <p
             className="text-sm text-muted-foreground flex items-center 
           gap-3 rounded-lg px-3 py-2"
