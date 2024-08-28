@@ -204,7 +204,7 @@ export default function WindowFiles() {
         </div>
       </div>
 
-      <ScrollArea className="h-full max-h-[calc(100vh-60px-60px)] w-full px-[10px]">
+      <div className="overflow-auto max-h-[calc(100vh-60px-60px)] w-full px-[10px]">
         {newPage != 0 ? (
           <p></p>
         ) : (
@@ -257,7 +257,7 @@ export default function WindowFiles() {
             ))}
           </>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 }
