@@ -24,6 +24,7 @@ import { ErrorResponse } from "@/types";
 import { register } from "@/api/users";
 import EmailVerification from "@/components/auth/email-verfication";
 import { Loader } from "lucide-react";
+import Logo from "../../assets/logo.png";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -34,6 +35,7 @@ export default function Register() {
   const [pc, setPc] = useState("");
   const [os, setOs] = useState("");
   const [success, setSuccess] = useState(false);
+  const [privacyPolicy, setPrivacyPolicy] = useState(true);
 
   useEffect(() => {
     async function getSerialNumber() {
@@ -85,18 +87,16 @@ export default function Register() {
       setSuccess(true);
     },
     onError: (error: ErrorResponse) => {
-      console.log(error)
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
+      toast.error("Passwords do not match");
       return;
     }
     registerMutation.mutate();
@@ -104,19 +104,18 @@ export default function Register() {
 
   if (success) {
     return (
-      <EmailVerification 
-      close={() => {
-        setEmail("")
-        setName("")
-        setSurname("")
-        setPassword("")
-        setConfirmPassword("")
-        setPc("")
-        setOs("")
-        setSuccess(false)
-      }}
-      email={email} />
-    )
+      <EmailVerification
+        close={() => {
+          setEmail("");
+          setName("");
+          setSurname("");
+          setPassword("");
+          setConfirmPassword("");
+          setSuccess(false);
+        }}
+        email={email}
+      />
+    );
   }
 
   return (
@@ -124,16 +123,15 @@ export default function Register() {
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-full max-w-sm gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold mb-6">Crear cuenta</h1>
-            <p 
-            onClick={()=>       setSuccess(true)}
-            className="text-balance text-muted-foreground mb-4">
-              Ingresa tu datos para crear una cuenta.
+            <h1 className="text-3xl font-bold mb-6">Sign up</h1>
+            <p
+              onClick={() => setSuccess(true)}
+              className="text-balance text-muted-foreground mb-4"
+            >
+              Create a new account in Iron Stream
             </p>
           </div>
-          <form 
-          onSubmit={handleSubmit}
-          className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2 mb-4">
               <Label htmlFor="email">Correo electrónico</Label>
               <Input
@@ -141,41 +139,39 @@ export default function Register() {
                 value={email}
                 id="email"
                 type="email"
-                placeholder="ejemplo@gmail.com"
+                placeholder="Your email address"
                 required
               />
             </div>
 
             <div className="grid gap-2 mb-4">
-              <Label htmlFor="name">Nombre</Label>
+              <Label htmlFor="first-name">First name</Label>
               <Input
-                id="name"
+                id="first-name"
                 type="text"
                 onChange={(e) => setName(e.target.value)}
                 value={name}
-                placeholder="Agustin"
+                placeholder="Your first name"
                 required
               />
             </div>
 
             <div className="grid gap-2 mb-4">
-              <Label htmlFor="name">Apellido</Label>
+              <Label htmlFor="last-name">Last name</Label>
               <Input
-                id="name"
+                id="last-name"
                 type="text"
                 onChange={(e) => setSurname(e.target.value)}
                 value={surname}
-                placeholder="Fricke"
+                placeholder="Your last name"
                 required
               />
             </div>
 
-
             <div className="grid gap-2 mb-4">
               <div className="flex items-center">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password">Password</Label>
               </div>
-
               <PasswordInput
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
@@ -187,35 +183,37 @@ export default function Register() {
 
             <div className="grid gap-2 mb-4">
               <div className="flex items-center">
-                <Label htmlFor="password">Confirmar contraseña</Label>
+                <Label htmlFor="c-password">Confirm your password</Label>
               </div>
               <PasswordInput
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 value={confirmPassword}
                 required
-                id="password"
+                id="c-password"
                 placeholder="••••••••"
               />
             </div>
 
             <div className="items-top flex space-x-2 mb-4">
-              <Checkbox id="terms" />
+              <Checkbox
+                checked={privacyPolicy}
+                onCheckedChange={(active: boolean) => setPrivacyPolicy(active)}
+                id="privacy-policy"
+              />
               <div className="grid gap-1.5 leading-none">
                 <label
-                  htmlFor="terms"
+                  htmlFor="privacy-policy"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed 
           peer-disabled:opacity-70"
                 >
-                  Aceptar los{" "}
+                  By continuing you agree to our{" "}
                   <AlertDialog>
                     <AlertDialogTrigger className="underline">
-                      terminos y condiciones
+                      Privacy Policy
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Terminos y Condiciones
-                        </AlertDialogTitle>
+                        <AlertDialogTitle>Privacy Policy</AlertDialogTitle>
                         <AlertDialogDescription>
                           With less than a month to go before the European Union
                           enacts new consumer privacy laws for its citizens,
@@ -233,40 +231,33 @@ export default function Register() {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cerrar</AlertDialogCancel>
-                        <AlertDialogAction>Aceptar</AlertDialogAction>
+                        <AlertDialogCancel>Close</AlertDialogCancel>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 </label>
               </div>
             </div>
-            <Button
-              type="submit"
-            className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
-            >
-            {registerMutation.isPending ? (
-              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
-            ) : (
-              <span>Crear cuenta</span>
-            )}
+            <Button 
+            type="submit"
+            className="flex gap-2" disabled={registerMutation.isPending}>
+              {registerMutation.isPending && (
+                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
+              )}
+              <span>Create account</span>
             </Button>
           </form>
 
           <div className="text-center text-sm">
-            ¿Tienes una cuenta?{" "}
+            Have an account?{" "}
             <Link to="/login" className="underline">
-              Iniciar sesión
+              Login
             </Link>
           </div>
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
-        <img
-          src="https://kive.ai/assets/login-41fe131e.webp"
-          alt="Image"
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+        <img src={Logo} alt="Login image" />
       </div>
     </div>
   );

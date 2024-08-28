@@ -8,12 +8,11 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PasswordInput } from "@/components/ui/password-input";
 import { useAuthStore } from "@/store/auth";
 import { useMutation } from "@tanstack/react-query";
 import {
-  requestEmailTokenResetPassword,
   resendEmail,
   updatePassword,
   verifyAccount,
@@ -34,9 +33,10 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   const resendEmailMutation = useMutation({
-    mutationFn: () => requestEmailTokenResetPassword(email),
+    mutationFn: () => resendEmail(email),
     onSuccess: () => {
       setStep(2);
+      toast.success("New code sent to " + email);
     },
     onError: (error: ErrorResponse) => {
       toast.error(
@@ -70,10 +70,9 @@ export default function ResetPassword() {
       navigate("/home");
     },
     onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -126,7 +125,6 @@ export default function ResetPassword() {
 
               <Button
                 type="submit"
-                className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500"
               >
                 Update password
               </Button>
@@ -184,22 +182,37 @@ export default function ResetPassword() {
               )}
             </form>
 
-            <div className="text-center text-sm">
-              Did not receive the email?{" "}
-              <Link to="/login" className="underline">
-                Send again
-              </Link>
-            </div>
+          <div className="flex justify-center gap-1 text-center text-sm">
+            <p>Didn't receive the code? </p>
+            {resendEmailMutation.isPending ? (
+              <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+            ) : (
+              <p
+                onClick={() => resendEmailMutation.mutate()}
+                className="underline cursor-pointer"
+              >
+                Resend code
+              </p>
+            )}
+          </div>
 
-            <div className="text-center text-sm">
-              Wrong email?
-              <Link to="/register" className="underline">
+          <div className="flex justify-center gap-1 text-center text-sm">
+            <p>Wrong email? </p>
+              <p
+                onClick={() => {
+                  setEmail("")
+                  setEmailToken("")
+                  setStep(1); 
+                }}
+                className="underline cursor-pointer"
+              >
                 Change it
-              </Link>
-            </div>
+              </p>
+          </div>
+
           </div>
         </div>
-        <div className="hidden bg-muted lg:block">
+        <div className="hidden bg-zinc-900 lg:block">
           <img src={Logo} alt="Login image" />
         </div>
       </div>
