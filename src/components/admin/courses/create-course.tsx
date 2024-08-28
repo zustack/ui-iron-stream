@@ -298,7 +298,7 @@ export default function CreateCourse() {
               Create course
               </span>
               {(createCourseMutation.isPending || uploadChunkMutation.isPending) && (
-                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
+                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
               )}
           </Button>
         </AlertDialogFooter>

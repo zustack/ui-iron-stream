@@ -91,7 +91,7 @@ export default function AdminApps() {
         <div className="ml-auto flex items-center gap-2">
 
           <p className="text-sm text-muted-foreground">
-          {data == null ? (
+          {data == null && status !== "pending" ? (
               <span>No apps found.</span>
           ) : (
             <span>
@@ -154,7 +154,7 @@ export default function AdminApps() {
       <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
         <Table>
           <TableCaption>
-            {data == null && (
+          {data == null && status !== "pending" && (
               <div className="h-[100px] flex justify-center items-center">
                 No apps found
               </div>

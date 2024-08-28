@@ -10,6 +10,8 @@ import { useMutation } from "@tanstack/react-query";
 import { login } from "@/api/users";
 import { useAuthStore } from "@/store/auth";
 import { ErrorResponse } from "@/types";
+import Logo from "../../assets/logo.png";
+import { Loader } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -17,7 +19,7 @@ export default function Login() {
   const [pc, setPc] = useState("");
 
   const { setAuthState } = useAuthStore();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function getSerialNumber() {
@@ -63,14 +65,19 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: () => login(email, password, pc),
     onSuccess: (response) => {
-      setAuthState(response.token, response.userId, response.isAdmin, response.exp, response.fullName);
+      setAuthState(
+        response.token,
+        response.userId,
+        response.isAdmin,
+        response.exp,
+        response.fullName
+      );
       navigate("/home");
     },
     onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -79,79 +86,68 @@ export default function Login() {
     loginMutation.mutate();
   };
 
- const [loading, setLoading] = useState(true);
-
-  const handleImageLoad = () => {
-    setLoading(false);
-  };
-
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-full max-w-sm gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold mb-6">Iniciar sesión</h1>
+            <h1 className="text-3xl font-bold mb-6">Login</h1>
             <p className="text-balance text-muted-foreground mb-4">
-              Ingresa tu correo electrónico para iniciar sesión.
+              Login to your Iron Stream account.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2 mb-4">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 id="email"
                 type="email"
-                placeholder="Ingresa tu correo electrónico"
+                placeholder="Your email address"
                 required
               />
             </div>
             <div className="grid gap-2 mb-4">
               <div className="flex items-center">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password">Password</Label>
                 <Link
                   to="/reset-password"
                   className="ml-auto inline-block text-sm underline"
                 >
-                  ¿Olvidaste tu contraseña?
+                  Forgot your password?
                 </Link>
               </div>
               <Input
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Usa al menos 6 caracteres"
+                placeholder="••••••••"
                 id="password"
                 type="password"
                 required
               />
             </div>
-            <Button className="bg-indigo-600 text-white font-semibold hover:bg-indigo-500">
-              Iniciar sesión
+            <Button 
+            type="submit"
+            className="flex gap-2" disabled={loginMutation.isPending}>
+              {loginMutation.isPending && (
+                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
+              )}
+              <span>Login</span>
             </Button>
           </form>
 
           <div className="text-center text-sm">
-            ¿No tienes una cuenta?{" "}
+            Don't have an account?{" "}
             <Link to="/register" className="underline">
-              Registrate
+              Sign up
             </Link>
           </div>
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
-      {loading && (
-        <div className="text-center flex justify-center items-center">
-          <p className="text-red-500 text-4xl">Loading SLDKFNSDLFNLSAFNSKFNSDLFN...</p>
-        </div>
-      )}
-      <img
-      src="https://helpfadu.com.ar/static/PORTADA.png"
-        alt="Image"
-      className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-      onLoad={handleImageLoad}
-      />
+        <img src={Logo} alt="Login image" />
       </div>
     </div>
   );

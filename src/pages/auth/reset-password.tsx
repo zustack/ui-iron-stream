@@ -12,10 +12,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { PasswordInput } from "@/components/ui/password-input";
 import { useAuthStore } from "@/store/auth";
 import { useMutation } from "@tanstack/react-query";
-import { requestEmailTokenResetPassword, resendEmail, updatePassword, verifyAccount } from "@/api/users";
+import {
+  requestEmailTokenResetPassword,
+  resendEmail,
+  updatePassword,
+  verifyAccount,
+} from "@/api/users";
 import { ErrorResponse } from "@/types";
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
+import Logo from "../../assets/logo.png";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -27,43 +33,37 @@ export default function ResetPassword() {
   const { setAuthState } = useAuthStore();
   const navigate = useNavigate();
 
-  // resend email mutation
   const resendEmailMutation = useMutation({
     mutationFn: () => requestEmailTokenResetPassword(email),
     onSuccess: () => {
-      toast.success("Te enviamos un codigo a " + email);
       setStep(2);
     },
     onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
-  // verify email token mutation
   const verifyEmailMutation = useMutation({
     mutationFn: () => verifyAccount(email, Number(emailToken)),
     onSuccess: (response) => {
       setAuthState(
         response.token,
-        response.user_id,
-        response.is_admin,
-        response.exp
+        response.userId,
+        response.isAdmin,
+        response.exp,
+        response.fullName
       );
       setStep(3);
-      // navigate("/home");
     },
     onError: (error: ErrorResponse) => {
-      if (error.response.data.error === "") {
-        toast.error("Ocurrio un error inesperado");
-      }
-      toast.error(error.response.data.error);
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
-  // update password
   const updatePasswordMutation = useMutation({
     mutationFn: () => updatePassword(password),
     onSuccess: () => {
@@ -80,7 +80,7 @@ export default function ResetPassword() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
+      toast.error("Passwords do not match");
       return;
     }
     updatePasswordMutation.mutate();
@@ -92,17 +92,16 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h1 className="text-3xl font-bold mb-6">Cambia tu contraseña</h1>
+              <h1 className="text-3xl font-bold mb-6">Update your password</h1>
               <p className="text-balance text-muted-foreground mb-4">
-                Ingresa tu nueva contraseña.
+                Create your new password.
               </p>
             </div>
             <form onSubmit={handleSubmit} className="grid gap-4">
               <div className="grid gap-2 mb-4">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Contraseña</Label>
+                  <Label htmlFor="password">New password</Label>
                 </div>
-
                 <PasswordInput
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -114,7 +113,7 @@ export default function ResetPassword() {
 
               <div className="grid gap-2 mb-4">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Confirmar contraseña</Label>
+                  <Label htmlFor="password">Confirm your new password</Label>
                 </div>
                 <PasswordInput
                   required
@@ -129,17 +128,13 @@ export default function ResetPassword() {
                 type="submit"
                 className="bg-indigo-400 text-black font-semibold hover:bg-indigo-500"
               >
-                Cambiar contraseña
+                Update password
               </Button>
             </form>
           </div>
         </div>
         <div className="hidden bg-muted lg:block">
-          <img
-            src="https://kive.ai/assets/login-41fe131e.webp"
-            alt="Image"
-            className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          />
+          <img src={Logo} alt="Login image" />
         </div>
       </div>
     );
@@ -151,10 +146,10 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h1 className="text-3xl font-bold mb-6">Recuperar contraseña</h1>
+              <h1 className="text-3xl font-bold mb-6">Recover your account</h1>
               <p className="text-balance text-muted-foreground mb-4">
-                Ingresa el código enviado a{" "}
-                <span className="text-zinc-100 font-semibold">{email}</span>
+                Enter the code sent to{" "}
+                <span className="text-zinc-100 font-semibold">{email}</span>.
               </p>
             </div>
 
@@ -190,26 +185,22 @@ export default function ResetPassword() {
             </form>
 
             <div className="text-center text-sm">
-              ¿No recibiste el código?{" "}
+              Did not receive the email?{" "}
               <Link to="/login" className="underline">
-                Volver a enviar
+                Send again
               </Link>
             </div>
 
             <div className="text-center text-sm">
-              ¿Correo electrónico incorrecto?{" "}
+              Wrong email?
               <Link to="/register" className="underline">
-                Cambialo
+                Change it
               </Link>
             </div>
           </div>
         </div>
         <div className="hidden bg-muted lg:block">
-          <img
-            src="https://kive.ai/assets/login-41fe131e.webp"
-            alt="Image"
-            className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          />
+          <img src={Logo} alt="Login image" />
         </div>
       </div>
     );
@@ -221,9 +212,9 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h1 className="text-3xl font-bold mb-6">Recuperar contraseña</h1>
+              <h1 className="text-3xl font-bold mb-6">Recover your account</h1>
               <p className="text-balance text-muted-foreground mb-4">
-                Ingresa tu correo electrónico para recuperar tu cuenta.
+                Enter your email address to recover your account.
               </p>
             </div>
 
@@ -235,36 +226,31 @@ export default function ResetPassword() {
               className="grid gap-4"
             >
               <div className="grid gap-2 mb-4">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   id="email"
                   type="email"
-                  placeholder="ejemplo@gmail.com"
+                  placeholder="Your email address"
                   required
                 />
               </div>
               <Button
-                className=""
                 type="submit"
+                className="flex gap-2"
                 disabled={resendEmailMutation.isPending}
               >
-                {resendEmailMutation.isPending ? (
-                  <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
-                ) : (
-                  <span>Enviar código</span>
+                {resendEmailMutation.isPending && (
+                  <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
                 )}
+                <span>Next step</span>
               </Button>
             </form>
           </div>
         </div>
         <div className="hidden bg-muted lg:block">
-          <img
-            src="https://kive.ai/assets/login-41fe131e.webp"
-            alt="Image"
-            className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          />
+          <img src={Logo} alt="Login image" />
         </div>
       </div>
     );

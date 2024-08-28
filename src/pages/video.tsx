@@ -43,7 +43,7 @@ export default function Video() {
     queryFn: () => getForbiddenApps(),
   });
 
-    console.log(data)
+  console.log(data);
 
   async function killApps(apps: App[]) {
     setLoading(true);
@@ -250,13 +250,11 @@ export default function Video() {
           </div>
         )}
 
-        <div style={{ display: isFetching ? "none" : "block" }}>
-          <video 
-          id="video"
-          ref={videoRef} autoPlay={true} />
+        <div style={{ display: isFetching || isLoading ? "none" : "block" }}>
+          <video id="video" ref={videoRef} autoPlay={true} />
           <div className="flex justify-between mt-2">
             <h1 className="text-zinc-200 text-2xl font-semibold">
-              {currentVideo && currentVideo.video.title}
+              {currentVideo?.video.title}
             </h1>
             <Button variant="outline" className="flex gap-1" size={"sm"}>
               <File className="h-4 w-4" />
@@ -264,41 +262,41 @@ export default function Video() {
             </Button>
           </div>
           <p className="text-zinc-400 mt-2">
-            {currentVideo && currentVideo.video.description}
+            {currentVideo?.video.description}
           </p>
         </div>
 
-        {foundApps && foundApps.length > 0 && (
-            <AlertDialog open={foundApps && foundApps.length > 0}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    The following apps are open
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                  <p>To continue watching the video, you need to close the applications</p>
-                    {foundApps.map((app: any) => (
-                      <div className="pt-2" key={app.id}>
-                        <li
-                          className="font-semibold">{app.name}</li>
-                      </div>
-                    ))}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <Button 
+        {foundApps?.length > 0 && (
+          <AlertDialog open={foundApps?.length > 0}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>The following apps are open</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <p>
+                    To continue watching the video, you need to close the
+                    applications
+                  </p>
+                  {foundApps.map((app: any) => (
+                    <div className="pt-2" key={app.id}>
+                      <li className="font-semibold">{app.name}</li>
+                    </div>
+                  ))}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <Button
                   className="flex gap-1 w-[100px]"
                   disabled={loading}
-                  onClick={() => killApps(foundApps)}>
-
+                  onClick={() => killApps(foundApps)}
+                >
                   {loading && (
                     <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
                   )}
-                    Kill apps
-                  </Button>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                  Close apps
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
 
@@ -321,69 +319,67 @@ export default function Video() {
           <div className="bg-zinc-900 rounded-[0.75rem] h-full">
             {isErrorVideos && <span>Something went wrong</span>}
 
-            {videos == null && debouncedSearchTerm != "" && (
-              <span>No results found for "{debouncedSearchTerm}"</span>
+            {videos == null && searchInput != "" && !isLoadingVideos && (
+              <span className="flex justify-center items-center pt-[10px] text-zinc-400">
+                No results found for "{debouncedSearchTerm}"
+              </span>
             )}
 
-            {(isLoadingVideos || isLoadingCurrentVideo || isLoading) ? (
+            {isLoadingVideos || isLoadingCurrentVideo || isLoading ? (
               <div className="h-[100px] flex justify-center items-center">
                 <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
               </div>
             ) : (
               <>
-              {videos?.map((v: any) => (
-                    <div
-                      onClick={() => {
-                        newVideoMutation.mutate(String(v.id));
-                        setCurrentVideoId(v.id);
-                      }}
-                      id={v.id}
-                      className={`${
-                        (currentVideoId === 0 &&
-                          v.id === (currentVideo && currentVideo.video.id)) ||
-                        v.id === currentVideoId
-                          ? "bg-zinc-800"
-                          : ""
-                      }
+                {videos?.map((v: any) => (
+                  <div
+                    onClick={() => {
+                      newVideoMutation.mutate(String(v.id));
+                      setCurrentVideoId(v.id);
+                    }}
+                    id={v.id}
+                    className={`${
+                      (currentVideoId === 0 &&
+                        v.id === (currentVideo && currentVideo.video.id)) ||
+                      v.id === currentVideoId
+                        ? "bg-zinc-800"
+                        : ""
+                    }
   mb-2 p-1 hover:bg-zinc-800 rounded-[0.75rem] cursor-pointer 
   transition-colors duration-200 border-indigo-600
 `}
-                    >
-                      <div className="relative">
-                        <div
-                          className="
+                  >
+                    <div className="relative">
+                      <div
+                        className="
                       relative overflow-hidden rounded-[0.75rem]"
-                        >
-                          <img
-                            src={`${import.meta.env.VITE_BACKEND_URL}${v.thumbnail}`}
-                            alt=""
-                            className="w-full"
-                          />
-                          <div
-                            style={{ width: `${v.video_resume}%` }}
-                            className={`absolute 
+                      >
+                        <img
+                          src={`${import.meta.env.VITE_BACKEND_URL}${v.thumbnail}`}
+                          alt=""
+                          className="w-full"
+                        />
+                        <div
+                          style={{ width: `${v.video_resume}%` }}
+                          className={`absolute 
                     bottom-0 left-0 
                     h-[6px] bg-indigo-600 rounded-b-[0.75rem]`}
-                          ></div>
-                        </div>
-                      </div>
-                      <div className="flex-col mx-2">
-                        <h4 className="font-semibold mt-2">{v.title}</h4>
-                        <p className="text-sm text-zinc-200 mt-2">
-                          {v.description}
-                        </p>
-                        <div className="flex gap-2 mt-2">
-                          <p className="text-sm text-zinc-400">
-                            {v.duration} minutes
-                          </p>
-                          <p className="text-sm text-zinc-400">•</p>
-                          <p className="text-sm text-zinc-400">
-                            {v.views} views
-                          </p>
-                        </div>
+                        ></div>
                       </div>
                     </div>
-                  ))}
+                    <div className="flex-col mx-2">
+                      <h4 className="font-semibold mt-2">{v.title}</h4>
+                      <p className="text-sm text-zinc-200 mt-2">
+                        {v.description}
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        <p className="text-sm text-zinc-400">{v.duration}</p>
+                        <p className="text-sm text-zinc-400">•</p>
+                        <p className="text-sm text-zinc-400">{v.views} views</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </>
             )}
           </div>
