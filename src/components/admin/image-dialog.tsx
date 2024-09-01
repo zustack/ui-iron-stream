@@ -28,9 +28,7 @@ export default function ImageDialog({
       <AlertDialogContent className="max-w-5xl">
         <AlertDialogHeader>
           <AlertDialogTitle>Image for the course {title}.</AlertDialogTitle>
-          <AlertDialogDescription>
             <img className="rounded-[0.15rem]" src={src} />
-          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cerrar</AlertDialogCancel>

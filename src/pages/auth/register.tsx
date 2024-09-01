@@ -3,10 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PasswordInput } from "@/components/ui/password-input";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -21,7 +20,7 @@ import { platform } from "@tauri-apps/api/os";
 import toast from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
 import { ErrorResponse } from "@/types";
-import { register } from "@/api/users";
+import { signUp } from "@/api/users";
 import EmailVerification from "@/components/auth/email-verfication";
 import { Loader } from "lucide-react";
 import Logo from "../../assets/logo.png";
@@ -81,8 +80,8 @@ export default function Register() {
     getSerialNumber();
   }, []);
 
-  const registerMutation = useMutation({
-    mutationFn: () => register(email, name, surname, password, pc, os),
+  const signUpMutation = useMutation({
+    mutationFn: () => signUp(email, name, surname, password, pc, os),
     onSuccess: () => {
       setSuccess(true);
     },
@@ -99,7 +98,7 @@ export default function Register() {
       toast.error("Passwords do not match");
       return;
     }
-    registerMutation.mutate();
+    signUpMutation.mutate();
   };
 
   if (success) {
@@ -240,8 +239,8 @@ export default function Register() {
             </div>
             <Button 
             type="submit"
-            className="flex gap-2" disabled={registerMutation.isPending}>
-              {registerMutation.isPending && (
+            className="flex gap-2" disabled={signUpMutation.isPending}>
+              {signUpMutation.isPending && (
                 <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
               )}
               <span>Create account</span>

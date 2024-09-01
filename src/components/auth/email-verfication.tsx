@@ -9,7 +9,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { ErrorResponse } from "@/types";
 import {
-  deleteAccountAtRegister,
+  deleteAccountByEmail,
   resendEmail,
   verifyAccount,
 } from "@/api/users";
@@ -61,10 +61,8 @@ export default function EmailVerification({
     },
   });
 
-  // 2 mutation: send new code to email()
-  // 3 mutation: datos incorrectos, eliminar el usuario creado y volver a register
-  const deleteAccountAtRegisterMutation = useMutation({
-    mutationFn: () => deleteAccountAtRegister(email),
+  const deleteAccountByEmailMutation = useMutation({
+    mutationFn: () => deleteAccountByEmail(email),
     onSuccess: () => {
       close();
     },
@@ -141,11 +139,11 @@ export default function EmailVerification({
           <div className="flex justify-center gap-1 text-center text-sm">
             <p>Discard account and</p>
 
-            {deleteAccountAtRegisterMutation.isPending ? (
+            {deleteAccountByEmailMutation.isPending ? (
               <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
             ) : (
               <p
-                onClick={() => deleteAccountAtRegisterMutation.mutate()}
+                onClick={() => deleteAccountByEmailMutation.mutate()}
                 className="underline cursor-pointer"
               >
               create a new one

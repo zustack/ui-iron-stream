@@ -24,6 +24,7 @@ import {
 import LoadImage from "@/components/load-image";
 import { WebviewWindow } from "@tauri-apps/api/window";
 import toast from "react-hot-toast";
+import { ErrorResponse } from "@/types";
 
 type App = {
   name: string;
@@ -45,8 +46,6 @@ export default function Video() {
     queryKey: ["fobidden-apps"],
     queryFn: () => getForbiddenApps(),
   });
-
-  console.log(data);
 
   async function killApps(apps: App[]) {
     setLoading(true);
@@ -186,11 +185,12 @@ export default function Video() {
       await queryClient.invalidateQueries({ queryKey: ["current-video"] });
       await queryClient.invalidateQueries({ queryKey: ["videos"] });
     },
-    onError: (response) => {
-      //@ts-ignore
-      toast.error(response.response.data.error);
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
-  });
+  });  
 
   const openFiles = async (videoId: number, videoTitle: string) => {
     try {

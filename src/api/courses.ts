@@ -28,52 +28,6 @@ export const sortCourses = async (
   return response.data;
 };
 
-export const updateCourse = async ({
-  id,
-  sort_order,
-  title,
-  description,
-  author,
-  duration,
-  is_active,
-  thumbnail,
-  old_thumbnail,
-  preview_tmp,
-  old_video,
-  isVideo,
-}: {
-  id: number;
-  sort_order: number;
-  title: string;
-  description: string;
-  author: string;
-  duration: string;
-  is_active: boolean;
-  thumbnail: File | undefined;
-  old_thumbnail: string;
-  preview_tmp: string;
-  old_video: string;
-  isVideo: boolean;
-}) => {
-  const formData = new FormData();
-  formData.append("id", id.toString());
-  formData.append("sortOrder", sort_order.toString());
-  formData.append("title", title);
-  formData.append("description", description);
-  formData.append("author", author);
-  formData.append("duration", duration);
-  formData.append("is_active", is_active.toString());
-  formData.append("thumbnail", thumbnail || "");
-  formData.append("old_thumbnail", old_thumbnail);
-  formData.append("preview_tmp", preview_tmp);
-  formData.append("old_video", old_video);
-  formData.append("isVideo", isVideo.toString());
-  const response = await authAxios.put("/courses/update", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return response.data;
-};
-
 export const getSoloCourse = async (id: number) => {
   const response = await authAxios.get(`/courses/solo/${id}`);
   return response.data;
@@ -83,6 +37,48 @@ export const deleteCourse = async (id: number) => {
   const response = await authAxios.delete(`/courses/delete/${id}`);
   return response.data;
 };
+
+
+export const updateCourse = async ({
+  id,
+  title,
+  description,
+  author,
+  duration,
+  is_active,
+  thumbnail,
+  old_thumbnail,
+  preview_tmp,
+  old_preview,
+}: {
+  id: number;
+  title: string;
+  description: string;
+  author: string;
+  duration: string;
+  is_active: boolean;
+  thumbnail: File | undefined;
+  old_thumbnail: string;
+  preview_tmp: string;
+  old_preview: string;
+}) => {
+  const formData = new FormData();
+  formData.append("id", id.toString());
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("author", author);
+  formData.append("duration", duration);
+  formData.append("is_active", is_active.toString());
+  formData.append("thumbnail", thumbnail || "");
+  formData.append("old_thumbnail", old_thumbnail);
+  formData.append("preview_tmp", preview_tmp);
+  formData.append("old_preview", old_preview);
+  const response = await authAxios.put("/courses/update", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
 
 export const createCourse = async ({
   title,

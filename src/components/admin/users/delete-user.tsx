@@ -1,4 +1,4 @@
-import { deleteAccountAtRegister } from "@/api/users";
+import { deleteAccountByEmail } from "@/api/users";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -27,7 +27,7 @@ export default function DeleteUser({ email, name, surname }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   const deleteUserMutation = useMutation({
-    mutationFn: (email: string) => deleteAccountAtRegister(email),
+    mutationFn: (email: string) => deleteAccountByEmail(email),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setIsOpen(false);

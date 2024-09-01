@@ -34,7 +34,6 @@ export default function UpdateCourse({ course }: { course: Course }) {
   const [sortOrder, setSortOrder] = useState("");
   const [video, setVideo] = useState<File>();
   const [oldVideo, setOldVideo] = useState("");
-  const [isVideo, setIsVideo] = useState(false);
   const queryClient = useQueryClient();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const videoRef = React.useRef<HTMLInputElement>(null);
@@ -48,9 +47,6 @@ export default function UpdateCourse({ course }: { course: Course }) {
     setActive(course.is_active);
     setOldThumbnail(course.thumbnail);
     setOldVideo(course.preview);
-    if (course.preview) {
-      setIsVideo(true);
-    }
   }, [course]);
 
   const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -64,13 +60,11 @@ export default function UpdateCourse({ course }: { course: Course }) {
     const file = event.target.files && event.target.files[0];
     if (file) {
       setVideo(file);
-      setIsVideo(true);
     }
   };
 
   type CourseData = {
     id: number;
-    sort_order: number;
     title: string;
     description: string;
     author: string;
@@ -79,8 +73,7 @@ export default function UpdateCourse({ course }: { course: Course }) {
     thumbnail: File | undefined;
     old_thumbnail: string;
     preview_tmp: string;
-    old_video: string;
-    isVideo: boolean;
+    old_preview: string;
   };
 
   const updateCourseMutation = useMutation({
@@ -116,7 +109,6 @@ export default function UpdateCourse({ course }: { course: Course }) {
     onSuccess: (response) => {
       updateCourseMutation.mutate({
         id: course.id,
-        sort_order: Number(sortOrder),
         title,
         description,
         author,
@@ -124,9 +116,8 @@ export default function UpdateCourse({ course }: { course: Course }) {
         is_active: active,
         thumbnail,
         old_thumbnail: oldThumbnail,
-        old_video: oldVideo,
+        old_preview: oldVideo,
         preview_tmp: response,
-        isVideo,
       });
     },
     onError: (error: ErrorResponse) => {
@@ -143,7 +134,6 @@ export default function UpdateCourse({ course }: { course: Course }) {
     } else {
       updateCourseMutation.mutate({
         id: course.id,
-        sort_order: Number(sortOrder),
         title,
         description,
         author,
@@ -151,9 +141,8 @@ export default function UpdateCourse({ course }: { course: Course }) {
         is_active: active,
         thumbnail,
         old_thumbnail: oldThumbnail,
-        old_video: oldVideo,
+        old_preview: oldVideo,
         preview_tmp: "",
-        isVideo,
       });
     }
   }

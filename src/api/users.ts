@@ -1,49 +1,32 @@
 import { authAxios, noAuthAxios } from "@/lib/axiosInstances";
 import { SearchParam, UserResponse } from "@/types";
 
-export const updateAdminStatus = async (
+export const updateAdminStatus = async (userId: number, isAdmin: boolean) => {
+  const response = await authAxios.put(
+    `/users/update/admin/status/${userId}/${isAdmin}`
+  );
+  return response.data;
+};
+
+export const updateSpecialAppUser = async (
   userId: number,
-  isAdmin: boolean
+  specialApps: boolean
 ) => {
-  const response = await authAxios.put(`/users/update/admin/status/${userId}/${isAdmin}`);
+  const response = await authAxios.put(
+    `/users/update/special/apps/user/${userId}/${specialApps}`
+  );
   return response.data;
 };
 
-export const makeSpecialAppUser = async (
-  user_id: number,
-  special_apps: boolean
-) => {
-  const response = await authAxios.put(`/make/special/apps/user/${user_id}/${special_apps}`);
+export const updateActiveStatusAllUser = async (active: boolean) => {
+  const response = await authAxios.put(`/users/update/all/active/status/${active}`);
   return response.data;
 };
 
-export const deactivateCourseForAllUsers = async(id:number) => {
-  const response = await authAxios.put(`/deactivate/course/for/all/users/${id}`);
-  return response.data;
-}
-
-export const deactivateAllCourses = async() => {
-  const response = await authAxios.put("/deactivate/all/courses");
-  return response.data;
-}
-
-export const updateActiveStatusAllUser = async(isActive: boolean) => {
-  // Podria mandar la param en la url
-  const formData = new FormData();
-  formData.append("isActive", isActive.toString());
-  const response = await authAxios.put("/update/active/status", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return response.data;
-}
-
-export const updateActiveStatus = async (
-  user_id: number,
-) => {
-  const response = await authAxios.put(`/update/active/status/${user_id}`);
+export const updateActiveStatus = async (userId: number) => {
+  const response = await authAxios.put(`/users/update/active/status/${userId}`);
   return response.data;
 };
-
 
 export const adminUsers = async ({
   pageParam = 0,
@@ -51,7 +34,7 @@ export const adminUsers = async ({
   active,
   admin,
   special,
-  verified
+  verified,
 }: SearchParam): Promise<UserResponse> => {
   const response = await authAxios.get<UserResponse>(
     `/users/admin?cursor=${pageParam}&q=${searchParam}&a=${active}&admin=${admin}&special=${special}&verified=${verified}`
@@ -59,87 +42,57 @@ export const adminUsers = async ({
   return response.data;
 };
 
-export const requestEmailTokenResetPassword = async (
-  email: string,
-) => {
-  const response = await noAuthAxios.put("request/email/token/reset/password", {
-    email,
-  });
-  return response.data;
-};
-
-
-export const updatePassword = async (
-  password: string,
-) => {
-  const response = await authAxios.put("/update/password", {
+export const updatePassword = async (password: string) => {
+  const response = await authAxios.put("/users/update/password", {
     password,
   });
   return response.data;
 };
 
+export const deleteAccountByEmail = async (email: string) => {
+  const response = await noAuthAxios.post(
+    `/users/delete/account/by/email/${email}`
+  );
+  return response.data;
+};
 
-export const deleteAccountAtRegister = async (
-  email: string,
-) => {
-  const response = await noAuthAxios.post("/delete/account/at/register", {
+export const resendEmail = async (email: string) => {
+  const response = await noAuthAxios.post(`/users/resend/email/token/${email}`);
+  return response.data;
+};
+
+export const verifyAccount = async (email: string, emailToken: number) => {
+  const response = await noAuthAxios.post("/users/verify", {
     email,
+    email_token: emailToken,
   });
   return response.data;
 };
 
-
-export const resendEmail = async (
-  email: string,
-) => {
-  const response = await noAuthAxios.post("/resend/email/token", {
-    email,
-  });
-  return response.data;
-};
-
-
-export const verifyAccount = async (
-  email: string,
-  emailToken: number
-) => {
-  const response = await noAuthAxios.post("/verify", {
-    email,
-    email_token: emailToken
-  });
-  return response.data;
-};
-
-
-export const register = async (
+export const signUp = async (
   email: string,
   name: string,
   surname: string,
   password: string,
   pc: string,
-  os: string,
+  os: string
 ) => {
-  const response = await noAuthAxios.post("/register", {
+  const response = await noAuthAxios.post("/users/signup", {
     email,
     name,
     surname,
     password,
     pc,
-    os
+    os,
   });
   return response.data;
 };
 
-export const login = async (
-  email: string,
-  password: string,
-  pc: string
-) => {
-  const response = await noAuthAxios.post("/login", {
+export const login = async (email: string, password: string, pc: string) => {
+  const response = await noAuthAxios.post("/users/login", {
     email,
     password,
-    pc
+    pc,
   });
   return response.data;
 };
-

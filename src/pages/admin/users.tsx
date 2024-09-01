@@ -31,7 +31,7 @@ import toast from "react-hot-toast";
 import { ErrorResponse, User } from "@/types";
 import {
   adminUsers,
-  makeSpecialAppUser,
+  updateSpecialAppUser,
   updateActiveStatus,
   updateAdminStatus,
 } from "@/api/users";
@@ -111,14 +111,14 @@ export default function AdminUsers() {
     },
   });
 
-  const makeSpecialAppUserMutation = useMutation({
+  const updateSpecialAppUserMutation = useMutation({
     mutationFn: ({
       userId,
       specialApp,
     }: {
       userId: number;
       specialApp: boolean;
-    }) => makeSpecialAppUser(userId, specialApp),
+    }) => updateSpecialAppUser(userId, specialApp),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
@@ -170,17 +170,16 @@ export default function AdminUsers() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-
           <p className="text-sm text-muted-foreground">
             {data?.pages[0].data === null ? (
-                <span>No users found.</span>
+              <span>No users found.</span>
             ) : (
-            <span>
-              {data?.pages[0].totalCount}{" "}
-              {data?.pages[0].totalCount === 1
-                ? " user found."
-                : " users found."}
-            </span>
+              <span>
+                {data?.pages[0].totalCount}{" "}
+                {data?.pages[0].totalCount === 1
+                  ? " user found."
+                  : " users found."}
+              </span>
             )}
           </p>
 
@@ -432,12 +431,12 @@ export default function AdminUsers() {
 
                       <TableCell className="flex items-center gap-1">
                         {activeId === user.id &&
-                        makeSpecialAppUserMutation.isPending ? (
+                        updateSpecialAppUserMutation.isPending ? (
                           <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
                         ) : (
                           <Checkbox
                             onClick={() => {
-                              makeSpecialAppUserMutation.mutate({
+                              updateSpecialAppUserMutation.mutate({
                                 userId: user.id,
                                 specialApp: !user.special_apps,
                               });
