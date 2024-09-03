@@ -99,7 +99,7 @@ export default function UserApps({ userId, email, name, surname }: Props) {
             <ScrollArea className="h-[300px]">
               <Table className="p-1">
                 <TableCaption>
-                  {data && data.data.length === 0 && (
+                  {data?.length === 0 && (
                     <div className="text-center text-zinc-400">
                       No results found.
                     </div>
@@ -125,8 +125,7 @@ export default function UserApps({ userId, email, name, surname }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-              {data &&
-                data.data.map((app: any) => (
+                {data?.map((app: any) => (
                   <TableRow>
                     <TableCell>
                     {app.id === activeUpdateId &&
@@ -135,7 +134,7 @@ export default function UserApps({ userId, email, name, surname }: Props) {
                       <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
                     ) : (
                       <Checkbox
-                        checked={app.exists}
+                        checked={app.is_user_enrolled}
                         onClick={() => {
                           setActiveUpdateId(app.id);
                           if (app.exists) {

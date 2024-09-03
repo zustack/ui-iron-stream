@@ -9,8 +9,6 @@ import { plyrOptions } from "@/lib/plyr-options";
 export default function Preview() {
   const { courseId } = useParams()
 
-  // get course by id
-
   const {
     data,
     isLoading,
@@ -24,7 +22,6 @@ export default function Preview() {
 
   useEffect(() => {
     if (data) {
-
 
     let videoSrc = `${import.meta.env.VITE_BACKEND_URL}${data.preview}`;
     const video = document.getElementById("video") as HTMLMediaElement;

@@ -5,6 +5,12 @@ export const getForbiddenApps = async () => {
   return response.data;
 };
 
+export const updateExecuteAlways = async (id: number, execute_always: boolean) => {
+  const response = await authAxios.put(
+    `/apps/update/ea/${id}/${execute_always}`
+  );
+  return response.data;
+};
 
 export const updateAppStatus = async (id: number, is_active: boolean) => {
   const response = await authAxios.put(
@@ -34,13 +40,15 @@ export const updateApp = async (
   id: number,
   name: string,
   process_name: string,
-  is_active: boolean
+  is_active: boolean,
+  execute_always: boolean
 ) => {
   const response = await authAxios.put("/apps/update", {
     id,
     name,
     process_name,
     is_active,
+    execute_always,
   });
   return response.data;
 };
@@ -53,12 +61,14 @@ export const deleteApp = async (id: number) => {
 export const createApp = async (
   name: string,
   process_name: string,
-  is_active: boolean
+  is_active: boolean,
+  execute_always: boolean
 ) => {
   const response = await authAxios.post("/apps/create", {
     name,
     process_name,
     is_active,
+    execute_always,
   });
   return response.data;
 };

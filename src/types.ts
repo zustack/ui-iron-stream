@@ -16,6 +16,7 @@ export type App = {
   name: string
   process_name: string
   is_active: boolean
+  execute_always: boolean
   created_at: string
 }
 
@@ -62,7 +63,7 @@ export type Course = {
   duration: string;
   is_active: boolean;
   sort_order: number;
-  allowed: boolean;
+  is_user_enrolled: boolean;
   created_at: string;
 };
 

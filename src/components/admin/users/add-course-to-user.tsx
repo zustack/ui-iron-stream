@@ -15,7 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader, Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import toast from "react-hot-toast";
-import { ErrorResponse } from "@/types";
+import { Course, ErrorResponse } from "@/types";
 import {
   createUserCourse,
   deleteUserCoursesByCourseIdAndUserId,
@@ -103,7 +103,7 @@ export default function AddCouseToUser({
             <ScrollArea className="h-[300px]">
               <Table className="p-1">
                 <TableCaption>
-                  {data && data.data.length === 0 && (
+                  {data?.length === 0 && (
                     <div className="text-center text-zinc-400">
                       No results found.
                     </div>
@@ -128,8 +128,7 @@ export default function AddCouseToUser({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data &&
-                    data.data.map((course: any) => (
+                {data?.map((course: Course) => (
                       <TableRow>
                         <TableCell>
                           {course.id === activeUpdateId &&
@@ -138,10 +137,10 @@ export default function AddCouseToUser({
                             <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
                           ) : (
                             <Checkbox
-                              checked={course.allowed}
+                              checked={course.is_user_enrolled}
                               onClick={() => {
                                 setActiveUpdateId(course.id);
-                                if (course.allowed) {
+                                if (course.is_user_enrolled) {
                                   deleteUserCoursesByCourseIdAndUserIdMutation.mutate(
                                     {
                                       userId: userId,

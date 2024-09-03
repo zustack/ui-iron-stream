@@ -22,18 +22,20 @@ export default function CreateApp() {
   const [name, setName] = useState("");
   const [processName, setProcessName] = useState("");
   const [active, setActive] = useState(true);
+  const [executeAlways, setExecuteAlways] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
   const createAppMutation = useMutation({
-    mutationFn: () => createApp(name, processName, active),
+    mutationFn: () => createApp(name, processName, active, executeAlways),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
       setIsOpen(false);
       setName("");
       setProcessName("");
       setActive(true);
+      setExecuteAlways(false);
     },
     onError: (error: ErrorResponse) => {
       toast.error(
@@ -98,6 +100,22 @@ export default function CreateApp() {
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
                           {active ? "Active" : "Non active"}
+                        </label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={executeAlways}
+                          onCheckedChange={(active: boolean) =>
+                            setExecuteAlways(active)
+                          }
+                          id="execute_always"
+                        />
+                        <label
+                          htmlFor="execute_always"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {executeAlways ? "Kill every time" : "Kill on close"}
                         </label>
                       </div>
                     </div>

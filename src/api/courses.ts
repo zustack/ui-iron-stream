@@ -14,8 +14,8 @@ export const adminCourses = async (searchParam: string, active: string) => {
   return response.data;
 };
 
-export const updateCourseActiveStatus = async (course_id: number) => {
-  const response = await authAxios.put(`/courses/update/active/${course_id}`);
+export const updateCourseActiveStatus = async (course_id: number, active: boolean) => {
+  const response = await authAxios.put(`/courses/update/active/${course_id}/${active}`);
   return response.data;
 };
 
@@ -37,7 +37,6 @@ export const deleteCourse = async (id: number) => {
   const response = await authAxios.delete(`/courses/delete/${id}`);
   return response.data;
 };
-
 
 export const updateCourse = async ({
   id,
@@ -78,7 +77,6 @@ export const updateCourse = async ({
   });
   return response.data;
 };
-
 
 export const createCourse = async ({
   title,

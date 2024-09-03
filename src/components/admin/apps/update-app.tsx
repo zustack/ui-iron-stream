@@ -26,6 +26,7 @@ export default function UpdateApp({ app }: { app: App }) {
   const [titleName, setTitleName] = useState("");
   const [processName, setProcessName] = useState("");
   const [active, setActive] = useState(false);
+  const [executeAlways, setExecuteAlways] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   const queryClient = useQueryClient();
@@ -35,10 +36,11 @@ export default function UpdateApp({ app }: { app: App }) {
     setTitleName(app.name);
     setProcessName(app.process_name);
     setActive(app.is_active);
+    setExecuteAlways(app.execute_always);
   }, [app]);
 
   const updateAppMutation = useMutation({
-    mutationFn: () => updateApp(app.id, name, processName, active),
+    mutationFn: () => updateApp(app.id, name, processName, active, executeAlways),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
       setIsOpen(false);
@@ -106,6 +108,22 @@ export default function UpdateApp({ app }: { app: App }) {
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
                           {active ? "Active" : "Non active"}
+                        </label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={executeAlways}
+                          onCheckedChange={(active: boolean) =>
+                            setExecuteAlways(active)
+                          }
+                          id="execute_always"
+                        />
+                        <label
+                          htmlFor="execute_always"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {executeAlways ? "Kill every time" : "Kill on close"}
                         </label>
                       </div>
                     </div>

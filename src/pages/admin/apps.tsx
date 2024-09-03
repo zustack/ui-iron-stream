@@ -23,7 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CreateApp from "@/components/admin/apps/create-app";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, ChangeEvent, useEffect } from "react";
-import { getAdminApps, updateAppStatus } from "@/api/apps";
+import { getAdminApps, updateAppStatus, updateExecuteAlways } from "@/api/apps";
 import UpdateApp from "@/components/admin/apps/update-app";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
@@ -55,6 +55,19 @@ export default function AdminApps() {
   const updateAppStatusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
       updateAppStatus(id, isActive),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
+    },
+  });
+
+  const updateAppExecuteAlwaysMutation = useMutation({
+    mutationFn: ({ id, eA }: { id: number; eA: boolean }) =>
+      updateExecuteAlways(id, eA),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
     },
@@ -171,6 +184,7 @@ export default function AdminApps() {
           <TableHeader>
             <TableRow>
               <TableHead>State</TableHead>
+              <TableHead>Execute always</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Process name</TableHead>
               <TableHead>Created</TableHead>
@@ -195,6 +209,23 @@ export default function AdminApps() {
                         setActiveAppId(app.id);
                       }}
                       checked={app.is_active}
+                    />
+                  )}
+                </TableCell>
+                <TableCell>
+                  {updateAppExecuteAlwaysMutation.isPending &&
+                  activeAppId === app.id ? (
+                    <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+                  ) : (
+                    <Checkbox
+                      onClick={() => {
+                        updateAppExecuteAlwaysMutation.mutate({
+                          id: app.id,
+                          eA: !app.execute_always,
+                        });
+                        setActiveAppId(app.id);
+                      }}
+                      checked={app.execute_always}
                     />
                   )}
                 </TableCell>

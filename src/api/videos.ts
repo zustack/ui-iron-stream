@@ -5,6 +5,7 @@ export const deleteVideo = async (id: number) => {
   return response.data;
 };
 
+// this should be in history.ts
 export const updateHistory = async (id: string, resume: string) => {
   const response = await authAxios.put("/history/update", {
     resume,
@@ -113,14 +114,14 @@ export const getCurrentVideo = async (courseID: string) => {
 };
 
 export const newVideo = async (
-  id: string,
-  video_id: string,
+  history_id: string,
+  video_id: number,
   course_id: string,
   resume: string,
   current_video_id: number
 ) => {
   const response = await authAxios.put(`history/watch`, {
-    id: id,
+    history_id: history_id,
     video_id: video_id,
     course_id: course_id,
     resume: resume,

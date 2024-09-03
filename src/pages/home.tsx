@@ -39,13 +39,16 @@ export default function Home() {
     };
   }, [searchInput]);
 
+
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setSearchInput(value);
   };
 
+
   return (
     <section className="container mx-auto mt-[10px]">
+
       <form className="ml-auto flex-1 sm:flex-initial mb-[10px] mr-4 flex justify-center">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -59,7 +62,7 @@ export default function Home() {
         </div>
       </form>
 
-      {data?.data.length === 0 && (
+      {data?.length === 0 && (
         <div className="text-center text-zinc-400">No courses found.</div>
       )}
 
@@ -74,7 +77,7 @@ export default function Home() {
           Error: {error.message}
         </div>
       )}
-      {data?.data.map((course: Course) => (
+      {data?.map((course: Course) => (
         <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-1 xl:grid-cols-2 min-h-[379px] border mb-8">
           <div className="p-1">
             <LoadImage
@@ -116,7 +119,7 @@ export default function Home() {
               </p>
             </div>
             <div className="flex gap-2 mt-auto flex-col lg:flex-row">
-              {course.allowed ? (
+              {course.is_user_enrolled ? (
                 <>
                   <Button
                     onClick={() => {

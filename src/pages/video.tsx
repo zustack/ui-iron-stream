@@ -25,6 +25,7 @@ import LoadImage from "@/components/load-image";
 import { WebviewWindow } from "@tauri-apps/api/window";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
+import { useAuthStore } from "@/store/auth";
 
 type App = {
   name: string;
@@ -41,11 +42,28 @@ export default function Video() {
   const { os } = useOsStore();
   const [foundApps, setFoundApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(false);
+  const { access } = useAuthStore();
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["fobidden-apps"],
     queryFn: () => getForbiddenApps(),
   });
+
+  async function killAppsAlways(process_name: string) {
+    if (os === "darwin") {
+        const command = new Command("kill-mac", [process_name]);
+        await command.execute();
+    }
+    if (os === "win32") {
+        const command = new Command("kill-win", [process_name]);
+        await command.execute();
+    }
+    if (os === "linux") {
+        console.log("aca es kill linux")
+        const command = new Command("kill-linux", [process_name]);
+        await command.execute();
+    }
+  }
 
   async function killApps(apps: App[]) {
     setLoading(true);
@@ -86,9 +104,13 @@ export default function Video() {
     }
     const command = new Command(commandName);
     const output = await command.execute();
-    const found = data.filter((item: App) =>
-      output.stdout.includes(item.process_name)
-    );
+    const found = data.filter((item: any) => {
+      if (item.execute_always && output.stdout.includes(item.process_name)) {
+        killAppsAlways(item.process_name);
+        return
+      }
+      return output.stdout.includes(item.process_name);
+    });
     if (found.length > 0) {
       videoRef.current?.pause();
     }
@@ -112,7 +134,7 @@ export default function Video() {
   } = useQuery({
     queryKey: ["current-video"],
     queryFn: () => getCurrentVideo(courseId || ""),
-    enabled: !!data,
+    enabled: isSuccess,
   });
 
   useEffect(() => {
@@ -130,17 +152,25 @@ export default function Video() {
       const defaultOptions: Plyr.Options = plyrOptions;
 
       if (Hls.isSupported()) {
-        const hls = new Hls();
+        const hls = new Hls({
+          xhrSetup: function (xhr) {
+            if (access) {
+              xhr.setRequestHeader("Authorization", `Bearer ${access}`);
+            }
+          },
+        });
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           new Plyr(video, defaultOptions);
+          video.currentTime = Number(currentVideo.resume);
           video.play().catch((e) => console.error("Error al reproducir:", e));
         });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = videoSrc;
         video.addEventListener("canplay", () => {
           new Plyr(video, defaultOptions);
+          video.currentTime = Number(currentVideo.resume);
           video.play().catch((e) => console.error("Error al reproducir:", e));
         });
       }
@@ -154,7 +184,7 @@ export default function Video() {
   } = useQuery({
     queryKey: ["videos", debouncedSearchTerm],
     queryFn: () => getVideosByCourseId(courseId || "", debouncedSearchTerm),
-    enabled: !!data,
+    enabled: isSuccess,
   });
 
   useEffect(() => {
@@ -173,7 +203,7 @@ export default function Video() {
   };
 
   const newVideoMutation = useMutation({
-    mutationFn: (video_id: string) =>
+    mutationFn: (video_id: number) =>
       newVideo(
         localStorage.getItem("historyId") || "",
         video_id,
@@ -190,7 +220,7 @@ export default function Video() {
         error.response?.data?.error || "An unexpected error occurred."
       );
     },
-  });  
+  });
 
   const openFiles = async (videoId: number, videoTitle: string) => {
     try {
@@ -272,11 +302,16 @@ export default function Video() {
             <h1 className="text-zinc-200 text-2xl font-semibold">
               {currentVideo?.video.title}
             </h1>
-            <Button 
-            onClick={() => openFiles(currentVideo?.video.id, currentVideo?.video.title)}
-            variant="outline" className="flex gap-1" size={"sm"}>
+            <Button
+              onClick={() =>
+                openFiles(currentVideo?.video.id, currentVideo?.video.title)
+              }
+              variant="outline"
+              className="flex gap-1"
+              size={"sm"}
+            >
               <File className="h-4 w-4" />
-                View files
+              View files
             </Button>
           </div>
           <p className="text-zinc-400 mt-2">
@@ -352,7 +387,7 @@ export default function Video() {
                 {videos?.map((v: any) => (
                   <div
                     onClick={() => {
-                      newVideoMutation.mutate(String(v.id));
+                      newVideoMutation.mutate(v.id);
                       setCurrentVideoId(v.id);
                     }}
                     id={v.id}
@@ -393,7 +428,6 @@ export default function Video() {
                         <p className="text-sm text-zinc-400">{v.duration}</p>
                         <p className="text-sm text-zinc-400">•</p>
                         <p className="text-sm text-zinc-400">{v.views} views</p>
-                        {v.id}
                       </div>
                     </div>
                   </div>

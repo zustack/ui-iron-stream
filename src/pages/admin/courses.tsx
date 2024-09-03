@@ -89,7 +89,7 @@ export default function AdminCourses() {
   });
 
   const updateCourseStatusMutation = useMutation({
-    mutationFn: (id: number) => updateCourseActiveStatus(id),
+    mutationFn: ({id, active}:{id: number, active: boolean}) => updateCourseActiveStatus(id, active),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
     },
@@ -247,7 +247,10 @@ export default function AdminCourses() {
                     <Checkbox
                       onClick={() => {
                         setActiveUpdateStatusId(course.id);
-                        updateCourseStatusMutation.mutate(course.id);
+                        updateCourseStatusMutation.mutate({
+                          id: course.id,
+                          active: !course.is_active
+                        });
                       }}
                       checked={course.is_active}
                     />
