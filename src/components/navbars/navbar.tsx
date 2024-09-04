@@ -87,7 +87,7 @@ export default function Navbar() {
                     <DropdownMenuItem
                       onClick={() => handleNavigation("/admin/courses")}
                     >
-                      Cursos
+                      Courses
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleNavigation("/admin/apps")}

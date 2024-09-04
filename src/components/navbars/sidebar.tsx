@@ -1,11 +1,20 @@
 import { useAuthStore } from "@/store/auth";
-import { AppWindow, GalleryVerticalEnd, Home as H, ListVideo, Package, Pickaxe, Star, User } from "lucide-react";
+import {
+  AppWindow,
+  GalleryVerticalEnd,
+  Home as H,
+  ListVideo,
+  Package,
+  Pickaxe,
+  Star,
+  User,
+} from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
   const location = useLocation();
-  const navigate = useNavigate()
-  const { logout } = useAuthStore()
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
 
   const getLinkClass = (path: string) => {
     return location.pathname === path
@@ -29,7 +38,7 @@ export default function Sidebar() {
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4 gap-y-2">
             <Link to="/home" className={getLinkClass("/home")}>
               <H className="h-4 w-4" />
-                Home
+              Home
             </Link>
 
             <Link to="/admin/users" className={getLinkClass("/admin/users")}>
@@ -60,7 +69,7 @@ export default function Sidebar() {
               className={getLinkClass("/admin/courses")}
             >
               <ListVideo className="h-4 w-4" />
-                Courses
+              Courses
             </Link>
 
             <Link
@@ -68,7 +77,7 @@ export default function Sidebar() {
               className={getLinkClass("/admin/historial")}
             >
               <GalleryVerticalEnd className="h-4 w-4" />
-              History 
+              History
             </Link>
           </nav>
         </div>
@@ -79,12 +88,13 @@ export default function Sidebar() {
             Configuraciones
           </Link>
 
-          <button 
-          onClick={() => {
-            navigate("/")
-            logout()
-          }}
-          className={getLinkClass("/")}>
+          <button
+            onClick={() => {
+              navigate("/");
+              logout();
+            }}
+            className={getLinkClass("/")}
+          >
             <H className="h-4 w-4" />
             Logout
           </button>

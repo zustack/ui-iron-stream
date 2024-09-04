@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { AdminRoute, PrivateRoute } from "./lib/private-routes";
 import Layout from "./components/layouts/layout";
 import AdminLayout from "./components/layouts/admin-layout";
@@ -6,7 +6,6 @@ import Landing from "./pages/landing";
 import Home from "./pages/home";
 import AdminUsers from "./pages/admin/users";
 import Login from "./pages/auth/login";
-import Register from "./pages/auth/register";
 import Video from "./pages/video";
 import ResetPassword from "./pages/auth/reset-password";
 import AdminCourses from "./pages/admin/courses";
@@ -23,6 +22,7 @@ import { updateHistory } from "./api/videos";
 import { appWindow } from "@tauri-apps/api/window";
 import Files from "./pages/files";
 import { Loader } from "lucide-react";
+import Signup from "./pages/auth/signup";
 
 function App() {
   const { setOs } = useOsStore();
@@ -58,19 +58,15 @@ function App() {
           resume: video.currentTime,
           historyId: historyId || "",
         });
-        // not authenticated or the user opens a new window aka not need to logout
       } else if (
         location.pathname === "/login" ||
         location.pathname === "/register" ||
         location.pathname === "/reset-password" ||
         location.pathname.includes("files")
-        
       ) {
         appWindow.close();
-        // authenticated aka need to logout
       } else {
         appWindow.close();
-        console.log("bye")
       }
     });
     return () => {
@@ -88,7 +84,7 @@ function App() {
         <Routes>
           <Route index element={<Landing />} />
           <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
+          <Route path="signup" element={<Signup />} />
           <Route path="reset-password" element={<ResetPassword />} />
 
           <Route element={<PrivateRoute />}>

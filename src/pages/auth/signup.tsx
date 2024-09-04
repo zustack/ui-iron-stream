@@ -25,7 +25,7 @@ import EmailVerification from "@/components/auth/email-verfication";
 import { Loader } from "lucide-react";
 import Logo from "../../assets/logo.png";
 
-export default function Register() {
+export default function Signup() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");

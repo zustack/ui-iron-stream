@@ -302,17 +302,19 @@ export default function Video() {
             <h1 className="text-zinc-200 text-2xl font-semibold">
               {currentVideo?.video.title}
             </h1>
-            <Button
+            {currentVideo?.isFile && (
+              <Button
               onClick={() =>
                 openFiles(currentVideo?.video.id, currentVideo?.video.title)
               }
               variant="outline"
               className="flex gap-1"
               size={"sm"}
-            >
+              >
               <File className="h-4 w-4" />
               View files
-            </Button>
+              </Button>
+            )}
           </div>
           <p className="text-zinc-400 mt-2">
             {currentVideo?.video.description}

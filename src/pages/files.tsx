@@ -77,7 +77,7 @@ export default function Files() {
 
         {!isLoading && data?.files == null && (
           <div className="h-[100px] flex justify-center items-center">
-            <span>No files found in page {}.</span>
+            <span>No files found in pagae.</span>
           </div>
         )}
 
@@ -87,7 +87,7 @@ export default function Files() {
           </div>
         )}
 
-        {data?.files.map((file: FileResponse) => (
+        {data?.files?.map((file: FileResponse) => (
           <div key={file.id} className="bg-white">
             <div key={file.id} className="">
               <img

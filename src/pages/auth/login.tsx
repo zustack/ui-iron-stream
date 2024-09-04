@@ -12,6 +12,7 @@ import { useAuthStore } from "@/store/auth";
 import { ErrorResponse } from "@/types";
 import Logo from "../../assets/logo.png";
 import { Loader } from "lucide-react";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -119,13 +120,12 @@ export default function Login() {
                   Forgot your password?
                 </Link>
               </div>
-              <Input
-                value={password}
+              <PasswordInput
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                id="password"
-                type="password"
+                value={password}
                 required
+                id="password"
+                placeholder="••••••••"
               />
             </div>
             <Button 
@@ -138,12 +138,12 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="text-center text-sm">
+          <p className="text-center">
             Don't have an account?{" "}
-            <Link to="/register" className="underline">
+            <Link to="/signup" className="underline">
               Sign up
             </Link>
-          </div>
+          </p>
         </div>
       </div>
       <div className="hidden bg-muted lg:block">

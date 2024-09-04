@@ -14,7 +14,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 
 export default function WindowFiles() {
@@ -71,6 +70,8 @@ export default function WindowFiles() {
       );
     },
   });
+
+  console.log(data)
 
   return (
     <div>
