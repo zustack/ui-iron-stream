@@ -7,12 +7,12 @@ import {
   Loader,
   MessageSquareMore,
   Search,
-  StarIcon,
   Video,
   Lock,
 } from "lucide-react";
 import { useEffect, useState, ChangeEvent } from "react";
 import { Course } from "@/types";
+import StarIcon from "@mui/icons-material/Star";
 import { Rating } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -39,16 +39,13 @@ export default function Home() {
     };
   }, [searchInput]);
 
-
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setSearchInput(value);
   };
 
-
   return (
     <section className="container mx-auto mt-[10px]">
-
       <form className="ml-auto flex-1 sm:flex-initial mb-[10px] mr-4 flex justify-center">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -100,16 +97,19 @@ export default function Home() {
               <div className="flex gap-2 mb-6">
                 <Rating
                   name="text-feedback"
-                  value={course.rating}
+                  value={4}
                   readOnly
                   precision={0.5}
                   size="medium"
+                  icon={
+                    <StarIcon className="text-yellow-500" fontSize="medium" />
+                  }
                   emptyIcon={
-                    <StarIcon className="text-zinc-700" fontSize="inherit" />
+                    <StarIcon className="text-zinc-500" fontSize="medium" />
                   }
                 />
                 <p>{course.rating}</p>
-                <Link to="/reviews" className="underline">
+                <Link to={`/reviews/${course.id}`} className="underline">
                   Read reviews
                 </Link>
               </div>

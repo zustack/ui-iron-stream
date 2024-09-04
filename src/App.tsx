@@ -23,6 +23,8 @@ import { appWindow } from "@tauri-apps/api/window";
 import Files from "./pages/files";
 import { Loader } from "lucide-react";
 import Signup from "./pages/auth/signup";
+import Reviews from "./pages/reviews";
+import AdminReviews from "./pages/admin/reviews";
 
 function App() {
   const { setOs } = useOsStore();
@@ -90,6 +92,7 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Layout />}>
               <Route path="home" element={<Home />} />
+              <Route path="reviews/:courseId" element={<Reviews />} />
               <Route path="video/:courseId" element={<Video />} />
               <Route path="preview/:courseId" element={<Preview />} />
             </Route>
@@ -102,6 +105,7 @@ function App() {
           <Route path="admin" element={<AdminLayout />}>
             <Route path="users" element={<AdminUsers />} />
             <Route path="courses" element={<AdminCourses />} />
+            <Route path="reviews" element={<AdminReviews />} />
             <Route
               path="videos/:courseId/:courseTitle"
               element={<AdminVideos />}

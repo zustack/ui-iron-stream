@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Roboto-Regular";
+  src: url(../assets/Roboto-Regular.ttf) format("truetype");
+}
+
 @keyframes slow-spin {
   from {
     transform: rotate(0deg);
@@ -12,7 +17,7 @@
 }
 
 .slower {
-  animation: slow-spin 2s linear infinite; 
+  animation: slow-spin 2s linear infinite;
 }
 
 @layer base {
@@ -21,17 +26,16 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif; 
+    font-family: "Roboto-Regular", sans-serif;
   }
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 @layer base {
   :root {
-
     --plyr-color-main: #0d9488;
 
     --background: 240 10% 6.9%;

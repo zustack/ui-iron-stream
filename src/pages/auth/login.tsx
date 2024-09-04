@@ -92,8 +92,10 @@ export default function Login() {
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-full max-w-sm gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold mb-6">Login</h1>
-            <p className="text-balance text-muted-foreground mb-4">
+            <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight">
+              Login
+            </h3>
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
               Login to your Iron Stream account.
             </p>
           </div>

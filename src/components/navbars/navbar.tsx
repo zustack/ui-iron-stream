@@ -94,6 +94,11 @@ export default function Navbar() {
                     >
                       Apps
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleNavigation("/admin/reviews")}
+                    >
+                      Reviews
+                    </DropdownMenuItem>
                   </>
                 )}
                 <DropdownMenuSeparator />
