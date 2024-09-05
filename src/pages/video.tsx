@@ -26,6 +26,7 @@ import { WebviewWindow } from "@tauri-apps/api/window";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { useAuthStore } from "@/store/auth";
+import { createNote, deleteNote, getNotes, updateNote } from "@/api/notes";
 
 type App = {
   name: string;
@@ -43,25 +44,39 @@ export default function Video() {
   const [foundApps, setFoundApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(false);
   const { access } = useAuthStore();
+  const [noteTime, setNoteTime] = useState(0.0);
+  const [body, setBody] = useState("");
+  const [currentNoteId, setCurrentNoteId] = useState(0);
+  const [editingNote, setEditingNote] = useState(false);
+  const [hoverNote, setHoverNote] = useState(0);
 
   const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["fobidden-apps"],
     queryFn: () => getForbiddenApps(),
   });
 
+  const {
+    data: notes,
+    isLoading: lNotes,
+    isError: eNotes,
+  } = useQuery({
+    queryKey: ["notes"],
+    queryFn: () => getNotes(courseId || ""),
+  });
+
   async function killAppsAlways(process_name: string) {
     if (os === "darwin") {
-        const command = new Command("kill-mac", [process_name]);
-        await command.execute();
+      const command = new Command("kill-mac", [process_name]);
+      await command.execute();
     }
     if (os === "win32") {
-        const command = new Command("kill-win", [process_name]);
-        await command.execute();
+      const command = new Command("kill-win", [process_name]);
+      await command.execute();
     }
     if (os === "linux") {
-        console.log("aca es kill linux")
-        const command = new Command("kill-linux", [process_name]);
-        await command.execute();
+      console.log("aca es kill linux");
+      const command = new Command("kill-linux", [process_name]);
+      await command.execute();
     }
   }
 
@@ -107,7 +122,7 @@ export default function Video() {
     const found = data.filter((item: any) => {
       if (item.execute_always && output.stdout.includes(item.process_name)) {
         killAppsAlways(item.process_name);
-        return
+        return;
       }
       return output.stdout.includes(item.process_name);
     });
@@ -222,6 +237,46 @@ export default function Video() {
     },
   });
 
+  const createNewNoteMutation = useMutation({
+    mutationFn: () =>
+      createNote(courseId || "", body, noteTime, currentVideo.video.title),
+    onSuccess: async () => {
+      setBody("");
+      await queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
+    },
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: (id: number) => deleteNote(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
+    },
+  });
+
+  const updateNoteMutation = useMutation({
+    mutationFn: (id: number) => updateNote(id, body),
+    onSuccess: async () => {
+      setBody("");
+      setCurrentNoteId(0);
+      await queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
+    },
+  });
+
   const openFiles = async (videoId: number, videoTitle: string) => {
     try {
       const webview = new WebviewWindow("Files", {
@@ -245,41 +300,113 @@ export default function Video() {
 
   return (
     <div className="lg:h-[calc(100vh-60px)] flex flex-col lg:flex-row overflow-hidden pt-[10px] px-[10px] gap-[10px] mx-auto">
-      {/* Contenedor notas */}
       <div className="flex-1 w-full lg:flex-auto xl:w-[30%]">
-        <div className=" h-[100px] flex flex-col justify-between">
+        <div className="h-[100px] flex flex-col justify-between">
           <div className="flex gap-2">
             <Textarea
+              onMouseDown={() => {
+                setNoteTime(videoRef.current?.currentTime || 0);
+              }}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
               rows={4}
               placeholder="Write a note"
               className="flex-grow"
             />
-            <Button variant="outline" className="self-end">
-              Save Note
-            </Button>
+
+            {editingNote ? (
+              <div className="flex flex-col gap-2">
+                <Button
+                  disabled={updateNoteMutation.isPending}
+                  variant="outline"
+                  className="self-end flex gap-2 w-full h-full"
+                >
+                  <span>Cancel edit</span>
+                </Button>
+                <Button
+                  onClick={() => {
+                    updateNoteMutation.mutate(currentNoteId);
+                  }}
+                  disabled={updateNoteMutation.isPending}
+                  variant="outline"
+                  className="self-end flex gap-2 w-full h-full"
+                >
+                  {updateNoteMutation.isPending && (
+                    <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
+                  )}
+                  <span>Save note</span>
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={() => {
+                  createNewNoteMutation.mutate();
+                }}
+                disabled={createNewNoteMutation.isPending}
+                variant="outline"
+                className="self-end flex gap-2 "
+              >
+                {createNewNoteMutation.isPending && (
+                  <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
+                )}
+                <span>Save note</span>
+              </Button>
+            )}
           </div>
         </div>
+
+        {lNotes && <Skeleton className="h-[660px] w-[1173px] rounded-xl" />}
+
+        {eNotes && <p>Error with notes</p>}
+
         <div className="bg-zinc-900 rounded-[0.75rem] mt-[10px] overflow-auto h-[calc(100vh-60px-100px-30px)]">
           <div className="h-full p-2">
-            <div
-              className="hover:bg-zinc-800 rounded-[0.75rem] cursor-pointer 
-  transition-colors duration-200 p-2"
-            >
-              <div className="flex justify-between">
-                <h1 className="text-zinc-200 font-semibold">Bubble Sort</h1>
-                <div className="flex gap-2">
+            {notes?.map((n: any) => (
+              <div
+                onMouseEnter={() => setHoverNote(n.id)}
+                onMouseLeave={() => setHoverNote(0)}
+                className={
+                  currentNoteId === n.id
+                    ? `bg-zinc-800 rounded-[0.75rem] cursor-pointer p-3 px-3 border-[0.5px] border-indigo-500`
+                    : `hover:bg-zinc-800 rounded-[0.75rem] cursor-pointer 
+                      transition-colors duration-200 p-3 px-3 my-1`
+                }
+              >
+                <div className="flex justify-between">
+                  <h1 className="text-zinc-200 font-semibold">
+                    {n.video_title}
+                  </h1>
+
                   <div className="flex gap-2">
-                    <Trash className="h-5 w-5 text-red-500 hover:text-red-600 cursor-pointer" />
-                    <Pencil className="h-5 w-5 text-indigo-500 hover:text-indigo-600 cursor-pointer" />
+                    {currentNoteId === n.id || hoverNote === n.id ? (
+                      <div className="flex gap-2">
+                        {deleteNoteMutation.isPending ? (
+                          <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                        ) : (
+                          <Trash
+                            onClick={() => deleteNoteMutation.mutate(n.id)}
+                            className="h-5 w-5 text-red-500 hover:text-red-600 cursor-pointer"
+                          />
+                        )}
+                        <Pencil
+                          onClick={() => {
+                            setCurrentNoteId(n.id);
+                            setBody(n.body);
+                            setEditingNote(true);
+                          }}
+                          className="h-5 w-5 text-indigo-500 hover:text-indigo-600 cursor-pointer"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-indigo-500">{n.time}</p>
+                      </>
+                    )}
                   </div>
-                  <p className="text-indigo-500">4:20</p>
                 </div>
+                <p className="text-zinc-200">{n.body}</p>
               </div>
-              <p className="text-zinc-200">
-                La tecnología ha transformado la vida cotidiana de maneras
-                inimaginables hace solo unas décadas. Desde la forma en que nos
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -304,15 +431,15 @@ export default function Video() {
             </h1>
             {currentVideo?.isFile && (
               <Button
-              onClick={() =>
-                openFiles(currentVideo?.video.id, currentVideo?.video.title)
-              }
-              variant="outline"
-              className="flex gap-1"
-              size={"sm"}
+                onClick={() =>
+                  openFiles(currentVideo?.video.id, currentVideo?.video.title)
+                }
+                variant="outline"
+                className="flex gap-1"
+                size={"sm"}
               >
-              <File className="h-4 w-4" />
-              View files
+                <File className="h-4 w-4" />
+                View files
               </Button>
             )}
           </div>
