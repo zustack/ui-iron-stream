@@ -1,20 +1,39 @@
+import { getNotifications } from "@/api/notifications";
 import { useAuthStore } from "@/store/auth";
+import { useQuery } from "@tanstack/react-query";
 import {
   AppWindow,
   GalleryVerticalEnd,
   Home as H,
   ListVideo,
-  Package,
-  Pickaxe,
+  Loader,
   Star,
   User,
 } from "lucide-react";
+import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+
+  const { data, isLoading  } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => getNotifications(),
+  });
+
+  console.log(data)
+
+  useEffect(() => {
+    if (data) {
+      const userInfo = JSON.stringify(data.info_r);
+      localStorage.setItem("user_n", userInfo);
+
+      const reviewInfo = JSON.stringify(data.info_r); // Asumí que `data.info_r` es lo que quieres almacenar para `review_n` también
+      localStorage.setItem("review_n", reviewInfo);
+    }
+  }, [data])
 
   const getLinkClass = (path: string) => {
     return location.pathname === path
@@ -41,9 +60,22 @@ export default function Sidebar() {
               Home
             </Link>
 
-            <Link to="/admin/users" className={getLinkClass("/admin/users")}>
-              <User className="h-4 w-4" />
-              Users
+            <Link
+              to="/admin/users"
+              className={getLinkClass("/admin/users")}
+            >
+              <Star className={data?.user_n > 0 ? `h-4 w-4 text-indigo-400` : `h-4 w-4`} />
+              <span className={data?.user_n > 0 ? `text-indigo-400` : ``}>
+                Users
+              </span>
+              {isLoading && (
+                <Loader className="ml-auto h-4 w-4 text-zinc-200 animate-spin slower" />
+              )}
+              {data?.user_n > 0 && (
+                <span className="ml-auto text-indigo-400">
+                  {data?.user_n}
+                </span>
+              )}
             </Link>
 
             <Link to="/admin/apps" className={getLinkClass("/admin/apps")}>
@@ -55,13 +87,18 @@ export default function Sidebar() {
               to="/admin/reviews"
               className={getLinkClass("/admin/reviews")}
             >
-              <Star className="h-4 w-4" />
-              <span className="font-semibold text-xs text-indigo-400">
+              <Star className={data?.review_n > 0 ? `h-4 w-4 text-indigo-400` : `h-4 w-4`} />
+              <span className={data?.review_n > 0 ? `text-indigo-400` : ``}>
                 Reviews
               </span>
-              <span className="ml-auto font-semibold text-xs text-indigo-400">
-                2
-              </span>
+              {isLoading && (
+                <Loader className="ml-auto h-4 w-4 text-zinc-200 animate-spin slower" />
+              )}
+              {data?.review_n > 0 && (
+                <span className="ml-auto text-indigo-400">
+                  {data?.review_n}
+                </span>
+              )}
             </Link>
 
             <Link

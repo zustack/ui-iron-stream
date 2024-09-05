@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListFilter, Loader, Search } from "lucide-react";
+import { Bell, ListFilter, Loader, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +49,7 @@ export default function AdminUsers() {
   const [adminParam, setAdminParam] = useState<number | string>("");
   const [specialParam, setSpecialParam] = useState<number | string>("");
   const [verifiedParam, setVerifiedParam] = useState<number | string>("");
+  const [isNotification, setIsNotification] = useState<any[]>([]);
 
   const queryClient = useQueryClient();
 
@@ -83,6 +84,14 @@ export default function AdminUsers() {
     getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
     initialPageParam: 0,
   });
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem("user_n");
+    if (userInfo) {
+      const parsedReviewInfo = JSON.parse(userInfo);
+      setIsNotification(parsedReviewInfo);
+    }
+  }, [setIsNotification]);
 
   const updateActiveMutation = useMutation({
     mutationFn: (user_id: number) => updateActiveStatus(user_id),
@@ -182,6 +191,18 @@ export default function AdminUsers() {
               </span>
             )}
           </p>
+
+          <Button 
+          onClick={() => {
+            localStorage.removeItem("review_n");
+            setIsNotification([]);
+          }}
+          variant="outline" size="sm" className="h-8 gap-1">
+            <Bell className="h-3.5 w-3.5" />
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+              Mark notifications as read
+            </span>
+          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -386,7 +407,13 @@ export default function AdminUsers() {
               <React.Fragment key={page.nextId}>
                 {page?.data?.map((user: User) => (
                   <>
-                    <TableRow>
+                    <TableRow
+                      className={
+                        isNotification.some((info) => info.info == user.email)
+                          ? "bg-muted/80 border"
+                          : ""
+                      }
+                    >
                       <TableCell>
                         {activeId === user.id &&
                         updateActiveMutation.isPending ? (

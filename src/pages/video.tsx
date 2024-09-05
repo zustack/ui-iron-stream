@@ -290,13 +290,14 @@ export default function Video() {
     }
   };
 
-  if (isErrorVideos || isErrorCurrentVideo || isError) {
+  if (isError) {
     return (
       <div className="text-center flex justify-center text-3xl">
         Something went wrong
       </div>
     );
   }
+  console.log();
 
   return (
     <div className="lg:h-[calc(100vh-60px)] flex flex-col lg:flex-row overflow-hidden pt-[10px] px-[10px] gap-[10px] mx-auto">
@@ -420,6 +421,12 @@ export default function Video() {
               <Skeleton className="h-4 w-[250px]" />
               <Skeleton className="h-4 w-[400px]" />
             </div>
+          </div>
+        )}
+
+        {isErrorCurrentVideo && (
+          <div className="h-[660px] w-[1173px] flex justify-center items-center rounded-xl bg-zinc-900">
+            <p>Error reproducing video</p>
           </div>
         )}
 

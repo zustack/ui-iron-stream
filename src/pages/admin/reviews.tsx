@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListFilter, Loader, Search } from "lucide-react";
+import { Bell, ListFilter, Loader, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +43,7 @@ export default function AdminReviews() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [active, setActive] = useState<string>("");
+  const [isNotification, setIsNotification] = useState<any[]>([]);
 
   const queryClient = useQueryClient();
 
@@ -63,6 +64,14 @@ export default function AdminReviews() {
       );
     },
   });
+
+  useEffect(() => {
+    const reviewInfo = localStorage.getItem("review_n");
+    if (reviewInfo) {
+      const parsedReviewInfo = JSON.parse(reviewInfo);
+      setIsNotification(parsedReviewInfo);
+    }
+  }, [setIsNotification]);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -103,6 +112,18 @@ export default function AdminReviews() {
               {data?.length === 1 ? " review found." : " reviews found."}
             </span>
           </p>
+
+          <Button 
+          onClick={() => {
+            localStorage.removeItem("review_n");
+            setIsNotification([]);
+          }}
+          variant="outline" size="sm" className="h-8 gap-1">
+            <Bell className="h-3.5 w-3.5" />
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+              Mark notifications as read
+            </span>
+          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -182,7 +203,13 @@ export default function AdminReviews() {
 
           <TableBody>
             {data?.map((r: any) => (
-              <TableRow>
+              <TableRow
+                className={
+                  isNotification.some((info) => info.info == r.id)
+                    ? "bg-muted/80 border"
+                    : ""
+                }
+              >
                 <TableCell>
                   {r.id === activeUpdateStatusId &&
                   updateReviewStatusMutation.isPending ? (
