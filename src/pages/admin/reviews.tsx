@@ -36,6 +36,7 @@ import { adminReviews, updatePublicStatus } from "@/api/reviews";
 import StarIcon from "@mui/icons-material/Star";
 import { Rating } from "@mui/material";
 import DeleteReview from "@/components/admin/delete-review";
+import { deleteNotifications } from "@/api/notifications";
 
 export default function AdminReviews() {
   const [activeUpdateStatusId, setActiveUpdateStatusId] = useState(0);
@@ -65,13 +66,27 @@ export default function AdminReviews() {
     },
   });
 
+  const deleteNsMutation = useMutation({
+    mutationFn: () => deleteNotifications(isNotification),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      localStorage.removeItem("review_n");
+      setIsNotification([]);
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
+    },
+  });
+
+  const reviewInfo = localStorage.getItem("review_n");
   useEffect(() => {
-    const reviewInfo = localStorage.getItem("review_n");
     if (reviewInfo) {
       const parsedReviewInfo = JSON.parse(reviewInfo);
       setIsNotification(parsedReviewInfo);
     }
-  }, [setIsNotification]);
+  }, [reviewInfo]);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -113,17 +128,27 @@ export default function AdminReviews() {
             </span>
           </p>
 
-          <Button 
-          onClick={() => {
-            localStorage.removeItem("review_n");
-            setIsNotification([]);
-          }}
-          variant="outline" size="sm" className="h-8 gap-1">
-            <Bell className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Mark notifications as read
-            </span>
-          </Button>
+          {isNotification != null && (
+            <Button
+              disabled={
+                isNotification?.length === 0 || deleteNsMutation.isPending
+              }
+              onClick={() => {
+                deleteNsMutation.mutate();
+              }}
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1"
+            >
+              <Bell className="h-3.5 w-3.5" />
+              {deleteNsMutation.isPending && (
+                <Loader className="h-4 w-4 animate-spin" />
+              )}
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Mark notifications as read
+              </span>
+            </Button>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -205,7 +230,7 @@ export default function AdminReviews() {
             {data?.map((r: any) => (
               <TableRow
                 className={
-                  isNotification.some((info) => info.info == r.id)
+                  isNotification?.some((info) => info.info == r.id)
                     ? "bg-muted/80 border"
                     : ""
                 }

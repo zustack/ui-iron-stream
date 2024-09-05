@@ -39,6 +39,7 @@ import AddCouseToUser from "@/components/admin/users/add-course-to-user";
 import Deactivate from "@/components/admin/users/deactivate";
 import UserApps from "@/components/admin/users/user-apps";
 import DeleteUser from "@/components/admin/users/delete-user";
+import { deleteNotifications } from "@/api/notifications";
 
 export default function AdminUsers() {
   const [searchInput, setSearchInput] = useState("");
@@ -85,13 +86,27 @@ export default function AdminUsers() {
     initialPageParam: 0,
   });
 
+  const deleteNsMutation = useMutation({
+    mutationFn: () => deleteNotifications(isNotification),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      localStorage.removeItem("review_n");
+      setIsNotification([]);
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
+    },
+  });
+
+  const userInfo = localStorage.getItem("user_n");
   useEffect(() => {
-    const userInfo = localStorage.getItem("user_n");
     if (userInfo) {
       const parsedReviewInfo = JSON.parse(userInfo);
       setIsNotification(parsedReviewInfo);
     }
-  }, [setIsNotification]);
+  }, [userInfo]);
 
   const updateActiveMutation = useMutation({
     mutationFn: (user_id: number) => updateActiveStatus(user_id),
@@ -192,17 +207,27 @@ export default function AdminUsers() {
             )}
           </p>
 
-          <Button 
-          onClick={() => {
-            localStorage.removeItem("review_n");
-            setIsNotification([]);
-          }}
-          variant="outline" size="sm" className="h-8 gap-1">
-            <Bell className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Mark notifications as read
-            </span>
-          </Button>
+          {isNotification != null && (
+            <Button
+              disabled={
+                isNotification?.length === 0 || deleteNsMutation.isPending
+              }
+              onClick={() => {
+                deleteNsMutation.mutate();
+              }}
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1"
+            >
+              <Bell className="h-3.5 w-3.5" />
+              {deleteNsMutation.isPending && (
+                <Loader className="h-4 w-4 animate-spin" />
+              )}
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Mark notifications as read
+              </span>
+            </Button>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -409,7 +434,7 @@ export default function AdminUsers() {
                   <>
                     <TableRow
                       className={
-                        isNotification.some((info) => info.info == user.email)
+                        isNotification?.some((info) => info.info == user.email)
                           ? "bg-muted/80 border"
                           : ""
                       }

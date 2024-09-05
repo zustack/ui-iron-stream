@@ -23,14 +23,12 @@ export default function Sidebar() {
     queryFn: () => getNotifications(),
   });
 
-  console.log(data)
-
   useEffect(() => {
     if (data) {
-      const userInfo = JSON.stringify(data.info_r);
+      const userInfo = JSON.stringify(data.info_u);
       localStorage.setItem("user_n", userInfo);
 
-      const reviewInfo = JSON.stringify(data.info_r); // Asumí que `data.info_r` es lo que quieres almacenar para `review_n` también
+      const reviewInfo = JSON.stringify(data.info_r); 
       localStorage.setItem("review_n", reviewInfo);
     }
   }, [data])
@@ -40,6 +38,8 @@ export default function Sidebar() {
       ? "flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
       : "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary";
   };
+
+  console.log(data)
 
   return (
     <div className="hidden bg-muted/40 md:block">
