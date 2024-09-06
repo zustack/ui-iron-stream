@@ -1,3 +1,14 @@
+import { Calendar as CalendarIcon } from "lucide-react";
+import { addDays, format } from "date-fns";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -10,7 +21,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, ListFilter, Loader, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -40,6 +50,7 @@ import Deactivate from "@/components/admin/users/deactivate";
 import UserApps from "@/components/admin/users/user-apps";
 import DeleteUser from "@/components/admin/users/delete-user";
 import { deleteNotifications } from "@/api/notifications";
+import { DateRange } from "react-day-picker";
 
 export default function AdminUsers() {
   const [searchInput, setSearchInput] = useState("");
@@ -51,6 +62,10 @@ export default function AdminUsers() {
   const [specialParam, setSpecialParam] = useState<number | string>("");
   const [verifiedParam, setVerifiedParam] = useState<number | string>("");
   const [isNotification, setIsNotification] = useState<any[]>([]);
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
 
   const queryClient = useQueryClient();
 
@@ -71,6 +86,8 @@ export default function AdminUsers() {
       adminParam,
       specialParam,
       verifiedParam,
+      date?.from,
+      date?.to
     ],
     queryFn: async ({ pageParam }) => {
       return adminUsers({
@@ -80,6 +97,8 @@ export default function AdminUsers() {
         admin: adminParam,
         special: specialParam,
         verified: verifiedParam,
+        from: String(date?.from == undefined ? "" : format(date.from, "dd/MM/yyyy")),
+        to: String(date?.to == undefined ? "" : format(date.to, "dd/MM/yyyy"))
       });
     },
     getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
@@ -206,6 +225,46 @@ export default function AdminUsers() {
               </span>
             )}
           </p>
+
+          <div className={cn("grid gap-2")}>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  size="sm"
+                  id="date"
+                  variant={"outline"}
+                  className={cn(
+                    "w-[300px] justify-start text-left h-8",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                  {date?.from ? (
+                    date.to ? (
+                      <>
+                        {format(date.from, "dd/MM/yyyy")} -{" "}
+                        {format(date.to, "dd/MM/yyyy")}
+                      </>
+                    ) : (
+                      format(date.from, "dd/MM/yyyy")
+                    )
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={date?.from}
+                  selected={date}
+                  onSelect={setDate}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
           {isNotification != null && (
             <Button

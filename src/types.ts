@@ -49,6 +49,8 @@ export type SearchParam = {
   admin: number | string;
   special: number | string;
   verified: number | string;
+  from: string;
+  to: string;
 }
 
 export type Course = {

@@ -35,9 +35,11 @@ export const adminUsers = async ({
   admin,
   special,
   verified,
+  from,
+  to,
 }: SearchParam): Promise<UserResponse> => {
   const response = await authAxios.get<UserResponse>(
-    `/users/admin?cursor=${pageParam}&q=${searchParam}&a=${active}&admin=${admin}&special=${special}&verified=${verified}`
+    `/users/admin?cursor=${pageParam}&q=${searchParam}&a=${active}&admin=${admin}&special=${special}&verified=${verified}&from=${from}&to=${to}`
   );
   return response.data;
 };
