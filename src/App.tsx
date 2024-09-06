@@ -25,6 +25,7 @@ import { Loader } from "lucide-react";
 import Signup from "./pages/auth/signup";
 import Reviews from "./pages/reviews";
 import AdminReviews from "./pages/admin/reviews";
+import AdminPolicy from "./pages/admin/policy";
 
 function App() {
   const { setOs } = useOsStore();
@@ -111,6 +112,7 @@ function App() {
               element={<AdminVideos />}
             />
             <Route path="apps" element={<AdminApps />} />
+            <Route path="policy" element={<AdminPolicy />} />
             <Route
               path="files/:courseId/:courseTitle/:videoId/:videoTitle"
               element={<WindowFiles />}

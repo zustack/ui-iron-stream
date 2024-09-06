@@ -5,6 +5,7 @@ import {
   AppWindow,
   GalleryVerticalEnd,
   Home as H,
+  Handshake,
   ListVideo,
   Loader,
   Star,
@@ -18,7 +19,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
 
-  const { data, isLoading  } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: () => getNotifications(),
   });
@@ -28,10 +29,10 @@ export default function Sidebar() {
       const userInfo = JSON.stringify(data.info_u);
       localStorage.setItem("user_n", userInfo);
 
-      const reviewInfo = JSON.stringify(data.info_r); 
+      const reviewInfo = JSON.stringify(data.info_r);
       localStorage.setItem("review_n", reviewInfo);
     }
-  }, [data])
+  }, [data]);
 
   const getLinkClass = (path: string) => {
     return location.pathname === path
@@ -39,7 +40,7 @@ export default function Sidebar() {
       : "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary";
   };
 
-  console.log(data)
+  console.log(data);
 
   return (
     <div className="hidden bg-muted/40 md:block">
@@ -60,11 +61,12 @@ export default function Sidebar() {
               Home
             </Link>
 
-            <Link
-              to="/admin/users"
-              className={getLinkClass("/admin/users")}
-            >
-              <Star className={data?.user_n > 0 ? `h-4 w-4 text-indigo-400` : `h-4 w-4`} />
+            <Link to="/admin/users" className={getLinkClass("/admin/users")}>
+              <User
+                className={
+                  data?.user_n > 0 ? `h-4 w-4 text-indigo-400` : `h-4 w-4`
+                }
+              />
               <span className={data?.user_n > 0 ? `text-indigo-400` : ``}>
                 Users
               </span>
@@ -72,9 +74,7 @@ export default function Sidebar() {
                 <Loader className="ml-auto h-4 w-4 text-zinc-200 animate-spin slower" />
               )}
               {data?.user_n > 0 && (
-                <span className="ml-auto text-indigo-400">
-                  {data?.user_n}
-                </span>
+                <span className="ml-auto text-indigo-400">{data?.user_n}</span>
               )}
             </Link>
 
@@ -87,7 +87,11 @@ export default function Sidebar() {
               to="/admin/reviews"
               className={getLinkClass("/admin/reviews")}
             >
-              <Star className={data?.review_n > 0 ? `h-4 w-4 text-indigo-400` : `h-4 w-4`} />
+              <Star
+                className={
+                  data?.review_n > 0 ? `h-4 w-4 text-indigo-400` : `h-4 w-4`
+                }
+              />
               <span className={data?.review_n > 0 ? `text-indigo-400` : ``}>
                 Reviews
               </span>
@@ -107,6 +111,11 @@ export default function Sidebar() {
             >
               <ListVideo className="h-4 w-4" />
               Courses
+            </Link>
+
+            <Link to="/admin/policy" className={getLinkClass("/admin/policy")}>
+              <Handshake className="h-4 w-4" />
+              Privacy Policy
             </Link>
 
             <Link
