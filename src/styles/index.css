@@ -37,7 +37,6 @@ html {
 @layer base {
   :root {
     --plyr-color-main: #0d9488;
-
     --background: 240 10% 6.9%;
     --foreground: 0 0% 98%;
     --card: 240 3% 10%;

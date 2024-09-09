@@ -1,3 +1,12 @@
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { ErrorResponse } from "@/types";
+import { deletePolicy, getPolicy } from "@/api/policy";
+import CreatePolicy from "@/components/admin/policy/create-policy";
+
 import {
   Table,
   TableBody,
@@ -7,54 +16,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Bell,
-  Delete,
-  ListFilter,
-  Loader,
-  PlusCircle,
-  Search,
-  Trash,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useEffect, useState, ChangeEvent } from "react";
-import CreateCourse from "@/components/admin/courses/create-course";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import toast from "react-hot-toast";
-import { ErrorResponse } from "@/types";
-import { adminReviews, updatePublicStatus } from "@/api/reviews";
-import StarIcon from "@mui/icons-material/Star";
-import { Rating } from "@mui/material";
-import DeleteReview from "@/components/admin/delete-review";
-import { deleteNotifications } from "@/api/notifications";
-import { Card } from "@/components/ui/card";
-import Items from "@/components/admin/policy/items";
-import { deletePolicy, getPolicy } from "@/api/policy";
-import CreatePolicy from "@/components/admin/policy/create-policy";
+import DeletePolicy from "@/components/admin/policy/delete-policy";
+import { Loader } from "lucide-react";
 
 export default function AdminPolicy() {
   const queryClient = useQueryClient();
   const [currentId, setCurrentId] = useState(0);
 
   const { data, isFetching, isError } = useQuery({
-    queryKey: ["admin-policy"],
+    queryKey: ["policy"],
     queryFn: () => getPolicy(),
   });
 
@@ -81,36 +52,56 @@ export default function AdminPolicy() {
               {data?.length === 1 ? " policy found." : " policys found."}
             </span>
           </p>
+          <CreatePolicy />
         </div>
-
-        <CreatePolicy />
       </div>
 
       <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
-        <div className="flex justify-center">
-          <div className="bg-zinc-900 w-[800px] p-[10px] rounded-[10px]">
-            {data == null && <p className="text-center">No data</p>}
-            {isFetching && <p className="text-center">loading...</p>}
-            {isError && <p className="text-center">Something went wrong</p>}
+        <Table>
+          <TableCaption>
+            {isFetching && (
+              <div className="h-[100px] flex justify-center items-center">
+                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+              </div>
+            )}
+
+            {isError && (
+              <div className="h-[100px] flex justify-center items-center">
+                <span>An unexpected error occurred getting the policies.</span>
+              </div>
+            )}
+          </TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Title</TableHead>
+              <TableHead className="w-[100px]">List item</TableHead>
+              <TableHead className="w-[100px]">Text</TableHead>
+              <TableHead>Content</TableHead>
+              <TableHead className="w-[200px]">Created at</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {data?.map((p: any) => (
-              <>
-                <h1 className="text-3xl font-semibold">{p.title}</h1>
-                <Button
-                  onClick={() => {
-                    setCurrentId(p.id);
-                    deletePolicyMutation.mutate(p.id);
-                  }}
-                >
-                  {currentId == p.id && deletePolicyMutation.isPending && (
-                    <p>Loading...</p>
-                  )}
-                  Delete
-                </Button>
-                <Items id={p.id} />
-              </>
+              <TableRow>
+                <TableCell>
+                  <Checkbox disabled={true} checked={p.p_type == "title"} />
+                </TableCell>
+                <TableCell>
+                  <Checkbox disabled={true} checked={p.p_type == "li"} />
+                </TableCell>
+                <TableCell>
+                  <Checkbox disabled={true} checked={p.p_type == "text"} />
+                </TableCell>
+                <TableCell>{p.content}</TableCell>
+                <TableCell>{p.created_at}</TableCell>
+                <TableCell className="text-right">
+                  <DeletePolicy id={p.id} title={p.content} />
+                </TableCell>
+              </TableRow>
             ))}
-          </div>
-        </div>
+          </TableBody>
+        </Table>
       </ScrollArea>
     </>
   );

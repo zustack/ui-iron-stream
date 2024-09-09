@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader, PlusCircle } from "lucide-react";
+import { Check, ChevronsUpDown, Loader, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -17,19 +17,53 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { createPolicy } from "@/api/policy";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
+
+const pTypes = [
+  {
+    value: "text",
+    label: "Text",
+  },
+  {
+    value: "title",
+    label: "Title",
+  },
+  {
+    value: "li",
+    label: "List item",
+  },
+];
 
 export default function CreatePolicy() {
-  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [type, setType] = useState("");
 
   const queryClient = useQueryClient();
 
   const createPolicyMutation = useMutation({
-    mutationFn: () => createPolicy(title),
+    mutationFn: () => createPolicy(content, type),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-policy"] });
+      await queryClient.invalidateQueries({ queryKey: ["policy"] });
       setIsOpen(false);
-      setTitle("");
+      setContent("");
+      setType("");
     },
     onError: (error: ErrorResponse) => {
       toast.error(
@@ -63,15 +97,65 @@ export default function CreatePolicy() {
                   <div className="mx-auto grid w-full max-w-2xl gap-6">
                     <div className="grid gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="title">Title</Label>
-                        <Input
-                          id="title"
-                          value={title}
-                          onChange={(e) => setTitle(e.target.value)}
-                          placeholder="Title"
+                        <Label htmlFor="content">Content</Label>
+                        <Textarea
+                          id="content"
+                          value={content}
+                          onChange={(e) => setContent(e.target.value)}
+                          placeholder="Content"
                           required
+                          rows={5}
                         />
                       </div>
+
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-full justify-between"
+                          >
+                            {type
+                              ? pTypes.find((t) => t.value === type)?.label
+                              : "Select policy type..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[448px] p-0">
+                          <Command>
+                            <CommandList>
+                              <CommandEmpty>No policy type found.</CommandEmpty>
+                              <CommandGroup>
+                                {pTypes.map((t) => (
+                                  <CommandItem
+                                    key={t.value}
+                                    value={t.value}
+                                    onSelect={(currentValue) => {
+                                      setType(
+                                        currentValue === type
+                                          ? ""
+                                          : currentValue
+                                      );
+                                      setOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        type === t.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {t.label}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                 </div>

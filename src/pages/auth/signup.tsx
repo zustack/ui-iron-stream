@@ -18,12 +18,13 @@ import { useEffect, useState } from "react";
 import { Command } from "@tauri-apps/api/shell";
 import { platform } from "@tauri-apps/api/os";
 import toast from "react-hot-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ErrorResponse } from "@/types";
 import { signUp } from "@/api/users";
 import EmailVerification from "@/components/auth/email-verfication";
 import { Loader } from "lucide-react";
 import Logo from "../../assets/logo.png";
+import { getPolicy } from "@/api/policy";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -100,6 +101,12 @@ export default function Signup() {
     }
     signUpMutation.mutate();
   };
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["policy"],
+    queryFn: () => getPolicy(),
+  });
+  console.log(data);
 
   if (success) {
     return (
@@ -211,35 +218,66 @@ export default function Signup() {
                       Privacy Policy
                     </AlertDialogTrigger>
                     <AlertDialogContent>
+                      {isLoading && <Loader className="h-6 w-6 animate-spin" />}
+                      {isError && <p>Error getting privacy policy</p>}
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Privacy Policy</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          With less than a month to go before the European Union
-                          enacts new consumer privacy laws for its citizens,
-                          companies around the world are updating their terms of
-                          service agreements to comply.
-                        </AlertDialogDescription>
+                        {data?.map((p: any) => (
+                          <>
+                            {p.p_type === "title" && (
+                              <AlertDialogTitle>{p.content}</AlertDialogTitle>
+                            )}
 
-                        <AlertDialogDescription>
-                          The European Union’s General Data Protection
-                          Regulation (G.D.P.R.) goes into effect on May 25 and
-                          is meant to ensure a common set of data rights in the
-                          European Union. It requires organizations to notify
-                          users as soon as possible of high-risk data breaches
-                          that could personally affect them.
-                        </AlertDialogDescription>
+                            {p.p_type === "li" && (
+                              <AlertDialogDescription>
+                                <li>
+                                  {p.content
+                                    .split(/(\*\*[^*]+\*\*)/g)
+                                    .map((part: string, i: number) =>
+                                      part.startsWith("**") &&
+                                      part.endsWith("**") ? (
+                                        <span key={i} className="text-white">
+                                          {part.slice(2, -2)}
+                                        </span>
+                                      ) : (
+                                        <span key={i}>{part}</span>
+                                      )
+                                    )}
+                                </li>
+                              </AlertDialogDescription>
+                            )}
+
+                            {p.p_type === "text" && (
+                              <AlertDialogDescription>
+                                {p.content
+                                  .split(/(\*\*[^*]+\*\*)/g)
+                                  .map((part: string, i: number) =>
+                                    part.startsWith("**") &&
+                                    part.endsWith("**") ? (
+                                      <span key={i} className="text-white">
+                                        {part.slice(2, -2)}
+                                      </span>
+                                    ) : (
+                                      <span key={i}>{part}</span>
+                                    )
+                                  )}
+                              </AlertDialogDescription>
+                            )}
+                          </>
+                        ))}
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Close</AlertDialogCancel>
+                        <AlertDialogCancel>Accept</AlertDialogCancel>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 </label>
               </div>
             </div>
-            <Button 
-            type="submit"
-            className="flex gap-2" disabled={signUpMutation.isPending}>
+            <Button
+              type="submit"
+              className="flex gap-2"
+              disabled={signUpMutation.isPending}
+            >
               {signUpMutation.isPending && (
                 <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
               )}
