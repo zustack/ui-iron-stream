@@ -26,6 +26,7 @@ import Signup from "./pages/auth/signup";
 import Reviews from "./pages/reviews";
 import AdminReviews from "./pages/admin/reviews";
 import AdminPolicy from "./pages/admin/policy";
+import Account from "./pages/account";
 
 function App() {
   const { setOs } = useOsStore();
@@ -96,6 +97,7 @@ function App() {
               <Route path="reviews/:courseId" element={<Reviews />} />
               <Route path="video/:courseId" element={<Video />} />
               <Route path="preview/:courseId" element={<Preview />} />
+              <Route path="account" element={<Account />} />
             </Route>
             <Route
               path="files/:courseId/:videoId/:videoTitle"

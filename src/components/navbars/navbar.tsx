@@ -74,7 +74,7 @@ export default function Navbar() {
                   <span className="sr-only">Toggle user menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent className="w-[250px]" align="end">
                 <DropdownMenuLabel>Hola, {fullName}</DropdownMenuLabel>
                 {isAdmin && (
                   <>
@@ -102,6 +102,13 @@ export default function Navbar() {
                   </>
                 )}
                 <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleNavigation("/account");
+                  }}
+                >
+                  Account settings
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
                     logout();

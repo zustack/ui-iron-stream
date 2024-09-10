@@ -1,6 +1,11 @@
 import { authAxios, noAuthAxios } from "@/lib/axiosInstances";
 import { SearchParam, UserResponse } from "@/types";
 
+export const getCurrentUser = async () => {
+  const response = await authAxios.get("/users/current");
+  return response.data;
+};
+
 export const updateAdminStatus = async (userId: number, isAdmin: boolean) => {
   const response = await authAxios.put(
     `/users/update/admin/status/${userId}/${isAdmin}`
