@@ -9,18 +9,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Home, Loader } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { useState, ChangeEvent } from "react";
+import { useState } from "react";
 import LoadImage from "@/components/load-image";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
@@ -30,6 +27,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { getUserHistory } from "@/api/history";
 
 export default function Account() {
   const [page, setPage] = useState(0);
@@ -41,6 +39,15 @@ export default function Account() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["current-user"],
     queryFn: () => getCurrentUser(),
+  });
+
+  const {
+    data: hs,
+    isLoading: hsLoading,
+    isError: hsError,
+  } = useQuery({
+    queryKey: ["user-history"],
+    queryFn: () => getUserHistory(),
   });
 
   const resendEmailMutation = useMutation({
@@ -149,31 +156,31 @@ export default function Account() {
                               </div>
                             ) : (
                               <>
-                              <Label>
-                                A new code has been sent to {data?.email}
-                              </Label>
-                              <InputOTP
-                                maxLength={6}
-                                value={emailToken}
-                                onChange={(emailToken) => {
-                                  setEmailToken(emailToken);
-                                  if (emailToken.length === 6) {
-                                    verifyEmailMutation.mutate();
-                                  }
-                                }}
-                              >
-                                <InputOTPGroup>
-                                  <InputOTPSlot index={0} />
-                                  <InputOTPSlot index={1} />
-                                  <InputOTPSlot index={2} />
-                                </InputOTPGroup>
-                                <InputOTPSeparator />
-                                <InputOTPGroup>
-                                  <InputOTPSlot index={3} />
-                                  <InputOTPSlot index={4} />
-                                  <InputOTPSlot index={5} />
-                                </InputOTPGroup>
-                              </InputOTP>
+                                <Label>
+                                  A new code has been sent to {data?.email}
+                                </Label>
+                                <InputOTP
+                                  maxLength={6}
+                                  value={emailToken}
+                                  onChange={(emailToken) => {
+                                    setEmailToken(emailToken);
+                                    if (emailToken.length === 6) {
+                                      verifyEmailMutation.mutate();
+                                    }
+                                  }}
+                                >
+                                  <InputOTPGroup>
+                                    <InputOTPSlot index={0} />
+                                    <InputOTPSlot index={1} />
+                                    <InputOTPSlot index={2} />
+                                  </InputOTPGroup>
+                                  <InputOTPSeparator />
+                                  <InputOTPGroup>
+                                    <InputOTPSlot index={3} />
+                                    <InputOTPSlot index={4} />
+                                    <InputOTPSlot index={5} />
+                                  </InputOTPGroup>
+                                </InputOTP>
                               </>
                             )}
                           </>
@@ -233,61 +240,54 @@ export default function Account() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col gap-6">
-                    <div className="grid grid-cols-6">
-                      <div className="col-span-2">
-                        <LoadImage
-                          cn="rounded-[0.75rem]"
-                          src={
-                            "http://localhost:8081/web/uploads/thumbnails/1492331a-060b-4a3c-8cc8-55d72ff18450.png"
-                          }
-                        />
+                    {hsLoading && (
+                      <div className="flex justify-center items-center">
+                        <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
                       </div>
-                      <div className="col-span-4">
-                        <div className="flex flex-col gap-[15px] mx-2 py-1">
-                          <h4 className="font-semibold">
-                            CloudFront Signed URLs with Node.js
-                          </h4>
-                          <p className="text-sm text-zinc-200">
-                            Create signed urls to access files in a CloudFront
-                            distribution. Learn how to generate the signed URLs
-                            using a private key in a node application.
-                          </p>
-                          <div className="flex gap-2">
-                            <p className="text-sm text-zinc-400">4 hours</p>
-                            <p className="text-sm text-zinc-400">•</p>
-                            <p className="text-sm text-zinc-400">69 views</p>
+                    )}
+                    {hsError && (
+                      <p>Something went wrong. Please try again later.</p>
+                    )}
+                    {hs?.map((h: any) => (
+                      <div className="grid grid-cols-6">
+                        <div className="col-span-2">
+                          <div
+                            className="
+                      relative overflow-hidden rounded-[0.75rem]"
+                          >
+                            <LoadImage
+                              cn="rounded-[0.75rem]"
+                              src={`${import.meta.env.VITE_BACKEND_URL}${h.thumbnail}`}
+                            />
+                            <div
+                              style={{ width: `${h.video_resume}%` }}
+                              className={`absolute 
+                    bottom-0 left-0 
+                    h-[6px] bg-indigo-600 rounded-b-[0.75rem]`}
+                            ></div>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                        <div className="col-span-4">
+                          <div className="flex flex-col gap-[15px] mx-2 py-1">
+                            <h4 className="font-semibold">{h.video_title}</h4>
+                            <p className="text-sm text-zinc-200">
+                              {h.description}
+                            </p>
+                            <div className="flex gap-2">
+                              <p className="text-sm text-zinc-400">
+                                {h.duration}
+                              </p>
+                              <p className="text-sm text-zinc-400">•</p>
+                              <p className="text-sm text-zinc-400">{h.views}</p>
+                            </div>
 
-                    <div className="grid grid-cols-6">
-                      <div className="col-span-2">
-                        <LoadImage
-                          cn="rounded-[0.75rem]"
-                          src={
-                            "http://localhost:8081/web/uploads/thumbnails/1492331a-060b-4a3c-8cc8-55d72ff18450.png"
-                          }
-                        />
-                      </div>
-                      <div className="col-span-4">
-                        <div className="flex flex-col gap-[15px] mx-2 py-1">
-                          <h4 className="font-semibold">
-                            CloudFront Signed URLs with Node.js
-                          </h4>
-                          <p className="text-sm text-zinc-200">
-                            Create signed urls to access files in a CloudFront
-                            distribution. Learn how to generate the signed URLs
-                            using a private key in a node application.
-                          </p>
-                          <div className="flex gap-2">
-                            <p className="text-sm text-zinc-400">4 hours</p>
-                            <p className="text-sm text-zinc-400">•</p>
-                            <p className="text-sm text-zinc-400">69 views</p>
+                            <p className="text-sm text-zinc-400">
+                              You watch this video at {h.history_date}
+                            </p>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
