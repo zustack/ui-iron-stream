@@ -27,6 +27,7 @@ import Reviews from "./pages/reviews";
 import AdminReviews from "./pages/admin/reviews";
 import AdminPolicy from "./pages/admin/policy";
 import Account from "./pages/account";
+import { logout } from "./api/user_log";
 
 function App() {
   const { setOs } = useOsStore();
@@ -40,6 +41,13 @@ function App() {
     getPlaform();
   }, []);
 
+  const logoutMutation = useMutation({
+    mutationFn: () => logout(),
+    onSettled: async () => {
+      appWindow.close();
+    },
+  });
+
   const updateHistoryMutation = useMutation({
     mutationFn: ({
       resume,
@@ -48,7 +56,8 @@ function App() {
       resume: number;
       historyId: string;
     }) => updateHistory(historyId, String(resume)),
-    onSettled: () => {
+    onSettled: async () => {
+      await logoutMutation.mutateAsync();
       appWindow.close();
     },
   });
@@ -70,7 +79,7 @@ function App() {
       ) {
         appWindow.close();
       } else {
-        appWindow.close();
+        logoutMutation.mutate();
       }
     });
     return () => {

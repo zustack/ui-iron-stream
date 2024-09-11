@@ -27,6 +27,7 @@ import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { useAuthStore } from "@/store/auth";
 import { createNote, deleteNote, getNotes, updateNote } from "@/api/notes";
+import { foundAppsLog } from "@/api/user_log";
 
 type App = {
   name: string;
@@ -49,6 +50,7 @@ export default function Video() {
   const [currentNoteId, setCurrentNoteId] = useState(0);
   const [editingNote, setEditingNote] = useState(false);
   const [hoverNote, setHoverNote] = useState(0);
+  const [mutationSent, setMutationSent] = useState(false);
 
   const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["fobidden-apps"],
@@ -102,8 +104,13 @@ export default function Video() {
     }
     setFoundApps([]);
     setLoading(false);
+    setMutationSent(false)
     videoRef.current?.play();
   }
+
+  const foundAppsMutation = useMutation({
+    mutationFn: (found: App[]) => foundAppsLog(currentVideo.video.title, found),
+  });
 
   async function getLocalApps() {
     let commandName: string = "";
@@ -120,6 +127,12 @@ export default function Video() {
     const command = new Command(commandName);
     const output = await command.execute();
     const found = data.filter((item: any) => {
+      /*
+      const foundToRq = found;
+      if (foundToRq != found) {
+        foundAppsMutation.mutate();
+      }
+      */
       if (item.execute_always && output.stdout.includes(item.process_name)) {
         killAppsAlways(item.process_name);
         return;
@@ -127,7 +140,11 @@ export default function Video() {
       return output.stdout.includes(item.process_name);
     });
     if (found.length > 0) {
-      videoRef.current?.pause();
+      videoRef.current?.pause()
+      setMutationSent(true)
+      if (!mutationSent) {
+        foundAppsMutation.mutate(found);
+      }
     }
     setFoundApps(found);
   }
@@ -297,7 +314,6 @@ export default function Video() {
       </div>
     );
   }
-  console.log();
 
   return (
     <div className="lg:h-[calc(100vh-60px)] flex flex-col lg:flex-row overflow-hidden pt-[10px] px-[10px] gap-[10px] mx-auto">

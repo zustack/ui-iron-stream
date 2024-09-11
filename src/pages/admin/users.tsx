@@ -1,6 +1,5 @@
 import { Calendar as CalendarIcon } from "lucide-react";
-import { addDays, format } from "date-fns";
-
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -51,6 +50,7 @@ import UserApps from "@/components/admin/users/user-apps";
 import DeleteUser from "@/components/admin/users/delete-user";
 import { deleteNotifications } from "@/api/notifications";
 import { DateRange } from "react-day-picker";
+import AdminUserLog from "@/components/admin/users/user-log";
 
 export default function AdminUsers() {
   const [searchInput, setSearchInput] = useState("");
@@ -572,6 +572,12 @@ export default function AdminUsers() {
                       <TableCell>{user.created_at}</TableCell>
 
                       <TableCell className="text-right">
+                        <AdminUserLog
+                          email={user.email}
+                          name={user.name}
+                          surname={user.surname}
+                          userId={user.id}
+                        />
                         <AddCouseToUser
                           email={user.email}
                           name={user.name}
