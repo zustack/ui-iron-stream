@@ -15,6 +15,7 @@ import { deleteVideo } from "@/api/videos";
 import { ErrorResponse } from "@/types";
 import toast from "react-hot-toast";
 import { useState } from "react";
+import { createAdminLog } from "@/api/admin_log";
 
 export default function DeleteVideo({
   title,
@@ -26,10 +27,15 @@ export default function DeleteVideo({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
+  const createAdminLogMutation = useMutation({
+    mutationFn: () => createAdminLog(`The video ${title} has been deleted`, "3"),
+  });
+
   const deleteVideoMutation = useMutation({
     mutationFn: () => deleteVideo(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
+      createAdminLogMutation.mutate()
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {

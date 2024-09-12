@@ -119,11 +119,11 @@ export default function Sidebar() {
             </Link>
 
             <Link
-              to="/admin/historial"
-              className={getLinkClass("/admin/historial")}
+              to="/admin/log"
+              className={getLinkClass("/admin/log")}
             >
               <GalleryVerticalEnd className="h-4 w-4" />
-              History
+                Logs
             </Link>
           </nav>
         </div>

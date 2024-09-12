@@ -15,6 +15,7 @@ import { ErrorResponse } from "@/types";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { deleteApp } from "@/api/apps";
+import { createAdminLog } from "@/api/admin_log";
 
 export default function DeleteApp({
   name,
@@ -28,10 +29,15 @@ export default function DeleteApp({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
 
+  const createAdminLogMutation = useMutation({
+    mutationFn: () => createAdminLog(`The app ${name} has been deleted`, "3"),
+  });
+
   const deleteAppMutation = useMutation({
     mutationFn: () => deleteApp(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-apps"] });
+      createAdminLogMutation.mutate()
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {

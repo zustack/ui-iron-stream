@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { createAdminLog } from "@/api/admin_log";
 
 type Props = {
   userId: number;
@@ -47,12 +48,17 @@ export default function AddCouseToUser({
   const queryClient = useQueryClient();
   const [activeUpdateId, setActiveUpdateId] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [title, setTitle] = useState("");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["user-courses", userId],
-    // is "" because we dont want to search a course here! or do we?
     queryFn: () => userCourses("", userId),
     enabled: isOpen,
+  });
+
+  const createAdminLogMutation = useMutation({
+    mutationFn: (content: string) => createAdminLog(content, "1"),
+
   });
 
   const createUserCourseMutation = useMutation({
@@ -60,6 +66,7 @@ export default function AddCouseToUser({
       createUserCourse(userId, courseId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["user-courses"] });
+      createAdminLogMutation.mutate(`The course ${title} was added to the user with email ${email}.`);
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -74,6 +81,7 @@ export default function AddCouseToUser({
       deleteUserCoursesByCourseIdAndUserId(userId, courseId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["user-courses"] });
+      createAdminLogMutation.mutate(`The course ${title} was removed to the user with email ${email}.`);
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -140,6 +148,7 @@ export default function AddCouseToUser({
                               checked={course.is_user_enrolled}
                               onClick={() => {
                                 setActiveUpdateId(course.id);
+                                setTitle(course.title);
                                 if (course.is_user_enrolled) {
                                   deleteUserCoursesByCourseIdAndUserIdMutation.mutate(
                                     {

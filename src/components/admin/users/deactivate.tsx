@@ -44,6 +44,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Course } from "@/types";
+import { createAdminLog } from "@/api/admin_log";
 
 export default function Deactivate() {
   return (
@@ -251,6 +252,7 @@ const DeactivateAllCourses = () => {
 const DeactivateIndividualCourses = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [confirmId, setConfirmId] = useState(0);
+  const [title, setTitle] = useState("")
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["deactivate-individual-courses"],
@@ -258,10 +260,15 @@ const DeactivateIndividualCourses = () => {
     enabled: isOpen,
   });
 
+  const createAdminLogMutation = useMutation({
+    mutationFn: () => createAdminLog(`The course ${title} has deactivated to all users.`, "3"),
+  });
+
   const deleteUserCourseByCourseIdMutation = useMutation({
     mutationFn: () => deleteUserCourseByCourseId(confirmId),
     onSuccess: () => {
       setConfirmId(0);
+      createAdminLogMutation.mutate()
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -346,6 +353,7 @@ const DeactivateIndividualCourses = () => {
                                     deleteUserCourseByCourseIdMutation.isPending
                                   }
                                   onClick={() => {
+                                    setTitle(course.title)
                                     deleteUserCourseByCourseIdMutation.mutate();
                                   }}
                                   variant="destructive"

@@ -14,8 +14,8 @@ import { Loader, Trash } from "lucide-react";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { useState } from "react";
-import { deleteCourse } from "@/api/courses";
 import { deletePolicy } from "@/api/policy";
+import { createAdminLog } from "@/api/admin_log";
 
 type Props = {
   id: number;
@@ -26,10 +26,15 @@ export default function DeletePolicy({ id, title }: Props) {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
 
+  const createAdminLogMutation = useMutation({
+    mutationFn: () => createAdminLog(`The policy ${title} has been deleted`, "3"),
+  });
+
   const deletePolicyMutation = useMutation({
     mutationFn: () => deletePolicy(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["policy"] });
+      createAdminLogMutation.mutate()
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {

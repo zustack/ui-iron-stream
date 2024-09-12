@@ -1,7 +1,5 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
-import { getPolicy } from "@/api/policy";
-import CreatePolicy from "@/components/admin/policy/create-policy";
 import {
   Table,
   TableBody,
@@ -11,14 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import DeletePolicy from "@/components/admin/policy/delete-policy";
 import { Loader } from "lucide-react";
+import { getAdminLog } from "@/api/admin_log";
 
-export default function AdminPolicy() {
+export default function AdminLog() {
   const { data, isFetching, isError } = useQuery({
-    queryKey: ["policy"],
-    queryFn: () => getPolicy(),
+    queryKey: ["admin-log"],
+    queryFn: () => getAdminLog(),
   });
 
   return (
@@ -28,10 +25,9 @@ export default function AdminPolicy() {
           <p className="text-sm text-muted-foreground">
             <span>
               {data?.length}{" "}
-              {data?.length === 1 ? " policy found." : " policys found."}
+              {data?.length === 1 ? " logs found." : " logs found."}
             </span>
           </p>
-          <CreatePolicy />
         </div>
       </div>
 
@@ -52,30 +48,16 @@ export default function AdminPolicy() {
           </TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Title</TableHead>
-              <TableHead className="w-[100px]">List item</TableHead>
-              <TableHead className="w-[100px]">Text</TableHead>
               <TableHead>Content</TableHead>
-              <TableHead className="w-[200px]">Created at</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">Created at</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data?.map((p: any) => (
               <TableRow>
-                <TableCell>
-                  <Checkbox disabled={true} checked={p.p_type == "title"} />
-                </TableCell>
-                <TableCell>
-                  <Checkbox disabled={true} checked={p.p_type == "li"} />
-                </TableCell>
-                <TableCell>
-                  <Checkbox disabled={true} checked={p.p_type == "text"} />
-                </TableCell>
                 <TableCell>{p.content}</TableCell>
-                <TableCell>{p.created_at}</TableCell>
                 <TableCell className="text-right">
-                  <DeletePolicy id={p.id} title={p.content} />
+                  {p.created_at}
                 </TableCell>
               </TableRow>
             ))}

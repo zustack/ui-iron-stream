@@ -15,6 +15,7 @@ import { Loader, Trash } from "lucide-react";
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { useState } from "react";
+import { createAdminLog } from "@/api/admin_log";
 
 type Props = {
   email: string;
@@ -26,11 +27,16 @@ export default function DeleteUser({ email, name, surname }: Props) {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
 
+  const createAdminLogMutation = useMutation({
+    mutationFn: () => createAdminLog(`The user with email ${email} has been deleted`, "3"),
+  });
+
   const deleteUserMutation = useMutation({
     mutationFn: (email: string) => deleteAccountByEmail(email),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setIsOpen(false);
+      createAdminLogMutation.mutate();
     },
     onError: (error: ErrorResponse) => {
       toast.error(error.response?.data?.error || "Ocurrió un error inesperado");

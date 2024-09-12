@@ -17,6 +17,7 @@ import { useState } from "react";
 import { deleteReview } from "@/api/reviews";
 import { Rating } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
+import { createAdminLog } from "@/api/admin_log";
 
 type Props = {
   id: number;
@@ -36,10 +37,15 @@ export default function DeleteReview({
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
 
+  const createAdminLogMutation = useMutation({
+    mutationFn: () => createAdminLog(`The review ${description} writen by ${author} in the course ${course_title} has been deleted`, "3"),
+  });
+
   const deleteReviewMutation = useMutation({
     mutationFn: () => deleteReview(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
+      createAdminLogMutation.mutate()
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {

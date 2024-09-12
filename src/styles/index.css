@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base { img { display: initial; } }
-
 @font-face {
   font-family: "Roboto-Regular";
   src: url(../assets/Roboto-Regular.ttf) format("truetype");

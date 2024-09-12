@@ -28,6 +28,7 @@ import AdminReviews from "./pages/admin/reviews";
 import AdminPolicy from "./pages/admin/policy";
 import Account from "./pages/account";
 import { logout } from "./api/user_log";
+import AdminLog from "./pages/admin/admin-log";
 
 function App() {
   const { setOs } = useOsStore();
@@ -127,6 +128,10 @@ function App() {
             <Route
               path="files/:courseId/:courseTitle/:videoId/:videoTitle"
               element={<WindowFiles />}
+            />
+            <Route
+              path="log"
+              element={<AdminLog />}
             />
           </Route>
 

@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { useState } from "react";
 import { deleteCourse } from "@/api/courses";
+import { createAdminLog } from "@/api/admin_log";
 
 type Props = {
   id: number;
@@ -25,10 +26,15 @@ export default function DeleteCourse({ id, title }: Props) {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
 
+  const createAdminLogMutation = useMutation({
+    mutationFn: () => createAdminLog(`The course ${title} has been deleted`, "3"),
+  });
+
   const deleteCourseMutation = useMutation({
     mutationFn: () => deleteCourse(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
+      createAdminLogMutation.mutate()
       setIsOpen(false);
     },
     onError: (error: ErrorResponse) => {
