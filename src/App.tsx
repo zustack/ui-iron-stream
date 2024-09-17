@@ -29,6 +29,7 @@ import AdminPolicy from "./pages/admin/policy";
 import Account from "./pages/account";
 import { logout } from "./api/user_log";
 import AdminLog from "./pages/admin/admin-log";
+import AdminStatistics from "./pages/admin/statistics";
 
 function App() {
   const { setOs } = useOsStore();
@@ -132,6 +133,10 @@ function App() {
             <Route
               path="log"
               element={<AdminLog />}
+            />
+            <Route
+              path="statistics"
+              element={<AdminStatistics />}
             />
           </Route>
 

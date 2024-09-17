@@ -3,6 +3,7 @@ import { useAuthStore } from "@/store/auth";
 import { useQuery } from "@tanstack/react-query";
 import {
   AppWindow,
+  ChartNoAxesCombined,
   GalleryVerticalEnd,
   Home as H,
   Handshake,
@@ -124,6 +125,14 @@ export default function Sidebar() {
             >
               <GalleryVerticalEnd className="h-4 w-4" />
                 Logs
+            </Link>
+
+            <Link
+              to="/admin/statistics"
+              className={getLinkClass("/admin/statistics")}
+            >
+              <ChartNoAxesCombined className="h-4 w-4" />
+                Statistics
             </Link>
           </nav>
         </div>
