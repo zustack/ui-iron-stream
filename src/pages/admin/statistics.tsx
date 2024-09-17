@@ -51,21 +51,26 @@ import { Calendar } from "@/components/ui/calendar";
 import { useQuery } from "@tanstack/react-query";
 import { getUserStats } from "@/api/stats";
 
+interface UserStat {
+  date: string;
+  windows: number;
+  mac: number;
+  linux: number;
+  all: number;
+}
+
 export default function Statistics() {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: undefined,
     to: undefined,
   });
 
-  const { data:chartData, isLoading, isError } = useQuery({
+  const { data:chartData, isLoading, isError } = useQuery<UserStat[], Error>({
     queryKey: ["user-stats"],
     queryFn: () => getUserStats(),
   });
 
-    console.log(chartData)
-
-  const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("windows");
+  const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>("windows");
   const total = React.useMemo(
     () => ({
       all: chartData?.reduce((acc, curr) => acc + curr.all, 0),
@@ -76,15 +81,16 @@ export default function Statistics() {
     []
   );
 
-  if (isLoading) return <p>LOading...</p>
+  if (isLoading) return <p>Loading...</p>
+  if (isError) return <p>Error...</p>
 
   return (
     <section className="p-[10px] flex flex-col gap-[10px]">
       <Card>
         <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-          <div className="flex flex-1 flex-col justify-center gap-4 px-6 py-5 sm:py-6">
+          <div className="flex flex-1 justify-between gap-1 px-6 py-2">
             <CardTitle>Users statistics</CardTitle>
-
+            <CardDescription>
             <div className={cn("grid gap-2")}>
               <Popover>
                 <PopoverTrigger asChild>
@@ -124,9 +130,6 @@ export default function Statistics() {
                 </PopoverContent>
               </Popover>
             </div>
-
-            <CardDescription>
-              Showing the total users in the last 3 months
             </CardDescription>
           </div>
 
@@ -137,7 +140,9 @@ export default function Statistics() {
                 <button
                   key={chart}
                   data-active={activeChart === chart}
-                  className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                  className="relative z-30 flex flex-1 flex-col justify-center 
+                  gap-1 border-t px-6 py-1 text-left even:border-l 
+                  data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-2"
                   onClick={() => setActiveChart(chart)}
                 >
                   <span className="text-xs text-muted-foreground">
