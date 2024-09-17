@@ -66,11 +66,11 @@ export default function Statistics() {
   });
 
   const { data:chartData, isLoading, isError } = useQuery<UserStat[], Error>({
-    queryKey: ["user-stats"],
-    queryFn: () => getUserStats(),
+    queryKey: ["user-stats", date],
+    queryFn: () => getUserStats(String(date?.from == undefined ? "" : format(date.from, "yyyy-MM-dd")), String(date?.to == undefined ? "" : format(date.to, "yyyy-MM-dd"))),
   });
 
-  const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>("windows");
+  const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>("all");
   const total = React.useMemo(
     () => ({
       all: chartData?.reduce((acc, curr) => acc + curr.all, 0),
@@ -78,7 +78,7 @@ export default function Statistics() {
       linux: chartData?.reduce((acc, curr) => acc + curr.linux, 0),
       mac: chartData?.reduce((acc, curr) => acc + curr.mac, 0),
     }),
-    []
+    [chartData]
   );
 
   if (isLoading) return <p>Loading...</p>
@@ -114,7 +114,7 @@ export default function Statistics() {
                         format(date.from, "dd/MM/yyyy")
                       )
                     ) : (
-                      <span>Pick a date</span>
+                      <span>Search between dates</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -134,7 +134,7 @@ export default function Statistics() {
           </div>
 
           <div className="flex">
-            {["windows", "mac", "linux", "all"].map((key) => {
+            {["all", "mac", "linux", "windows"].map((key) => {
               const chart = key as keyof typeof chartConfig;
               return (
                 <button
