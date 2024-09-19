@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState, useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   Card,
@@ -57,21 +57,36 @@ type UserStat = {
   mac: number;
   linux: number;
   all: number;
-}
+};
+
+const getFirstAndLastDateOfCurrentMonth = () => {
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Último día del mes
+  return { from: firstDay, to: lastDay };
+};
 
 export default function UsersStats() {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: undefined,
-    to: undefined,
-  });
+  const [date, setDate] = useState<DateRange | undefined>(
+    getFirstAndLastDateOfCurrentMonth()
+  );
 
-  const { data:chartData, isLoading, isError } = useQuery<UserStat[], Error>({
+  const {
+    data: chartData,
+    isLoading,
+    isError,
+  } = useQuery<UserStat[], Error>({
     queryKey: ["user-stats", date],
-    queryFn: () => getUserStats(String(date?.from == undefined ? "" : format(date.from, "yyyy-MM-dd")), String(date?.to == undefined ? "" : format(date.to, "yyyy-MM-dd"))),
+    queryFn: () =>
+      getUserStats(
+        String(date?.from == undefined ? "" : format(date.from, "yyyy-MM-dd")),
+        String(date?.to == undefined ? "" : format(date.to, "yyyy-MM-dd"))
+      ),
   });
 
-  const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>("all");
-  const total = React.useMemo(
+  const [activeChart, setActiveChart] =
+    useState<keyof typeof chartConfig>("all");
+  const total = useMemo(
     () => ({
       all: chartData?.reduce((acc, curr) => acc + curr.all, 0),
       windows: chartData?.reduce((acc, curr) => acc + curr.windows, 0),
@@ -82,11 +97,11 @@ export default function UsersStats() {
   );
 
   return (
-      <Card>
-        <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-          <div className="flex flex-1 justify-between gap-1 px-6 py-2">
-            <CardTitle>Users statistics</CardTitle>
-            <CardDescription>
+    <Card>
+      <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+        <div className="flex flex-1 justify-between gap-1 px-3 py-3">
+          <CardTitle>Users statistics</CardTitle>
+          <CardDescription>
             <div className={cn("grid gap-2")}>
               <Popover>
                 <PopoverTrigger asChild>
@@ -126,91 +141,91 @@ export default function UsersStats() {
                 </PopoverContent>
               </Popover>
             </div>
-            </CardDescription>
-          </div>
+          </CardDescription>
+        </div>
 
-          <div className="flex">
-            {["all", "mac", "linux", "windows"].map((key) => {
-              const chart = key as keyof typeof chartConfig;
-              return (
-                <button
-                  key={chart}
-                  data-active={activeChart === chart}
-                  className="relative z-30 flex flex-1 flex-col justify-center 
+        <div className="flex">
+          {["all", "mac", "linux", "windows"].map((key) => {
+            const chart = key as keyof typeof chartConfig;
+            return (
+              <button
+                key={chart}
+                data-active={activeChart === chart}
+                className="relative z-30 flex flex-1 flex-col justify-center 
                   gap-1 border-t px-6 py-1 text-left even:border-l 
                   data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-2"
-                  onClick={() => setActiveChart(chart)}
-                >
-                  <span className="text-xs text-muted-foreground">
-                    {chartConfig[chart].label}
-                  </span>
-                  <span className="text-lg font-bold leading-none sm:text-3xl">
-                    {total[key as keyof typeof total]?.toLocaleString()}
-                  </span>
-                </button>
-              );
-            })}
+                onClick={() => setActiveChart(chart)}
+              >
+                <span className="text-xs text-muted-foreground">
+                  {chartConfig[chart].label}
+                </span>
+                <span className="text-lg font-bold leading-none sm:text-3xl">
+                  {total[key as keyof typeof total]?.toLocaleString()}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </CardHeader>
+      <CardContent className="px-2 sm:p-6">
+        {isLoading && (
+          <div className="h-[100px] flex justify-center items-center">
+            <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
           </div>
-        </CardHeader>
-        <CardContent className="px-2 sm:p-6">
-            {isLoading && (
-              <div className="h-[100px] flex justify-center items-center">
-                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-              </div>
-            )}
+        )}
 
-            {isError && (
-              <div className="h-[100px] flex justify-center items-center">
-                <span>An unexpected error occurred.</span>
-              </div>
-            )}
+        {isError && (
+          <div className="h-[100px] flex justify-center items-center">
+            <span>An unexpected error occurred.</span>
+          </div>
+        )}
 
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[350px] w-full"
+        >
+          <BarChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
           >
-            <BarChart
-              accessibilityLayer
-              data={chartData}
-              margin={{
-                left: 12,
-                right: 12,
+            <CartesianGrid vertical={false} />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickCount={3}
+            />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              minTickGap={32}
+              tickFormatter={(value) => {
+                const date = new Date(value);
+                return date.toLocaleDateString("en-GB");
               }}
-            >
-              <CartesianGrid vertical={false} />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tickCount={3}
-              />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                minTickGap={32}
-                tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return date.toLocaleDateString("en-GB");
-                }}
-              />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    className="w-[150px]"
-                    nameKey="views"
-                    labelFormatter={(value) => {
-                  const date = new Date(value);
-                  return date.toLocaleDateString("en-GB");
-                    }}
-                  />
-                }
-              />
-              <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+            />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  className="w-[150px]"
+                  nameKey="views"
+                  labelFormatter={(value) => {
+                    const date = new Date(value);
+                    return date.toLocaleDateString("en-GB");
+                  }}
+                />
+              }
+            />
+            <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   );
 }
