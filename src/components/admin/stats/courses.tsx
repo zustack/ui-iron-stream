@@ -58,11 +58,26 @@ export default function CourseStats() {
       ),
   });
 
+  console.log(chartData);
+
   return (
     <Card>
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 justify-between gap-1 px-3 py-3">
-          <CardTitle>Courses statistics</CardTitle>
+          <div>
+            <CardTitle>Courses statistics</CardTitle>
+            <CardDescription className="mt-3">
+              Showing profit from{" "}
+              <span className="text-white mx-1">
+                {date?.from && format(date?.from, "dd/MM/yyyy")}
+              </span>
+              to
+              <span className="text-white mx-1">
+                {date?.to && format(date?.to, "dd/MM/yyyy")}{" "}
+              </span>
+              <span className="text-green-300 mx-1">${chartData?.total}</span>
+            </CardDescription>
+          </div>
           <CardDescription>
             <div className={cn("grid gap-2")}>
               <Popover>
@@ -124,7 +139,7 @@ export default function CourseStats() {
           className="aspect-auto h-[350px] w-full"
           config={chartConfig}
         >
-          <BarChart accessibilityLayer data={chartData}>
+          <BarChart accessibilityLayer data={chartData.courses}>
             <CartesianGrid vertical={false} />
             <YAxis
               tickLine={false}
