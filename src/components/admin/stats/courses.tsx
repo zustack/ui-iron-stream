@@ -10,7 +10,7 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
+  ChartTooltipContentMoney,
 } from "@/components/ui/chart";
 import { useState } from "react";
 import { Calendar as CalendarIcon, Loader } from "lucide-react";
@@ -57,8 +57,6 @@ export default function CourseStats() {
         String(date?.to == undefined ? "" : format(date.to, "dd-MM-yyyy"))
       ),
   });
-
-  console.log(chartData);
 
   return (
     <Card>
@@ -139,7 +137,7 @@ export default function CourseStats() {
           className="aspect-auto h-[350px] w-full"
           config={chartConfig}
         >
-          <BarChart accessibilityLayer data={chartData.courses}>
+          <BarChart accessibilityLayer data={chartData?.courses}>
             <CartesianGrid vertical={false} />
             <YAxis
               tickLine={false}
@@ -155,7 +153,7 @@ export default function CourseStats() {
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContentMoney hideLabel />}
             />
             <Bar dataKey="profit" fill="hsl(var(--chart-2))" radius={8} />
           </BarChart>
