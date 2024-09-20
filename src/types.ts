@@ -64,6 +64,7 @@ export type Course = {
   num_reviews: number;
   duration: string;
   is_active: boolean;
+  price: number;
   sort_order: number;
   is_user_enrolled: boolean;
   created_at: string;

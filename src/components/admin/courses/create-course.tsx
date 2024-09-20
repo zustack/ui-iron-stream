@@ -2,11 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Loader,
-  Paperclip,
-  PlusCircle,
-} from "lucide-react";
+import { Loader, Paperclip, PlusCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useState, ChangeEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,12 +22,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function CreateCourse() {
-
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("Created by ");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [active, setActive] = useState(false);
+  const [price, setPrice] = useState("");
   const [thumbnail, setThumbnail] = useState<File>();
   const [video, setVideo] = useState<File>();
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -60,6 +56,7 @@ export default function CreateCourse() {
     author: string;
     duration: string;
     is_active: boolean;
+    price: string;
     thumbnail: File;
     preview_tmp: string;
   };
@@ -72,13 +69,16 @@ export default function CreateCourse() {
       setTitle("");
       setDescription("");
       setAuthor("Created by ");
-      setActive(false)
+      setActive(false);
+      setPrice("");
       setDuration("");
       setThumbnail(undefined);
       setVideo(undefined);
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "An unexpected error occurred.");
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -105,13 +105,16 @@ export default function CreateCourse() {
           author,
           duration,
           is_active: active,
+          price,
           thumbnail,
           preview_tmp: response,
         });
       }
     },
     onError: (error: ErrorResponse) => {
-      toast.error(error.response?.data?.error || "An unexpected error occurred.");
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
     },
   });
 
@@ -126,18 +129,22 @@ export default function CreateCourse() {
           author,
           duration,
           is_active: active,
+          price,
           thumbnail,
           preview_tmp: "",
         });
       } else {
         toast.error("The thumbnail is required");
-        return
+        return;
       }
     }
   }
 
   return (
-    <AlertDialog onOpenChange={(open: boolean) => setIsOpen(open)} open={isOpen}>
+    <AlertDialog
+      onOpenChange={(open: boolean) => setIsOpen(open)}
+      open={isOpen}
+    >
       <AlertDialogTrigger>
         <Button size="sm" className="h-8 gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
@@ -202,6 +209,23 @@ export default function CreateCourse() {
                       </div>
 
                       <div className="grid gap-2">
+                        <Label htmlFor="price">Price</Label>
+                        <Input
+                          id="price"
+                          value={price}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                              setPrice(value);
+                            }
+                          }}
+                          placeholder="Price"
+                          inputMode="decimal"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
                         <Label htmlFor="thumbnail">Thumbnail</Label>
                         <Button
                           id="thumbnail"
@@ -246,7 +270,7 @@ export default function CreateCourse() {
                             ) : (
                               <>Recomended aspect ratio 16:9 (MP4, MOV, MKV)</>
                             )}
-                            </span>
+                          </span>
                         </Button>
                         <Input
                           ref={videoRef}
@@ -283,10 +307,12 @@ export default function CreateCourse() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-          disabled={
-            createCourseMutation.isPending || uploadChunkMutation.isPending
-          }
-          >Cancel</AlertDialogCancel>
+            disabled={
+              createCourseMutation.isPending || uploadChunkMutation.isPending
+            }
+          >
+            Cancel
+          </AlertDialogCancel>
           <Button
             className="flex gap-2"
             disabled={
@@ -294,12 +320,11 @@ export default function CreateCourse() {
             }
             onClick={detonateChain}
           >
-              <span>
-              Create course
-              </span>
-              {(createCourseMutation.isPending || uploadChunkMutation.isPending) && (
-                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
-              )}
+            <span>Create course</span>
+            {(createCourseMutation.isPending ||
+              uploadChunkMutation.isPending) && (
+              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
+            )}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

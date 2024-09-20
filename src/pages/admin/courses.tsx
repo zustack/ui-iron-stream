@@ -227,6 +227,7 @@ export default function AdminCourses() {
               <TableHead>Description</TableHead>
               <TableHead>Author</TableHead>
               <TableHead>Duration</TableHead>
+              <TableHead>Price</TableHead>
               <TableHead>Thumbnail</TableHead>
               <TableHead>Preview</TableHead>
               <TableHead>Rating</TableHead>
@@ -322,6 +323,10 @@ export default function AdminCourses() {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
+                </TableCell>
+
+                <TableCell>
+                $ {course.price}
                 </TableCell>
                 <TableCell>
                   <ImageDialog

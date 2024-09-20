@@ -14,8 +14,13 @@ export const adminCourses = async (searchParam: string, active: string) => {
   return response.data;
 };
 
-export const updateCourseActiveStatus = async (course_id: number, active: boolean) => {
-  const response = await authAxios.put(`/courses/update/active/${course_id}/${active}`);
+export const updateCourseActiveStatus = async (
+  course_id: number,
+  active: boolean
+) => {
+  const response = await authAxios.put(
+    `/courses/update/active/${course_id}/${active}`
+  );
   return response.data;
 };
 
@@ -45,6 +50,7 @@ export const updateCourse = async ({
   author,
   duration,
   is_active,
+  price,
   thumbnail,
   old_thumbnail,
   preview_tmp,
@@ -56,6 +62,7 @@ export const updateCourse = async ({
   author: string;
   duration: string;
   is_active: boolean;
+  price: string;
   thumbnail: File | undefined;
   old_thumbnail: string;
   preview_tmp: string;
@@ -68,6 +75,7 @@ export const updateCourse = async ({
   formData.append("author", author);
   formData.append("duration", duration);
   formData.append("is_active", is_active.toString());
+  formData.append("price", price);
   formData.append("thumbnail", thumbnail || "");
   formData.append("old_thumbnail", old_thumbnail);
   formData.append("preview_tmp", preview_tmp);
@@ -84,6 +92,7 @@ export const createCourse = async ({
   author,
   duration,
   is_active,
+  price,
   thumbnail,
   preview_tmp,
 }: {
@@ -92,6 +101,7 @@ export const createCourse = async ({
   author: string;
   duration: string;
   is_active: boolean;
+  price: string;
   thumbnail: File;
   preview_tmp: string;
 }) => {
@@ -101,6 +111,7 @@ export const createCourse = async ({
   formData.append("author", author);
   formData.append("duration", duration);
   formData.append("is_active", is_active.toString());
+  formData.append("price", price);
   formData.append("thumbnail", thumbnail);
   formData.append("preview_tmp", preview_tmp);
 

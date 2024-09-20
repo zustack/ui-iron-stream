@@ -28,10 +28,10 @@ export default function UpdateCourse({ course }: { course: Course }) {
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [active, setActive] = useState(false);
+  const [price, setPrice] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File>();
   const [oldThumbnail, setOldThumbnail] = useState("");
-  const [sortOrder, setSortOrder] = useState("");
   const [video, setVideo] = useState<File>();
   const [oldVideo, setOldVideo] = useState("");
   const queryClient = useQueryClient();
@@ -40,11 +40,11 @@ export default function UpdateCourse({ course }: { course: Course }) {
 
   useEffect(() => {
     setTitle(course.title);
-    setSortOrder(String(course.sort_order));
     setDescription(course.description);
     setAuthor(course.author);
     setDuration(course.duration);
     setActive(course.is_active);
+    setPrice(String(course.price));
     setOldThumbnail(course.thumbnail);
     setOldVideo(course.preview);
   }, [course]);
@@ -70,6 +70,7 @@ export default function UpdateCourse({ course }: { course: Course }) {
     author: string;
     duration: string;
     is_active: boolean;
+    price: string;
     thumbnail: File | undefined;
     old_thumbnail: string;
     preview_tmp: string;
@@ -114,6 +115,7 @@ export default function UpdateCourse({ course }: { course: Course }) {
         author,
         duration,
         is_active: active,
+        price,
         thumbnail,
         old_thumbnail: oldThumbnail,
         old_preview: oldVideo,
@@ -139,6 +141,7 @@ export default function UpdateCourse({ course }: { course: Course }) {
         author,
         duration,
         is_active: active,
+        price,
         thumbnail,
         old_thumbnail: oldThumbnail,
         old_preview: oldVideo,
@@ -208,6 +211,22 @@ export default function UpdateCourse({ course }: { course: Course }) {
                           value={duration}
                           onChange={(e) => setDuration(e.target.value)}
                           placeholder="Duration"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="price">Price</Label>
+                        <Input
+                          id="price"
+                          value={price}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                              setPrice(value);
+                            }
+                          }}
+                          placeholder="Price"
                           required
                         />
                       </div>
@@ -304,7 +323,7 @@ export default function UpdateCourse({ course }: { course: Course }) {
             <span>Update course</span>
             {(updateCourseMutation.isPending ||
               uploadChunkMutation.isPending) && (
-            <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
+              <Loader className="h-6 w-6 text-zinc-900 animate-spin slower items-center flex justify-center" />
             )}
           </Button>
         </AlertDialogFooter>
