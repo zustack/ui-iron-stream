@@ -126,15 +126,8 @@ export default function Home() {
                       navigate(`/video/${course.id}`);
                     }}
                   >
-                    Watch
+                    Watch course
                     <ChevronRight className="h-5 w-5" />
-                  </Button>
-
-                  <Button
-                    onClick={() => navigate(`/reviews/${course.id}`)}
-                  >
-                    Create review
-                    <MessageSquareMore className="h-5 w-5 ml-2" />
                   </Button>
                 </>
               ) : (

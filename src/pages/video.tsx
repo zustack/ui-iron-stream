@@ -55,12 +55,14 @@ export default function Video() {
   const [hoverNote, setHoverNote] = useState(0);
   const [mutationSent, setMutationSent] = useState(false);
 
+  const [rVisible, setRVisible] = useState(true);
   const [description, setDescription] = useState("");
   const [rating, setRating] = useState(5);
 
   const createReviewMutation = useMutation({
     mutationFn: () => createReview(description, rating, courseId || ""),
     onSuccess: () => {
+      setRVisible(false);
       toast.success("Thank you for your feedback!");
     },
     onError: (error: ErrorResponse) => {
@@ -488,7 +490,7 @@ export default function Video() {
             {currentVideo?.video.description}
           </p>
 
-          {currentVideo?.video.s_review && (
+          {(currentVideo?.video.s_review && !currentVideo?.userHasReviewed && rVisible) && (
             <div className="mt-8">
               <Textarea
                 value={description}
