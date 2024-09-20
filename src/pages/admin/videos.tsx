@@ -12,7 +12,7 @@ import { ChevronLeft, Loader, Paperclip, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, ChangeEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Tooltip,
   TooltipContent,
@@ -20,24 +20,44 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { adminVideos } from "@/api/videos";
+import { adminVideos, updateSReview } from "@/api/videos";
 import CreateVideo from "@/components/admin/videos/create-video";
 import UpdateVideo from "@/components/admin/videos/update-video";
 import DeleteVideo from "@/components/admin/videos/delete-video";
 import { WebviewWindow } from "@tauri-apps/api/window";
 import VideoDialog from "@/components/admin/video-dialog";
-import { Video } from "@/types";
+import { Video, ErrorResponse } from "@/types";
 import ImageDialog from "@/components/admin/image-dialog";
+import toast from "react-hot-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AdminVideos() {
   const { courseId, courseTitle } = useParams();
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const [activeId, setActiveId] = useState(0);
 
   const { data, isFetching, isError, error } = useQuery({
     queryKey: ["admin-videos", debouncedSearchTerm],
     queryFn: () => adminVideos(debouncedSearchTerm, courseId),
+  });
+
+  const queryClient = useQueryClient();
+
+  const updateSReviewMutation = useMutation({
+    mutationFn: ({ id, s_review }: { id: number; s_review: boolean }) =>
+      updateSReview(id, s_review),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error ||
+          "An error occurred, please try again later"
+      );
+    },
   });
 
   useEffect(() => {
@@ -125,6 +145,7 @@ export default function AdminVideos() {
           </TableCaption>
           <TableHeader>
             <TableRow>
+              <TableHead>Should review</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Views</TableHead>
@@ -139,6 +160,22 @@ export default function AdminVideos() {
           <TableBody>
             {data?.map((video: Video) => (
               <TableRow>
+                <TableCell>
+                  {activeId === video.id && updateSReviewMutation.isPending ? (
+                    <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+                  ) : (
+                    <Checkbox
+                      onClick={() => {
+                        updateSReviewMutation.mutate({
+                          id: video.id,
+                          s_review: !video.s_review,
+                        });
+                        setActiveId(video.id);
+                      }}
+                      checked={video.s_review}
+                    />
+                  )}
+                </TableCell>
                 <TableCell>{video.title}</TableCell>
                 <TableCell>
                   <TooltipProvider>
@@ -174,7 +211,11 @@ export default function AdminVideos() {
 
                 <TableCell className="text-right">
                   <Button
-                  onClick={() =>  navigate(`/admin/files/${courseId}/${courseTitle}/${video.id}/${video.title}`)}
+                    onClick={() =>
+                      navigate(
+                        `/admin/files/${courseId}/${courseTitle}/${video.id}/${video.title}`
+                      )
+                    }
                     variant="outline"
                     size="icon"
                     className="h-8 gap-1 mx-1"

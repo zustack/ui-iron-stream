@@ -131,7 +131,7 @@ export default function Home() {
                   </Button>
 
                   <Button
-                    onClick={() => navigate(`/reviews/create/${course.id}`)}
+                    onClick={() => navigate(`/reviews/${course.id}`)}
                   >
                     Create review
                     <MessageSquareMore className="h-5 w-5 ml-2" />

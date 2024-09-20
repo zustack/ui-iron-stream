@@ -78,6 +78,7 @@ export type Video = {
   thumbnail: string;
   duration: string;
   video_hls: string;
+  s_review: boolean;
   created_at: string;
 };
 

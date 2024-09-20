@@ -1,5 +1,10 @@
 import { authAxios } from "@/lib/axiosInstances";
 
+export const updateSReview= async (id: number, s_review: boolean) => {
+  const response = await authAxios.put(`/videos/s_review/${id}/${s_review}`);
+  return response.data;
+};
+
 export const deleteVideo = async (id: number) => {
   const response = await authAxios.delete(`/videos/${id}`);
   return response.data;

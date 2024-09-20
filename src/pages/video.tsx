@@ -28,6 +28,9 @@ import { ErrorResponse } from "@/types";
 import { useAuthStore } from "@/store/auth";
 import { createNote, deleteNote, getNotes, updateNote } from "@/api/notes";
 import { foundAppsLog } from "@/api/user_log";
+import { Rating } from "@mui/material";
+import StarIcon from "@mui/icons-material/Star";
+import { createReview } from "@/api/reviews";
 
 type App = {
   name: string;
@@ -51,6 +54,21 @@ export default function Video() {
   const [editingNote, setEditingNote] = useState(false);
   const [hoverNote, setHoverNote] = useState(0);
   const [mutationSent, setMutationSent] = useState(false);
+
+  const [description, setDescription] = useState("");
+  const [rating, setRating] = useState(5);
+
+  const createReviewMutation = useMutation({
+    mutationFn: () => createReview(description, rating, courseId || ""),
+    onSuccess: () => {
+      toast.success("Thank you for your feedback!");
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(
+        error.response?.data?.error || "An unexpected error occurred."
+      );
+    },
+  });
 
   const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["fobidden-apps"],
@@ -104,7 +122,7 @@ export default function Video() {
     }
     setFoundApps([]);
     setLoading(false);
-    setMutationSent(false)
+    setMutationSent(false);
     videoRef.current?.play();
   }
 
@@ -140,8 +158,8 @@ export default function Video() {
       return output.stdout.includes(item.process_name);
     });
     if (found.length > 0) {
-      videoRef.current?.pause()
-      setMutationSent(true)
+      videoRef.current?.pause();
+      setMutationSent(true);
       if (!mutationSent) {
         foundAppsMutation.mutate(found);
       }
@@ -469,6 +487,44 @@ export default function Video() {
           <p className="text-zinc-400 mt-2">
             {currentVideo?.video.description}
           </p>
+
+          {currentVideo?.video.s_review && (
+            <div className="mt-8">
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Leave a review"
+              />
+              <div className="flex justify-between items-center">
+                <Rating
+                  name="text-feedback"
+                  value={rating}
+                  onChange={(_, newValue) => {
+                    if (!newValue) return;
+                    setRating(newValue);
+                  }}
+                  precision={0.5}
+                  size="large"
+                  className="my-[20px]"
+                  icon={
+                    <StarIcon className="text-yellow-500" fontSize="large" />
+                  }
+                  emptyIcon={
+                    <StarIcon className="text-zinc-500" fontSize="large" />
+                  }
+                />
+                <Button
+                  disabled={createReviewMutation.isPending}
+                  onClick={() => createReviewMutation.mutate()}
+                >
+                  {createReviewMutation.isPending && (
+                    <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
+                  )}
+                  Create review
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {foundApps?.length > 0 && (

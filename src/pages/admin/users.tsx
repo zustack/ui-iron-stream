@@ -51,6 +51,12 @@ import DeleteUser from "@/components/admin/users/delete-user";
 import { deleteNotifications } from "@/api/notifications";
 import { DateRange } from "react-day-picker";
 import AdminUserLog from "@/components/admin/users/user-log";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function AdminUsers() {
   const [searchInput, setSearchInput] = useState("");
@@ -87,7 +93,7 @@ export default function AdminUsers() {
       specialParam,
       verifiedParam,
       date?.from,
-      date?.to
+      date?.to,
     ],
     queryFn: async ({ pageParam }) => {
       return adminUsers({
@@ -97,8 +103,10 @@ export default function AdminUsers() {
         admin: adminParam,
         special: specialParam,
         verified: verifiedParam,
-        from: String(date?.from == undefined ? "" : format(date.from, "dd/MM/yyyy")),
-        to: String(date?.to == undefined ? "" : format(date.to, "dd/MM/yyyy"))
+        from: String(
+          date?.from == undefined ? "" : format(date.from, "dd/MM/yyyy")
+        ),
+        to: String(date?.to == undefined ? "" : format(date.to, "dd/MM/yyyy")),
       });
     },
     getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
@@ -567,7 +575,18 @@ export default function AdminUsers() {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.name}</TableCell>
                       <TableCell>{user.surname}</TableCell>
-                      <TableCell>{user.pc}</TableCell>
+                      <TableCell>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              {user.pc.slice(0, 8)}...
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{user.pc}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
                       <TableCell>{user.os}</TableCell>
                       <TableCell>{user.created_at}</TableCell>
 
