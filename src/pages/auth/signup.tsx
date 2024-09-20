@@ -75,7 +75,11 @@ export default function Signup() {
       }
 
       if (data && platformName == "linux") {
-        setPc(data);
+        const match = data.match(/Machine ID:\s*([a-f0-9]+)/);
+        if (match) {
+          const serial_number = match[1];
+          setPc(serial_number);
+        }
       }
     }
     getSerialNumber();

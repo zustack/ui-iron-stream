@@ -26,8 +26,8 @@
            
           {
             "name": "serial-linux",
-            "cmd": "echo",
-            "args": ["$(whoami)@$(hostname)"]
+            "cmd": "hostnamectl",
+            "args": ["status"]
           },
           {
             "name": "serial-win",

@@ -57,7 +57,11 @@ export default function Login() {
       }
 
       if (data && platformName == "linux") {
-        setPc(data);
+        const match = data.match(/Machine ID:\s*([a-f0-9]+)/);
+        if (match) {
+          const serial_number = match[1];
+          setPc(serial_number);
+        }
       }
     }
     getSerialNumber();
@@ -130,9 +134,11 @@ export default function Login() {
                 placeholder="••••••••"
               />
             </div>
-            <Button 
-            type="submit"
-            className="flex gap-2" disabled={loginMutation.isPending}>
+            <Button
+              type="submit"
+              className="flex gap-2"
+              disabled={loginMutation.isPending}
+            >
               {loginMutation.isPending && (
                 <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
               )}
