@@ -45,7 +45,7 @@ export default function Navbar() {
       const video = document.getElementById("video") as HTMLMediaElement;
       const historyId = localStorage.getItem("historyId");
       updateHistoryMutation.mutate({
-        resume: video.currentTime,
+        resume: video?.currentTime,
         historyId: historyId || "",
       });
       navigate(path);
@@ -62,7 +62,7 @@ export default function Navbar() {
             onClick={() => {
               handleNavigation("/home");
             }}
-            className="flex gap-2 font-semibold text-xl text-foreground transition-colors hover:text-white cursor-pointer"
+            className="flex gap-2 font-bold text-xl text-foreground"
           >
             <Eclipse className="h-6 w-6" />
             <span>Iron</span>
@@ -88,24 +88,9 @@ export default function Navbar() {
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => handleNavigation("/admin/users")}
+                      onClick={() => handleNavigation("/admin/statistics")}
                     >
-                      Users
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleNavigation("/admin/courses")}
-                    >
-                      Courses
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleNavigation("/admin/apps")}
-                    >
-                      Apps
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleNavigation("/admin/reviews")}
-                    >
-                      Reviews
+                      Admin panel
                     </DropdownMenuItem>
                   </>
                 )}

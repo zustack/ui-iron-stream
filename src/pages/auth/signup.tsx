@@ -52,7 +52,7 @@ export default function Signup() {
         setOs("Linux");
         commandName = "serial-linux";
       } else {
-        toast.error("Ocurrio un error");
+        toast.error("An unexpected error occurred.");
         return;
       }
 
@@ -103,6 +103,10 @@ export default function Signup() {
       toast.error("Passwords do not match");
       return;
     }
+    if (!privacyPolicy) {
+      toast.error("Please accept the privacy policy");
+      return;
+    }
     signUpMutation.mutate();
   };
 
@@ -110,7 +114,6 @@ export default function Signup() {
     queryKey: ["policy"],
     queryFn: () => getPolicy(),
   });
-  console.log(data);
 
   if (success) {
     return (
@@ -143,7 +146,7 @@ export default function Signup() {
           </div>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2 mb-4">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email">Email address</Label>
               <Input
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
@@ -167,13 +170,13 @@ export default function Signup() {
             </div>
 
             <div className="grid gap-2 mb-4">
-              <Label htmlFor="last-name">Last name</Label>
+              <Label htmlFor="surname">Surname</Label>
               <Input
-                id="last-name"
+                id="surnmae"
                 type="text"
                 onChange={(e) => setSurname(e.target.value)}
                 value={surname}
-                placeholder="Your last name"
+                placeholder="Your surname"
                 required
               />
             </div>
@@ -289,7 +292,7 @@ export default function Signup() {
             </Button>
           </form>
 
-          <div className="text-center text-sm">
+          <div className="text-center">
             Have an account?{" "}
             <Link to="/login" className="underline">
               Login
@@ -298,7 +301,7 @@ export default function Signup() {
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
-        <img src={Logo} alt="Login image" />
+        <img src={Logo} alt="Logo image" />
       </div>
     </div>
   );

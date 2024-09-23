@@ -26,10 +26,13 @@ export default function AdminPolicy() {
       <div className="bg-muted/40 flex justify-between items-center px-[10px] h-[60px] border border-b">
         <div className="ml-auto flex items-center gap-2">
           <p className="text-sm text-muted-foreground">
+
+          {data != null && !isFetching && (
             <span>
               {data?.length}{" "}
               {data?.length === 1 ? " policy found." : " policys found."}
             </span>
+          )}
           </p>
           <CreatePolicy />
         </div>
@@ -38,6 +41,13 @@ export default function AdminPolicy() {
       <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
         <Table>
           <TableCaption>
+
+          {data == null && !isFetching && (
+              <div className="h-[100px] flex justify-center items-center">
+                No policies found
+              </div>
+            )}
+
             {isFetching && (
               <div className="h-[100px] flex justify-center items-center">
                 <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />

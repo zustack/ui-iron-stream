@@ -147,12 +147,6 @@ export default function Video() {
     const command = new Command(commandName);
     const output = await command.execute();
     const found = data.filter((item: any) => {
-      /*
-      const foundToRq = found;
-      if (foundToRq != found) {
-        foundAppsMutation.mutate();
-      }
-      */
       if (item.execute_always && output.stdout.includes(item.process_name)) {
         killAppsAlways(item.process_name);
         return;
@@ -211,6 +205,7 @@ export default function Video() {
             }
           },
         });
+
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -467,7 +462,7 @@ export default function Video() {
         )}
 
         <div style={{ display: isFetching || isLoading ? "none" : "block" }}>
-          <video id="video" ref={videoRef} autoPlay={true} />
+          <video id="video-player" ref={videoRef} autoPlay={true} />
           <div className="flex justify-between mt-2">
             <h1 className="text-zinc-200 text-2xl font-semibold">
               {currentVideo?.video.title}

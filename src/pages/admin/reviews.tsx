@@ -122,10 +122,12 @@ export default function AdminReviews() {
 
         <div className="ml-auto flex items-center gap-2">
           <p className="text-sm text-muted-foreground">
+          {data != null && !isFetching && (
             <span>
               {data?.length}{" "}
               {data?.length === 1 ? " review found." : " reviews found."}
             </span>
+          )}
           </p>
 
           {isNotification != null && (
@@ -202,6 +204,13 @@ export default function AdminReviews() {
       <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
         <Table>
           <TableCaption>
+
+          {data == null && !isFetching && (
+              <div className="h-[100px] flex justify-center items-center">
+                No reviews found
+              </div>
+            )}
+
             {isFetching && (
               <div className="h-[100px] flex justify-center items-center">
                 <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />

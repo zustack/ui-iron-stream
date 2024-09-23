@@ -107,14 +107,10 @@ export default function AdminVideos() {
           </p>
 
           <p className="text-sm text-muted-foreground">
-            {data == null ? (
-              <div className="h-[100px] flex justify-center items-center">
-                <span>No videos found.</span>
-              </div>
-            ) : (
+          {data != null && !isFetching && (
               <span>
                 {data?.length}{" "}
-                {data?.length === 1 ? " course found." : " courses found."}
+                {data?.length === 1 ? " video found." : " videos found."}
               </span>
             )}
           </p>

@@ -83,8 +83,8 @@ export default function EmailVerification({
             </h1>
             <p className="text-balance text-muted-foreground mb-4">
               Enter the code sent to your email address{" "}
-              <span className="text-zinc-100 font-semibold">{email}</span> ,
-              could be in your spam folder.
+              <span className="text-zinc-100 font-semibold">{email}</span> .
+              It may be in your spam folder.
             </p>
           </div>
 
@@ -121,7 +121,7 @@ export default function EmailVerification({
             </div>
           </form>
 
-          <div className="flex justify-center gap-1 text-center text-sm">
+          <div className="flex justify-center gap-1 text-center">
             <p>Didn't receive the code? </p>
 
             {resendEmailMutation.isPending ? (
@@ -136,7 +136,7 @@ export default function EmailVerification({
             )}
           </div>
 
-          <div className="flex justify-center gap-1 text-center text-sm">
+          <div className="flex justify-center gap-1 text-center">
             <p>Discard account and</p>
 
             {deleteAccountByEmailMutation.isPending ? (
@@ -154,7 +154,7 @@ export default function EmailVerification({
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
-        <img src={Logo} alt="Login image" />
+        <img src={Logo} alt="Logo image" />
       </div>
     </div>
   );

@@ -155,7 +155,9 @@ export default function Login() {
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
-        <img src={Logo} alt="Login image" />
+        <img 
+        src={Logo} 
+        alt="Logo image" />
       </div>
     </div>
   );

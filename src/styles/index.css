@@ -3,8 +3,10 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: "Roboto-Regular";
-  src: url(../assets/Roboto-Regular.ttf) format("truetype");
+  font-family: "Geist";
+  src: url('../assets/fonts/Geist-Regular.woff2') format('woff'); 
+  font-weight: normal;
+  font-style: normal;
 }
 
 @keyframes slow-spin {
@@ -26,7 +28,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: "Roboto-Regular", sans-serif;
+    font-family: "Geist", sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 

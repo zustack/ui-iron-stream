@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   ChevronRight,
   Loader,
-  MessageSquareMore,
   Search,
   Video,
   Lock,
@@ -97,7 +96,7 @@ export default function Home() {
               <div className="flex gap-2 mb-6">
                 <Rating
                   name="text-feedback"
-                  value={4}
+                  value={course.rating}
                   readOnly
                   precision={0.5}
                   size="medium"
@@ -108,9 +107,11 @@ export default function Home() {
                     <StarIcon className="text-zinc-500" fontSize="medium" />
                   }
                 />
-                <p>{course.rating}</p>
+                <p>
+                {course.rating}
+                </p>
                 <Link to={`/reviews/${course.id}`} className="underline">
-                  Read reviews
+                  Go to reviews
                 </Link>
               </div>
 

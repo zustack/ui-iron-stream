@@ -85,7 +85,7 @@ export default function AdminApps() {
 
   return (
     <>
-      <div className="bg-muted/40 flex justify-between pt-2 pb-[10px] px-11 border border-b">
+      <div className="bg-muted/40 flex justify-between items-center px-[10px] h-[60px] border border-b">
         <div>
           <form className="ml-auto flex-1 sm:flex-initial mr-4">
             <div className="relative">
@@ -104,9 +104,7 @@ export default function AdminApps() {
         <div className="ml-auto flex items-center gap-2">
 
           <p className="text-sm text-muted-foreground">
-          {data == null && status !== "pending" ? (
-              <span>No apps found.</span>
-          ) : (
+          {data != null && status !== "pending" && (
             <span>
               {data?.length}{" "}
               {data?.length === 1 ? " app found." : " apps found."}

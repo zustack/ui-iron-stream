@@ -8,7 +8,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PasswordInput } from "@/components/ui/password-input";
 import { useAuthStore } from "@/store/auth";
 import { useMutation } from "@tanstack/react-query";
@@ -260,6 +260,14 @@ export default function ResetPassword() {
                 <span>Next step</span>
               </Button>
             </form>
+
+          <div className="text-center">
+            Go back to {" "}
+            <Link to="/login" className="underline">
+              Login
+            </Link>
+          </div>
+
           </div>
         </div>
         <div className="hidden bg-muted lg:block">

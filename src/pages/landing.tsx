@@ -23,20 +23,23 @@ export default function Landing() {
       >
         <div className="mr-auto place-self-center lg:col-span-7">
           <h1
-            className="max-w-2xl mb-4 text-4xl ont-bold tracking-tight 
-                         leading-none md:text-5xl xl:text-6xl text-zinc-200"
+            className="
+            max-w-2xl mb-4 text-4xl font-bold tracking-tight 
+                         md:text-5xl xl:text-6xl text-zinc-200"
           >
             Iron <span className="text-indigo-400">Stream</span>
           </h1>
-          <p className="max-w-2xl mb-6 text-muted-foreground lg:mb-8">
+          <p className="max-w-2xl mb-6 text-xl text-muted-foreground lg:mb-8">
             Courses aimed at students and professionals to help them understand
             and apply knowledge.
           </p>
           <div className="flex gap-4">
-            <Button onClick={() => navigate("/login")}>Login to your account</Button>
-            <Button 
-            variant={"outline"}
-            onClick={() => navigate("/signup")}>Create a new account</Button>
+            <Button onClick={() => navigate("/login")}>
+              Login to your account
+            </Button>
+            <Button variant={"outline"} onClick={() => navigate("/signup")}>
+              Create a new account
+            </Button>
           </div>
         </div>
         <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">

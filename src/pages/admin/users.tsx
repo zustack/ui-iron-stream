@@ -204,7 +204,7 @@ export default function AdminUsers() {
 
   return (
     <>
-      <div className="bg-muted/40 flex justify-between pt-2 pb-[10px] px-11 border border-b">
+      <div className="bg-muted/40 flex justify-between items-center px-[10px] h-[60px] border border-b">
         <div>
           <form className="ml-auto flex-1 sm:flex-initial mr-4">
             <div className="relative">

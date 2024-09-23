@@ -66,7 +66,7 @@ function App() {
 
   useEffect(() => {
     const unlisten = appWindow.listen("tauri://close-requested", async () => {
-      if (location.pathname.includes("video")) {
+      if (location.pathname.slice(0, 6) == "video") {
         const video = document.getElementById("video") as HTMLMediaElement;
         const historyId = localStorage.getItem("historyId");
         updateHistoryMutation.mutate({
@@ -74,10 +74,10 @@ function App() {
           historyId: historyId || "",
         });
       } else if (
+        location.pathname === "/" ||
         location.pathname === "/login" ||
         location.pathname === "/register" ||
-        location.pathname === "/reset-password" ||
-        location.pathname.includes("files")
+        location.pathname === "/reset-password"
       ) {
         appWindow.close();
       } else {
