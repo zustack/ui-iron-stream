@@ -17,6 +17,7 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import LoadImage from "@/components/load-image";
+import Spinner from "@/components/ui/spinner";
 
 export default function Home() {
   const [searchInput, setSearchInput] = useState("");
@@ -64,17 +65,17 @@ export default function Home() {
 
       {isLoading && (
         <div className="h-[100px] flex justify-center items-center">
-          <Loader className="h-6 w-6 text-base animate-spin slower" />
+          <Spinner />
         </div>
       )}
 
       {isError && (
         <div className="h-[100px] flex justify-center items-center">
-          Error: {error.message}
+          An unexpected error occurred.
         </div>
       )}
 
-      <div className="flex flex-col gap-[10px]">
+      <div className="flex flex-col gap-[20px]">
       {data?.map((course: Course) => (
         <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-1 xl:grid-cols-2 min-h-[379px] border">
           <div className="p-1">
@@ -112,7 +113,7 @@ export default function Home() {
                 <p>
                 {course.rating}
                 </p>
-                <Link to={`/reviews/${course.id}`} className="underline text-blue-600">
+                <Link to={`/reviews/${course.id}`} className="underline text-blue-600 hover:text-blue-500">
                   Go to reviews
                 </Link>
               </div>
@@ -136,7 +137,6 @@ export default function Home() {
                 </>
               ) : (
                 <Button
-                  onClick={() => toast.error("No tienes acceso a este curso")}
                 >
                   You don't have access to this course
                   <Lock className="h-5 w-5 ml-2" />

@@ -1,13 +1,9 @@
 @charset "UTF-8";
-
 @keyframes plyr-progress {
   to {
     background-position: 25px 0;
     background-position: var(--plyr-progress-loading-size, 25px) 0;
   }
-}
-.player {
-  --plyr-color-main: #00b3ff;
 }
 @keyframes plyr-popup {
   0% {
@@ -47,7 +43,7 @@
   text-shadow: none;
   transition: box-shadow 0.3s ease;
   z-index: 0;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 .plyr audio,
 .plyr iframe,
@@ -78,6 +74,7 @@
 .plyr--full-ui label {
   touch-action: manipulation;
 }
+
 .plyr__badge {
   background: #4a5464;
   background: var(--plyr-badge-background, #4a5464);
@@ -90,6 +87,7 @@
   line-height: 1;
   padding: 3px 4px;
 }
+
 .plyr--full-ui ::-webkit-media-text-track-container {
   display: none;
 }
@@ -254,15 +252,15 @@ a.plyr__control:before {
 }
 .plyr__menu__container {
   animation: plyr-popup 0.2s ease;
-  background: #ffffffe6;
-  background: var(--plyr-menu-background, #ffffffe6);
+  background: #4a5464;
+  background: var(--plyr-menu-background, #4a5464);
   border-radius: 8px;
   border-radius: var(--plyr-menu-radius, 8px);
   bottom: 100%;
-  box-shadow: 0 1px 2px #00000026;
-  box-shadow: var(--plyr-menu-shadow, 0 1px 2px #00000026);
-  color: #4a5464;
-  color: var(--plyr-menu-color, #4a5464);
+  box-shadow: 0 1px 2px #ffffff;
+  box-shadow: var(--plyr-menu-shadow, 0 1px 2px #ffffff);
+  color: #ffffff;
+  color: var(--plyr-menu-color, #ffffff);
   font-size: 15px;
   font-size: var(--plyr-font-size-base, 15px);
   margin-bottom: 10px;
@@ -308,8 +306,8 @@ a.plyr__control:before {
 }
 .plyr__menu__container .plyr__control {
   align-items: center;
-  color: #4a5464;
-  color: var(--plyr-menu-color, #4a5464);
+  color: #ffffff;
+  color: var(--plyr-menu-color, #ffffff);
   display: flex;
   font-size: 13px;
   font-size: var(--plyr-font-size-menu, var(--plyr-font-size-small, 13px));

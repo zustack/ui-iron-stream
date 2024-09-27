@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Command } from "@tauri-apps/api/shell";
 import { useEffect, useState, ChangeEvent, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { File, Loader, Pencil, Search, Trash } from "lucide-react";
+import { File, Pencil, Search, Trash } from "lucide-react";
 import { getForbiddenApps } from "@/api/apps";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,8 @@ import { foundAppsLog } from "@/api/user_log";
 import { Rating } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import { createReview } from "@/api/reviews";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Spinner from "@/components/ui/spinner";
 
 type App = {
   name: string;
@@ -324,9 +326,9 @@ export default function Video() {
 
   if (isError) {
     return (
-      <div className="text-center flex justify-center text-3xl">
-        Something went wrong
-      </div>
+      <h3 className="text-center flex justify-center items-center text-3xl">
+        An unexpected error occurred.
+      </h3>
     );
   }
 
@@ -350,6 +352,11 @@ export default function Video() {
               <div className="flex flex-col gap-2">
                 <Button
                   disabled={updateNoteMutation.isPending}
+                  onClick={() => {
+                    setCurrentNoteId(0);
+                    setEditingNote(false);
+                    setBody("");
+                  }}
                   variant="outline"
                   className="self-end flex gap-2 w-full h-full"
                 >
@@ -361,12 +368,10 @@ export default function Video() {
                   }}
                   disabled={updateNoteMutation.isPending}
                   variant="outline"
-                  className="self-end flex gap-2 w-full h-full"
+                  className="bg-blue-600 hover:bg-blue-500 text-white self-end flex gap-2 w-full h-full"
                 >
-                  {updateNoteMutation.isPending && (
-                    <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
-                  )}
                   <span>Save note</span>
+                  {updateNoteMutation.isPending && <Spinner />}
                 </Button>
               </div>
             ) : (
@@ -375,98 +380,110 @@ export default function Video() {
                   createNewNoteMutation.mutate();
                 }}
                 disabled={createNewNoteMutation.isPending}
-                variant="outline"
-                className="self-end flex gap-2"
+                className="bg-blue-600 hover:bg-blue-500 text-white self-end flex gap-2"
               >
-                {createNewNoteMutation.isPending && (
-                  <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
-                )}
+                {createNewNoteMutation.isPending && <span>Save note</span>}
                 <span>Save note</span>
               </Button>
             )}
           </div>
         </div>
 
-        {lNotes && <Skeleton className="h-[660px] w-[1173px] rounded-xl" />}
+        {lNotes && (
+          <div className="flex justify-center mt-[100px]">
+            <Spinner />
+          </div>
+        )}
 
-        {eNotes && <p>Error with notes</p>}
+        {eNotes && (
+          <div className="flex justify-center mt-[100px]">
+            <p>An unexpected error occurred.</p>
+          </div>
+        )}
 
-        <div className="bg-zinc-900 rounded-[0.75rem] mt-[10px] overflow-auto h-[calc(100vh-60px-100px-30px)]">
-          <div className="h-full p-2">
-            {notes?.map((n: any) => (
-              <div
-                onMouseEnter={() => setHoverNote(n.id)}
-                onMouseLeave={() => setHoverNote(0)}
-                className={
-                  currentNoteId === n.id
-                    ? `bg-zinc-800 rounded-[0.75rem] cursor-pointer p-3 px-3 border-[0.5px] border-indigo-500`
-                    : `hover:bg-zinc-800 rounded-[0.75rem] cursor-pointer 
+        {!lNotes && (
+          <ScrollArea className="bg-zinc-900 rounded-[8px] mt-[10px] overflow-auto h-[calc(100vh-60px-100px-30px)]">
+            <div className="h-full p-[5px] pr-[12px]">
+              {notes?.map((n: any) => (
+                <div
+                  onMouseEnter={() => setHoverNote(n.id)}
+                  onMouseLeave={() => setHoverNote(0)}
+                  className={
+                    currentNoteId === n.id
+                      ? `bg-zinc-800 rounded-[8px] cursor-pointer p-3 px-3 border-[0.5px] border-blue-500`
+                      : `hover:bg-zinc-800 rounded-[8px] cursor-pointer 
                       transition-colors duration-200 p-3 px-3 my-1`
-                }
-              >
-                <div className="flex justify-between">
-                  <h1 className="text-zinc-200 font-semibold">
-                    {n.video_title}
-                  </h1>
+                  }
+                >
+                  <div 
+                  className="flex justify-between">
+                    <div>
+                      <h3 className="text-white">{n.video_title}</h3>
+                      <p className="text-muted-foreground">{n.body}</p>
+                    </div>
 
-                  <div className="flex gap-2">
-                    {currentNoteId === n.id || hoverNote === n.id ? (
-                      <div className="flex gap-2">
-                        {deleteNoteMutation.isPending ? (
-                          <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                        ) : (
-                          <Trash
-                            onClick={() => deleteNoteMutation.mutate(n.id)}
-                            className="h-5 w-5 text-red-500 hover:text-red-600 cursor-pointer"
-                          />
-                        )}
-                        <Pencil
-                          onClick={() => {
-                            setCurrentNoteId(n.id);
-                            setBody(n.body);
-                            setEditingNote(true);
-                          }}
-                          className="h-5 w-5 text-indigo-500 hover:text-indigo-600 cursor-pointer"
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        <p className="text-indigo-500">{n.time}</p>
-                      </>
-                    )}
+                    <div className="flex flex-col gap-1">
+                      <p 
+                      onClick={() => {
+                        // newVideoMutation.mutate(n.video_id);
+                        // setCurrentVideoId(n.video_id);
+                      }}
+                      className="text-blue-600 hover:text-blue-500 underline">{n.time}</p>
+
+                      {currentNoteId === n.id ||
+                        (hoverNote === n.id && (
+                          <div className="flex gap-1">
+                            {deleteNoteMutation.isPending ? (
+                              <Spinner />
+                            ) : (
+                              <Trash
+                                onClick={() => deleteNoteMutation.mutate(n.id)}
+                                className="block h-5 w-5 text-red-600 hover:text-red-500 cursor-pointer"
+                              />
+                            )}
+                            <Pencil
+                              onClick={() => {
+                                setCurrentNoteId(n.id);
+                                setBody(n.body);
+                                setEditingNote(true);
+                              }}
+                              className="block h-5 w-5 text-blue-600 hover:text-blue-500 cursor-pointer"
+                            />
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 </div>
-                <p className="text-zinc-200">{n.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
       </div>
 
       {/* Contenedor central */}
       <div className="flex-1 lg:flex-auto w-full">
-        {(isLoading || isFetching) && (
+        {(isLoading || isFetching || isLoadingCurrentVideo) && (
           <div className="flex flex-col space-y-3">
-            <Skeleton className="h-[660px] w-[1173px] rounded-xl" />
+            <Skeleton className="h-[660px] w-[1173px] rounded-[8px]" />
             <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[400px]" />
+              <Skeleton className="h-4 w-[250px] rounded-[8px]" />
+              <Skeleton className="h-4 w-[400px] rounded-[8px]" />
             </div>
           </div>
         )}
 
         {isErrorCurrentVideo && (
-          <div className="h-[660px] w-[1173px] flex justify-center items-center rounded-xl bg-zinc-900">
-            <p>Error reproducing video</p>
+          <div className="h-[660px] w-[1173px] flex justify-center items-center rounded-[8px] bg-zinc-900">
+            <p>An unexpected error occurred.</p>
           </div>
         )}
 
         <div style={{ display: isFetching || isLoading ? "none" : "block" }}>
           <video id="video-player" ref={videoRef} autoPlay={true} />
           <div className="flex justify-between mt-2">
-            <h1 className="text-zinc-200 text-2xl font-semibold">
+            <h3 className="scroll-m-20 text-3xl tracking-tight">
               {currentVideo?.video.title}
-            </h1>
+            </h3>
             {currentVideo?.isFile && (
               <Button
                 onClick={() =>
@@ -481,47 +498,49 @@ export default function Video() {
               </Button>
             )}
           </div>
-          <p className="text-zinc-400 mt-2">
+          <p className="leading-7 [&:not(:first-child)]:mt-2">
             {currentVideo?.video.description}
           </p>
 
-          {(currentVideo?.video.s_review && !currentVideo?.userHasReviewed && rVisible) && (
-            <div className="mt-8">
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Leave a review"
-              />
-              <div className="flex justify-between items-center">
-                <Rating
-                  name="text-feedback"
-                  value={rating}
-                  onChange={(_, newValue) => {
-                    if (!newValue) return;
-                    setRating(newValue);
-                  }}
-                  precision={0.5}
-                  size="large"
-                  className="my-[20px]"
-                  icon={
-                    <StarIcon className="text-yellow-500" fontSize="large" />
-                  }
-                  emptyIcon={
-                    <StarIcon className="text-zinc-500" fontSize="large" />
-                  }
+          {currentVideo?.video.s_review &&
+            !currentVideo?.userHasReviewed &&
+            rVisible && (
+              <div className="mt-8">
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Leave a review"
                 />
-                <Button
-                  disabled={createReviewMutation.isPending}
-                  onClick={() => createReviewMutation.mutate()}
-                >
-                  {createReviewMutation.isPending && (
-                    <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
-                  )}
-                  Create review
-                </Button>
+                <div className="flex justify-between items-center">
+                  <Rating
+                    name="text-feedback"
+                    value={rating}
+                    onChange={(_, newValue) => {
+                      if (!newValue) return;
+                      setRating(newValue);
+                    }}
+                    precision={0.5}
+                    size="large"
+                    className="my-[20px]"
+                    icon={
+                      <StarIcon className="text-yellow-500" fontSize="large" />
+                    }
+                    emptyIcon={
+                      <StarIcon className="text-zinc-500" fontSize="large" />
+                    }
+                  />
+                  <Button
+                    disabled={createReviewMutation.isPending}
+                    onClick={() => createReviewMutation.mutate()}
+                  >
+                    {createReviewMutation.isPending && (
+                      <Spinner />
+                    )}
+                    Create review
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
 
         {foundApps?.length > 0 && (
@@ -543,14 +562,14 @@ export default function Video() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <Button
-                  className="flex gap-1 w-[100px]"
+                  className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
                   disabled={loading}
                   onClick={() => killApps(foundApps)}
                 >
-                  {loading && (
-                    <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                  )}
                   Close apps
+                  {loading && (
+                    <Spinner />
+                  )}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -567,14 +586,21 @@ export default function Video() {
               value={searchInput}
               onChange={handleInputChange}
               type="search"
-              placeholder="Busca un video..."
+              placeholder="Search"
               className="pl-8 w-full"
             />
           </div>
         </form>
 
-        <div className="overflow-auto h-[calc(100vh-60px-50px-20px)]">
-          <div className="bg-zinc-900 rounded-[0.75rem] h-full">
+        {isLoadingVideos && (
+          <div className="mt-[100px] flex justify-center items-center">
+            <Spinner />
+          </div>
+        )}
+
+        <ScrollArea className="overflow-auto h-[calc(100vh-60px-50px-20px)]">
+
+          <div className="bg-zinc-900 rounded-[8px] h-full">
             {isErrorVideos && <span>Something went wrong</span>}
 
             {videos == null && searchInput != "" && !isLoadingVideos && (
@@ -583,64 +609,58 @@ export default function Video() {
               </span>
             )}
 
-            {isLoadingVideos || isLoadingCurrentVideo || isLoading ? (
-              <div className="h-[100px] flex justify-center items-center">
-                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-              </div>
-            ) : (
-              <>
-                {videos?.map((v: any) => (
-                  <div
-                    onClick={() => {
-                      newVideoMutation.mutate(v.id);
-                      setCurrentVideoId(v.id);
-                    }}
-                    id={v.id}
-                    className={`${
-                      (currentVideoId === 0 &&
-                        v.id === (currentVideo && currentVideo.video.id)) ||
-                      v.id === currentVideoId
-                        ? "bg-zinc-800"
-                        : ""
-                    }
-  mb-2 p-1 hover:bg-zinc-800 rounded-[0.75rem] cursor-pointer 
-  transition-colors duration-200 border-indigo-600
+            <div className="pr-[10px]">
+              {videos?.map((v: any) => (
+                <div
+                  onClick={() => {
+                    newVideoMutation.mutate(v.id);
+                    setCurrentVideoId(v.id);
+                  }}
+                  id={v.id}
+                  className={`${
+                    (currentVideoId === 0 &&
+                      v.id === (currentVideo && currentVideo.video.id)) ||
+                    v.id === currentVideoId
+                      ? "bg-zinc-800"
+                      : ""
+                  }
+  mb-2 p-1 hover:bg-zinc-800 rounded-[8px] cursor-pointer 
+  transition-colors duration-200 border-blue-600
 `}
-                  >
-                    <div className="relative">
+                >
+                  <div className="relative">
+                    <div
+                      className="
+                      relative overflow-hidden rounded-[8px]"
+                    >
+                      <LoadImage
+                        cn="h-[189px] rounded-[8px]"
+                        src={`${import.meta.env.VITE_BACKEND_URL}${v.thumbnail}`}
+                      />
                       <div
-                        className="
-                      relative overflow-hidden rounded-[0.75rem]"
-                      >
-                        <LoadImage
-                          cn="h-[189px] rounded-[0.75rem]"
-                          src={`${import.meta.env.VITE_BACKEND_URL}${v.thumbnail}`}
-                        />
-                        <div
-                          style={{ width: `${v.video_resume}%` }}
-                          className={`absolute 
+                        style={{ width: `${v.video_resume}%` }}
+                        className={`absolute 
                     bottom-0 left-0 
-                    h-[6px] bg-indigo-600 rounded-b-[0.75rem]`}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="flex-col mx-2">
-                      <h4 className="font-semibold mt-2">{v.title}</h4>
-                      <p className="text-sm text-zinc-200 mt-2">
-                        {v.description}
-                      </p>
-                      <div className="flex gap-2 mt-2">
-                        <p className="text-sm text-zinc-400">{v.duration}</p>
-                        <p className="text-sm text-zinc-400">•</p>
-                        <p className="text-sm text-zinc-400">{v.views} views</p>
-                      </div>
+                    h-[6px] bg-blue-600 rounded-b-[8px]`}
+                      ></div>
                     </div>
                   </div>
-                ))}
-              </>
-            )}
+                  <div className="flex-col mx-2">
+                    <h4 className="font-semibold mt-2">{v.title}</h4>
+                    <p className="text-sm text-zinc-200 mt-2">
+                      {v.description}
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                      <p className="text-sm text-zinc-400">{v.duration}</p>
+                      <p className="text-sm text-zinc-400">•</p>
+                      <p className="text-sm text-zinc-400">{v.views} views</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </ScrollArea>
       </div>
     </div>
   );
