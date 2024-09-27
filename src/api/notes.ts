@@ -10,8 +10,8 @@ export const deleteNote = async (id: number) => {
   return response.data;
 };
 
-export const createNote = async (courseId: string, body: string, time: number, video_title: string) => {
-  const response = await authAxios.post(`/notes/${courseId}`, {
+export const createNote = async (courseId: string, body: string, time: number, video_title: string, videoId: number) => {
+  const response = await authAxios.post(`/notes/${courseId}/${videoId}`, {
     body,
     time,
     video_title

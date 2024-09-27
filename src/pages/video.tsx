@@ -60,6 +60,7 @@ export default function Video() {
   const [rVisible, setRVisible] = useState(true);
   const [description, setDescription] = useState("");
   const [rating, setRating] = useState(5);
+  const [noteResume, setNoteResume] = useState(0)
 
   const createReviewMutation = useMutation({
     mutationFn: () => createReview(description, rating, courseId || ""),
@@ -212,8 +213,14 @@ export default function Video() {
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           new Plyr(video, defaultOptions);
-          video.currentTime = Number(currentVideo.resume);
-          video.play().catch((e) => console.error("Error al reproducir:", e));
+          if (noteResume !== 0) {
+            video.currentTime = noteResume;
+            video.play().catch((e) => console.error("Error al reproducir:", e));
+            setNoteResume(0);
+          } else {
+            video.currentTime = Number(currentVideo.resume);
+            video.play().catch((e) => console.error("Error al reproducir:", e));
+          }
         });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = videoSrc;
@@ -273,7 +280,7 @@ export default function Video() {
 
   const createNewNoteMutation = useMutation({
     mutationFn: () =>
-      createNote(courseId || "", body, noteTime, currentVideo.video.title),
+      createNote(courseId || "", body, noteTime, currentVideo.video.title, currentVideo.video.id),
     onSuccess: async () => {
       setBody("");
       await queryClient.invalidateQueries({ queryKey: ["notes"] });
@@ -382,8 +389,8 @@ export default function Video() {
                 disabled={createNewNoteMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-500 text-white self-end flex gap-2"
               >
-                {createNewNoteMutation.isPending && <span>Save note</span>}
                 <span>Save note</span>
+                {createNewNoteMutation.isPending && <Spinner />}
               </Button>
             )}
           </div>
@@ -419,17 +426,24 @@ export default function Video() {
                   className="flex justify-between">
                     <div>
                       <h3 className="text-white">{n.video_title}</h3>
-                      <p className="text-muted-foreground">{n.body}</p>
+                      <p className="text-muted-foreground">{n.body}
+                      </p>
                     </div>
 
                     <div className="flex flex-col gap-1">
                       <p 
                       onClick={() => {
-                        // newVideoMutation.mutate(n.video_id);
-                        // setCurrentVideoId(n.video_id);
+                        if (n.video_id == currentVideo.video.id) {
+                          if (videoRef.current) {
+                            videoRef.current.currentTime = n.m_time;
+                          }
+                        } else {
+                          newVideoMutation.mutate(Number(n.video_id));
+                          setCurrentVideoId(Number(n.video_id))
+                          setNoteResume(n.m_time);
+                        }
                       }}
                       className="text-blue-600 hover:text-blue-500 underline">{n.time}</p>
-
                       {currentNoteId === n.id ||
                         (hoverNote === n.id && (
                           <div className="flex gap-1">
