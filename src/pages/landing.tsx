@@ -24,7 +24,7 @@ export default function Landing() {
       >
         <div className="mr-auto place-self-center lg:col-span-7">
           <h1
-            className="max-w-2xl mb-4 text-4xl tracking-tight 
+            className="max-w-2xl mb-4 text-4xl bold tracking-tight 
             md:text-5xl xl:text-6xl text-zinc-200"
           >
             Iron <span className="text-blue-600">Stream</span>
@@ -35,14 +35,14 @@ export default function Landing() {
           </p>
           <div className="flex gap-4">
             <Button
-              className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
+              className="flex button-md gap-2 bg-blue-600 hover:bg-blue-500 text-white"
               onClick={() => navigate("/login")}
             >
               Sign in
               <ChevronRight className="w-5 h-5" />
             </Button>
             <Button 
-            className="flex gap-2"
+            className="flex gap-2 button-md"
             onClick={() => navigate("/signup")}>
               Create account
               <UserPlus className="w-5 h-5" />

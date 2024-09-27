@@ -100,7 +100,9 @@ export default function AddCouseToUser({
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>Add courses to user</AlertDialogTitle>
+          <AlertDialogTitle
+          className="scroll-m-20 bold text-2xl tracking-tight"
+          >Add courses to user</AlertDialogTitle>
           <AlertDialogDescription>
             <div className="flex flex-col py-2 pb-4">
               <p>

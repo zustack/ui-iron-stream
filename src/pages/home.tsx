@@ -86,7 +86,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col justify-between p-4">
             <div>
-              <h1 className="max-w-2xl text-4xl font-bold tracking-tight leading-none text-zinc-200 mb-6">
+              <h1 className="bold max-w-2xl text-4xl font-bold tracking-tight leading-none text-zinc-200 mb-6">
                 {course.title}
               </h1>
 
@@ -126,7 +126,7 @@ export default function Home() {
               {course.is_user_enrolled ? (
                 <>
                   <Button
-                    className="bg-blue-600 hover:bg-blue-500 text-white"
+                    className="button-md bg-blue-600 hover:bg-blue-500 text-white"
                     onClick={() => {
                       navigate(`/video/${course.id}`);
                     }}
@@ -137,6 +137,7 @@ export default function Home() {
                 </>
               ) : (
                 <Button
+                className="button-md"
                 >
                   You don't have access to this course
                   <Lock className="h-5 w-5 ml-2" />
@@ -144,7 +145,9 @@ export default function Home() {
               )}
 
               {course.preview != "" && (
-                <Button onClick={() => navigate(`/preview/${course.id}`)}>
+                <Button 
+                className="button-md"
+                onClick={() => navigate(`/preview/${course.id}`)}>
                   Watch free preview
                   <Video className="h-5 w-5 ml-2" />
                 </Button>

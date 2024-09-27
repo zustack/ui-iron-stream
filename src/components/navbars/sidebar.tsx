@@ -9,6 +9,7 @@ import {
   Handshake,
   ListVideo,
   Loader,
+  LogOut,
   Star,
   User,
 } from "lucide-react";
@@ -46,7 +47,7 @@ export default function Sidebar() {
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <button
-            className="flex gap-1 font-semibold text-xl text-foreground transition-colors hover:text-white"
+            className="flex bold gap-1 text-2xl text-foreground transition-colors hover:text-white"
           >
             <span>Iron</span>
             <span>Stream</span>
@@ -142,7 +143,7 @@ export default function Sidebar() {
             }}
             className={getLinkClass("/")}
           >
-            <H className="h-4 w-4" />
+            <LogOut className="h-4 w-4"/>
             Logout
           </button>
           <p

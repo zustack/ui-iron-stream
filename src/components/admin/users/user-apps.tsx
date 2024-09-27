@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Spinner from "@/components/ui/spinner";
 
 type Props = {
   userId: number;
@@ -88,7 +89,8 @@ export default function UserApps({ userId, email, name, surname }: Props) {
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>Add apps to user</AlertDialogTitle>
+          <AlertDialogTitle className="scroll-m-20 bold text-2xl tracking-tight">
+          Add apps to user</AlertDialogTitle>
           <AlertDialogDescription>
             <div className="flex flex-col py-2 pb-4">
               <p>
@@ -107,13 +109,13 @@ export default function UserApps({ userId, email, name, surname }: Props) {
 
                   {isLoading && (
                     <div className="h-[100px] flex justify-center items-center">
-                      <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                      <Spinner />
                     </div>
                   )}
 
                   {isError && (
                     <div className="h-[100px] flex justify-center items-center">
-                      Error: {error.message}
+An unexpected error occurred.
                     </div>
                   )}
                 </TableCaption>
@@ -131,7 +133,7 @@ export default function UserApps({ userId, email, name, surname }: Props) {
                     {app.id === activeUpdateId &&
                     (createUserAppMutation.isPending ||
                       deleteUserAppMutation.isPending) ? (
-                      <Loader className="h-5 w-5 text-zinc-300 animate-spin slower items-center flex justify-center" />
+                    <Spinner />
                     ) : (
                       <Checkbox
                         checked={app.is_user_enrolled}

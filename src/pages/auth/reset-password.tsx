@@ -87,7 +87,7 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h3 className="scroll-m-20 text-3xl tracking-tight">
+              <h3 className="bold scroll-m-20 text-3xl tracking-tight">
                 Enter your new password
               </h3>
               <p className="leading-7 [&:not(:first-child)]:mt-6">
@@ -124,7 +124,7 @@ export default function ResetPassword() {
               </div>
               <Button
                 disabled={updatePasswordMutation.isPending}
-                className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
+                className="button-md flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
                 type="submit"
               >
                 <span>Update password</span>
@@ -149,7 +149,7 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h3 className="scroll-m-20 text-3xl tracking-tight">
+              <h3 className="bold scroll-m-20 text-3xl tracking-tight">
                 Recover your account
               </h3>
               <p className="leading-7 [&:not(:first-child)]:mt-6">
@@ -241,7 +241,7 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h3 className="scroll-m-20 text-3xl tracking-tight">
+              <h3 className="bold scroll-m-20 text-3xl tracking-tight">
                 Recover your password
               </h3>
               <p className="leading-7 [&:not(:first-child)]:mt-6">
@@ -269,7 +269,7 @@ export default function ResetPassword() {
               </div>
               <Button
                 type="submit"
-                className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
+                className="button-md flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
                 disabled={resendEmailMutation.isPending}
               >
                 <span>Next step</span>

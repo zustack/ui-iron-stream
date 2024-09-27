@@ -22,7 +22,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ErrorResponse } from "@/types";
 import { signUp } from "@/api/users";
 import EmailVerification from "@/components/auth/email-verfication";
-import { Loader } from "lucide-react";
 import Logo from "../../assets/logo.png";
 import { getPolicy } from "@/api/policy";
 import Spinner from "@/components/ui/spinner";
@@ -137,7 +136,7 @@ export default function Signup() {
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-full max-w-sm gap-6">
           <div className="grid gap-2 text-center">
-            <h3 className="scroll-m-20 text-3xl tracking-tight">Sign up</h3>
+            <h3 className="bold scroll-m-20 text-3xl tracking-tight">Sign up</h3>
             <p className="leading-7 [&:not(:first-child)]:mt-6">
               Create a new account in Iron Stream
             </p>
@@ -286,7 +285,7 @@ export default function Signup() {
 
             <Button
               type="submit"
-              className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
+              className="button-md flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
               disabled={signUpMutation.isPending}
             >
               <span>Next</span>

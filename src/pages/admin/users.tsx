@@ -57,6 +57,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Spinner from "@/components/ui/spinner";
 
 export default function AdminUsers() {
   const [searchInput, setSearchInput] = useState("");
@@ -213,7 +214,7 @@ export default function AdminUsers() {
                 value={searchInput}
                 onChange={handleInputChange}
                 type="search"
-                placeholder="Search for users"
+                placeholder="Search"
                 className="pl-8 w-[450px]"
               />
             </div>
@@ -466,14 +467,14 @@ export default function AdminUsers() {
 
             {status === "error" && (
               <div className="h-[100px] flex justify-center items-center">
-                <span>An unexpected error occurred: {error.message}</span>
+                <span>An unexpected error occurred</span>
               </div>
             )}
 
             <div ref={ref} onClick={() => fetchNextPage()}>
               {isFetchingNextPage && (
                 <div className="h-[100px] flex justify-center items-center">
-                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                  <Spinner/>
                 </div>
               )}
             </div>
@@ -509,7 +510,7 @@ export default function AdminUsers() {
                       <TableCell>
                         {activeId === user.id &&
                         updateActiveMutation.isPending ? (
-                          <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+                          <Spinner />
                         ) : (
                           <Checkbox
                             onClick={() => {
@@ -525,7 +526,7 @@ export default function AdminUsers() {
                       <TableCell>
                         {activeId === user.id &&
                         updateAdminStatusMutation.isPending ? (
-                          <Loader className="h-5 w-5 text-zinc-200 animate-spin slower" />
+                          <Spinner />
                         ) : (
                           <Checkbox
                             onClick={() => {

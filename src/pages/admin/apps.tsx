@@ -94,7 +94,7 @@ export default function AdminApps() {
                 value={searchParam}
                 onChange={handleInputChange}
                 type="search"
-                placeholder="Search for apps"
+                placeholder="Search"
                 className="pl-8 w-[450px]"
               />
             </div>

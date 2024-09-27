@@ -42,6 +42,7 @@ import { Course } from "@/types";
 import DeleteCourse from "@/components/admin/courses/delete-course";
 import ImageDialog from "@/components/admin/image-dialog";
 import VideoDialog from "@/components/admin/video-dialog";
+import Spinner from "@/components/ui/spinner";
 
 export default function AdminCourses() {
   const [activeUpdateStatusId, setActiveUpdateStatusId] = useState(0);
@@ -89,7 +90,8 @@ export default function AdminCourses() {
   });
 
   const updateCourseStatusMutation = useMutation({
-    mutationFn: ({id, active}:{id: number, active: boolean}) => updateCourseActiveStatus(id, active),
+    mutationFn: ({ id, active }: { id: number; active: boolean }) =>
+      updateCourseActiveStatus(id, active),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-courses"] });
     },
@@ -125,7 +127,7 @@ export default function AdminCourses() {
                 value={searchInput}
                 onChange={handleInputChange}
                 type="search"
-                placeholder="Search courses"
+                placeholder="Search"
                 className="pl-8 w-[450px]"
               />
             </div>
@@ -134,83 +136,88 @@ export default function AdminCourses() {
 
         <div className="ml-auto flex items-center gap-2">
           <p className="text-sm text-muted-foreground">
-          {data != null && !isFetching && (
-            <span>
-              {data?.length}{" "}
-              {data?.length === 1 ? " course found." : " courses found."}
-            </span>
-          )}
+            {data != null && !isFetching && (
+              <span>
+                {data?.length}{" "}
+                {data?.length === 1 ? " course found." : " courses found."}
+              </span>
+            )}
           </p>
 
-          {isEditSort ? (
-            <div className="flex gap-2">
-              <Button
-                onClick={() => {
-                  if (editSort.map((item) => item.sort_order).join("") === "") {
-                    toast.error("You must enter at least one sort order.");
-                    return;
-                  }
-                  sortCoursesMutation.mutate();
-                }}
-                size="sm"
-                className="h-8 gap-1"
-              >
-                Save changes
-              </Button>
-              <Button
-                onClick={() => setIsEditSort(false)}
-                variant="destructive"
-                size="sm"
-                className="h-8 gap-1"
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <Button
-              onClick={() => setIsEditSort(true)}
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1"
-            >
-              Sort courses
-            </Button>
-          )}
+          {data != null && !isFetching && (
+            <>
+              {isEditSort ? (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      if (
+                        editSort.map((item) => item.sort_order).join("") === ""
+                      ) {
+                        toast.error("You must enter at least one sort order.");
+                        return;
+                      }
+                      sortCoursesMutation.mutate();
+                    }}
+                    size="sm"
+                    className="h-8 gap-1"
+                  >
+                    Save changes
+                  </Button>
+                  <Button
+                    onClick={() => setIsEditSort(false)}
+                    variant="destructive"
+                    size="sm"
+                    className="h-8 gap-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setIsEditSort(true)}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1"
+                >
+                  Sort courses
+                </Button>
+              )}
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <ListFilter className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Filter
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem
-                onClick={() => setActive("1")}
-                checked={active === "1"}
-              >
-                Active
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                onClick={() => setActive("0")}
-                checked={active === "0"}
-              >
-                Non active
-              </DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 gap-1">
+                    <ListFilter className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Filter
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    onClick={() => setActive("1")}
+                    checked={active === "1"}
+                  >
+                    Active
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    onClick={() => setActive("0")}
+                    checked={active === "0"}
+                  >
+                    Non active
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
           <CreateCourse />
         </div>
       </div>
       <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
         <Table>
           <TableCaption>
-
-          {data == null && !isFetching && (
+            {data == null && !isFetching && (
               <div className="h-[100px] flex justify-center items-center">
                 No courses found
               </div>
@@ -252,14 +259,14 @@ export default function AdminCourses() {
                 <TableCell>
                   {course.id === activeUpdateStatusId &&
                   updateCourseStatusMutation.isPending ? (
-                    <Loader className="h-5 w-5 text-zinc-300 animate-spin slower" />
+                    <Spinner />
                   ) : (
                     <Checkbox
                       onClick={() => {
                         setActiveUpdateStatusId(course.id);
                         updateCourseStatusMutation.mutate({
                           id: course.id,
-                          active: !course.is_active
+                          active: !course.is_active,
                         });
                       }}
                       checked={course.is_active}
@@ -334,9 +341,7 @@ export default function AdminCourses() {
                   </TooltipProvider>
                 </TableCell>
 
-                <TableCell>
-                $ {course.price}
-                </TableCell>
+                <TableCell>$ {course.price}</TableCell>
                 <TableCell>
                   <ImageDialog
                     title={course.title}
@@ -347,8 +352,8 @@ export default function AdminCourses() {
                 <TableCell>
                   {course.preview && (
                     <VideoDialog
-                    title={course.title}
-                    src={`${import.meta.env.VITE_BACKEND_URL}${course.preview}`}
+                      title={course.title}
+                      src={`${import.meta.env.VITE_BACKEND_URL}${course.preview}`}
                     />
                   )}
                 </TableCell>

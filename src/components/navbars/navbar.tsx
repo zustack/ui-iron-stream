@@ -62,7 +62,7 @@ export default function Navbar() {
             onClick={() => {
               handleNavigation("/home");
             }}
-            className="flex gap-2 text-xl text-foreground"
+            className="flex bold gap-2 text-xl text-foreground"
           >
             <span>Iron</span>
             <span>Stream</span>

@@ -12,38 +12,36 @@
     font-family: "Geist-Regular", sans-serif;
     letter-spacing: 0.01em;
   }
+}
 
-  h1 {
-    font-family: "Geist-Bold", sans-serif;
-    letter-spacing: 0.01em;
-  }
+.bold {
+  font-family: "Geist-Bold", sans-serif;
+  letter-spacing: 0.01em;
+}
 
-  h3 {
-    font-family: "Geist-Semibold", sans-serif;
-    letter-spacing: 0.01em;
-  }
+.semi {
+  font-family: "Geist-Semibold", sans-serif;
+  letter-spacing: 0.01em;
+}
 
-  button {
-    font-family: "Geist-Semibold", sans-serif;
-    letter-spacing: 0.01em;
-    font-size: 15px;
-  }
-
+.button-md {
+  font-family: "Geist-Semibold", sans-serif;
+  letter-spacing: 0.01em;
 }
 
 @font-face {
   font-family: "Geist-Regular";
-  src: url('../assets/fonts/Geist-Regular.woff2') format('woff'); 
+  src: url("../assets/fonts/Geist-Regular.woff2") format("woff");
 }
 
 @font-face {
   font-family: "Geist-Semibold";
-  src: url('../assets/fonts/Geist-SemiBold.woff2') format('woff'); 
+  src: url("../assets/fonts/Geist-SemiBold.woff2") format("woff");
 }
 
 @font-face {
   font-family: "Geist-Bold";
-  src: url('../assets/fonts/Geist-Bold.woff2') format('woff'); 
+  src: url("../assets/fonts/Geist-Bold.woff2") format("woff");
 }
 
 html {
@@ -80,4 +78,3 @@ html {
     --chart-2: 340 75% 55%;
   }
 }
-

@@ -155,7 +155,7 @@ export default function CreateCourse() {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-center">
+          <AlertDialogTitle className="text-center bold text-2xl">
             Create course
           </AlertDialogTitle>
           <AlertDialogDescription>

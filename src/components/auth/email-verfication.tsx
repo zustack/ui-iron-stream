@@ -74,7 +74,7 @@ export default function EmailVerification({
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-full max-w-md gap-6">
           <div className="grid gap-2 text-center">
-            <h3 className="scroll-m-20 text-3xl tracking-tight">
+            <h3 className="bold scroll-m-20 text-3xl tracking-tight">
               Verify your email address
             </h3>
 
@@ -143,7 +143,9 @@ export default function EmailVerification({
             ) : (
             <p
               onClick={() => deleteAccountByEmailMutation.mutate()}
-              className={"cursor-pointer hover:text-blue-500 underline text-blue-600"}
+                className={`${verifyEmailMutation.isPending ? 
+                  "cursor-not-allowed" : "cursor-pointer hover:text-blue-500"}
+                underline text-blue-600`}
             >
               Change it
             </p>
