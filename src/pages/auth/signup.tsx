@@ -25,6 +25,7 @@ import EmailVerification from "@/components/auth/email-verfication";
 import { Loader } from "lucide-react";
 import Logo from "../../assets/logo.png";
 import { getPolicy } from "@/api/policy";
+import Spinner from "@/components/ui/spinner";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -136,11 +137,8 @@ export default function Signup() {
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-full max-w-sm gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold mb-6">Sign up</h1>
-            <p
-              onClick={() => setSuccess(true)}
-              className="text-balance text-muted-foreground mb-4"
-            >
+            <h3 className="scroll-m-20 text-3xl tracking-tight">Sign up</h3>
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
               Create a new account in Iron Stream
             </p>
           </div>
@@ -150,6 +148,7 @@ export default function Signup() {
               <Input
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
+                disabled={signUpMutation.isPending}
                 id="email"
                 type="email"
                 placeholder="Your email address"
@@ -162,6 +161,7 @@ export default function Signup() {
               <Input
                 id="first-name"
                 type="text"
+                disabled={signUpMutation.isPending}
                 onChange={(e) => setName(e.target.value)}
                 value={name}
                 placeholder="Your first name"
@@ -174,6 +174,7 @@ export default function Signup() {
               <Input
                 id="surnmae"
                 type="text"
+                disabled={signUpMutation.isPending}
                 onChange={(e) => setSurname(e.target.value)}
                 value={surname}
                 placeholder="Your surname"
@@ -187,6 +188,7 @@ export default function Signup() {
               </div>
               <PasswordInput
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={signUpMutation.isPending}
                 value={password}
                 required
                 id="password"
@@ -200,6 +202,7 @@ export default function Signup() {
               </div>
               <PasswordInput
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={signUpMutation.isPending}
                 value={confirmPassword}
                 required
                 id="c-password"
@@ -207,101 +210,107 @@ export default function Signup() {
               />
             </div>
 
-            <div className="items-top flex space-x-2 mb-4">
+            <div className="flex items-center space-x-2">
               <Checkbox
                 checked={privacyPolicy}
+                disabled={signUpMutation.isPending}
                 onCheckedChange={(active: boolean) => setPrivacyPolicy(active)}
                 id="privacy-policy"
               />
-              <div className="grid gap-1.5 leading-none">
-                <label
-                  htmlFor="privacy-policy"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed 
-          peer-disabled:opacity-70"
-                >
-                  By continuing you agree to our{" "}
-                  <AlertDialog>
-                    <AlertDialogTrigger className="underline">
-                      Privacy Policy
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      {isLoading && <Loader className="h-6 w-6 animate-spin" />}
-                      {isError && <p>Error getting privacy policy</p>}
-                      <AlertDialogHeader>
-                        {data?.map((p: any) => (
-                          <>
-                            {p.p_type === "title" && (
-                              <AlertDialogTitle>{p.content}</AlertDialogTitle>
-                            )}
+              <Label htmlFor="privacy-policy">
+                Accept terms and conditions
+              </Label>
+              <AlertDialog>
+                <AlertDialogTrigger 
+                disabled={signUpMutation.isPending}
+                className={`${signUpMutation.isPending ? "cursor-not-allowed" : "hover:text-blue-500"} underline text-blue-600`} >
+                  Privacy Policy
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  {isLoading && <Spinner />}
+                  {isError && <p>An unexpected error occurred.</p>}
+                  <AlertDialogHeader>
+                    {data?.map((p: any) => (
+                      <>
+                        {p.p_type === "title" && (
+                          <AlertDialogTitle>
+                            <h3>{p.content}</h3>
+                          </AlertDialogTitle>
+                        )}
 
-                            {p.p_type === "li" && (
-                              <AlertDialogDescription>
-                                <li>
-                                  {p.content
-                                    .split(/(\*\*[^*]+\*\*)/g)
-                                    .map((part: string, i: number) =>
-                                      part.startsWith("**") &&
-                                      part.endsWith("**") ? (
-                                        <span key={i} className="text-white">
-                                          {part.slice(2, -2)}
-                                        </span>
-                                      ) : (
-                                        <span key={i}>{part}</span>
-                                      )
-                                    )}
-                                </li>
-                              </AlertDialogDescription>
-                            )}
+                        {p.p_type === "li" && (
+                          <AlertDialogDescription>
+                            <li>
+                              {p.content
+                                .split(/(\*\*[^*]+\*\*)/g)
+                                .map((part: string, i: number) =>
+                                  part.startsWith("**") &&
+                                  part.endsWith("**") ? (
+                                    <span key={i} className="text-white">
+                                      {part.slice(2, -2)}
+                                    </span>
+                                  ) : (
+                                    <span key={i}>{part}</span>
+                                  )
+                                )}
+                            </li>
+                          </AlertDialogDescription>
+                        )}
 
-                            {p.p_type === "text" && (
-                              <AlertDialogDescription>
-                                {p.content
-                                  .split(/(\*\*[^*]+\*\*)/g)
-                                  .map((part: string, i: number) =>
-                                    part.startsWith("**") &&
-                                    part.endsWith("**") ? (
-                                      <span key={i} className="text-white">
-                                        {part.slice(2, -2)}
-                                      </span>
-                                    ) : (
-                                      <span key={i}>{part}</span>
-                                    )
-                                  )}
-                              </AlertDialogDescription>
-                            )}
-                          </>
-                        ))}
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Accept</AlertDialogCancel>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </label>
-              </div>
+                        {p.p_type === "text" && (
+                          <AlertDialogDescription>
+                            {p.content
+                              .split(/(\*\*[^*]+\*\*)/g)
+                              .map((part: string, i: number) =>
+                                part.startsWith("**") && part.endsWith("**") ? (
+                                  <span key={i} className="text-white">
+                                    {part.slice(2, -2)}
+                                  </span>
+                                ) : (
+                                  <span key={i}>{part}</span>
+                                )
+                              )}
+                          </AlertDialogDescription>
+                        )}
+                      </>
+                    ))}
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white">
+                      Accept Privacy Policy
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
+
             <Button
               type="submit"
-              className="flex gap-2"
+              className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
               disabled={signUpMutation.isPending}
             >
-              {signUpMutation.isPending && (
-                <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
-              )}
-              <span>Create account</span>
+              <span>Next</span>
+              {signUpMutation.isPending && <Spinner />}
             </Button>
           </form>
-
           <div className="text-center">
             Have an account?{" "}
-            <Link to="/login" className="underline">
+            <Link
+              to={signUpMutation.isPending ? "/signup" : "/login"}
+              className={`${signUpMutation.isPending ? 
+                "cursor-not-allowed" : 
+                "hover:text-blue-500"} 
+              underline text-blue-600`} >
               Login
             </Link>
           </div>
         </div>
       </div>
-      <div className="hidden bg-muted lg:block">
-        <img src={Logo} alt="Logo image" />
+      <div
+        className="flex flex-1 min-h-screen items-center 
+        justify-center border-l border-dashed border-zinc-700"
+      >
+        <img src={Logo} className="w-[60%] h-auto" alt="Company Logo image" />
       </div>
     </div>
   );

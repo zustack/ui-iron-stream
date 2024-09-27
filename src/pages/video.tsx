@@ -376,7 +376,7 @@ export default function Video() {
                 }}
                 disabled={createNewNoteMutation.isPending}
                 variant="outline"
-                className="self-end flex gap-2 "
+                className="self-end flex gap-2"
               >
                 {createNewNoteMutation.isPending && (
                   <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />

@@ -12,15 +12,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { PasswordInput } from "@/components/ui/password-input";
 import { useAuthStore } from "@/store/auth";
 import { useMutation } from "@tanstack/react-query";
-import {
-  resendEmail,
-  updatePassword,
-  verifyAccount,
-} from "@/api/users";
+import { resendEmail, updatePassword, verifyAccount } from "@/api/users";
 import { ErrorResponse } from "@/types";
 import toast from "react-hot-toast";
-import { Loader } from "lucide-react";
 import Logo from "../../assets/logo.png";
+import Spinner from "@/components/ui/spinner";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -79,7 +75,7 @@ export default function ResetPassword() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error("Passwords do not match!");
       return;
     }
     updatePasswordMutation.mutate();
@@ -91,9 +87,11 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h1 className="text-3xl font-bold mb-6">Update your password</h1>
-              <p className="text-balance text-muted-foreground mb-4">
-                Create your new password.
+              <h3 className="scroll-m-20 text-3xl tracking-tight">
+                Enter your new password
+              </h3>
+              <p className="leading-7 [&:not(:first-child)]:mt-6">
+                Must be at least 8 characters long.
               </p>
             </div>
             <form onSubmit={handleSubmit} className="grid gap-4">
@@ -104,6 +102,7 @@ export default function ResetPassword() {
                 <PasswordInput
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={updatePasswordMutation.isPending}
                   required
                   id="password"
                   placeholder="••••••••"
@@ -116,23 +115,29 @@ export default function ResetPassword() {
                 </div>
                 <PasswordInput
                   required
+                  disabled={updatePasswordMutation.isPending}
                   id="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
                 />
               </div>
-
               <Button
+                disabled={updatePasswordMutation.isPending}
+                className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
                 type="submit"
               >
-                Update password
+                <span>Update password</span>
+                {updatePasswordMutation.isPending && <Spinner />}
               </Button>
             </form>
           </div>
         </div>
-        <div className="hidden bg-muted lg:block">
-          <img src={Logo} alt="Login image" />
+        <div
+          className="flex flex-1 min-h-screen items-center 
+        justify-center border-l border-dashed border-zinc-700"
+        >
+          <img src={Logo} className="w-[60%] h-auto" alt="Company Logo image" />
         </div>
       </div>
     );
@@ -144,17 +149,18 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h1 className="text-3xl font-bold mb-6">Recover your account</h1>
-              <p className="text-balance text-muted-foreground mb-4">
-                Enter the code sent to{" "}
-                <span className="text-zinc-100 font-semibold">{email}</span>.
+              <h3 className="scroll-m-20 text-3xl tracking-tight">
+                Recover your account
+              </h3>
+              <p className="leading-7 [&:not(:first-child)]:mt-6">
+                Enter the code sent to {email}
               </p>
             </div>
 
             <form className="grid gap-4 justify-center">
               {verifyEmailMutation.isPending ? (
                 <div className="flex justify-center items-center">
-                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                  <Spinner />
                 </div>
               ) : (
                 <InputOTP
@@ -182,38 +188,48 @@ export default function ResetPassword() {
               )}
             </form>
 
-          <div className="flex justify-center gap-1 text-center text-sm">
-            <p>Didn't receive the code? </p>
-            {resendEmailMutation.isPending ? (
-              <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-            ) : (
-              <p
-                onClick={() => resendEmailMutation.mutate()}
-                className="underline cursor-pointer"
-              >
-                Resend code
-              </p>
-            )}
-          </div>
+            <div className="flex justify-center gap-1 text-center items-center">
+              <p>Didn't receive the code? </p>
+              {resendEmailMutation.isPending ? (
+                <Spinner />
+              ) : (
+                <p
+                  onClick={() => {
+                    if (verifyEmailMutation.isPending) {
+                      return;
+                    }
+                    resendEmailMutation.mutate();
+                  }}
+                  className={`${verifyEmailMutation.isPending ? "cursor-not-allowed" : "cursor-pointer hover:text-blue-500"}underline text-blue-600`}
+                >
+                  Resend code
+                </p>
+              )}
+            </div>
 
-          <div className="flex justify-center gap-1 text-center text-sm">
-            <p>Wrong email? </p>
+            <div className="flex justify-center gap-1 text-center">
+              <p>Wrong email? </p>
               <p
                 onClick={() => {
-                  setEmail("")
-                  setEmailToken("")
-                  setStep(1); 
+                  if (verifyEmailMutation.isPending) {
+                    return;
+                  }
+                  setEmail("");
+                  setEmailToken("");
+                  setStep(1);
                 }}
-                className="underline cursor-pointer"
+                className={`${verifyEmailMutation.isPending ? "cursor-not-allowed" : "cursor-pointer hover:text-blue-500"}underline text-blue-600`}
               >
                 Change it
               </p>
-          </div>
-
+            </div>
           </div>
         </div>
-        <div className="hidden bg-zinc-900 lg:block">
-          <img src={Logo} alt="Login image" />
+        <div
+          className="flex flex-1 min-h-screen items-center 
+        justify-center border-l border-dashed border-zinc-700"
+        >
+          <img src={Logo} className="w-[60%] h-auto" alt="Company Logo image" />
         </div>
       </div>
     );
@@ -225,12 +241,13 @@ export default function ResetPassword() {
         <div className="flex items-center justify-center py-12">
           <div className="mx-auto grid w-full max-w-sm gap-6">
             <div className="grid gap-2 text-center">
-              <h1 className="text-3xl font-bold mb-6">Recover your account</h1>
-              <p className="text-balance text-muted-foreground mb-4">
-                Enter your email address to recover your account.
+              <h3 className="scroll-m-20 text-3xl tracking-tight">
+                Recover your password
+              </h3>
+              <p className="leading-7 [&:not(:first-child)]:mt-6">
+                Enter your email address.
               </p>
             </div>
-
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -245,33 +262,39 @@ export default function ResetPassword() {
                   onChange={(e) => setEmail(e.target.value)}
                   id="email"
                   type="email"
+                  disabled={resendEmailMutation.isPending}
                   placeholder="Your email address"
                   required
                 />
               </div>
               <Button
                 type="submit"
-                className="flex gap-2"
+                className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
                 disabled={resendEmailMutation.isPending}
               >
-                {resendEmailMutation.isPending && (
-                  <Loader className="h-6 w-6 text-zinc-900 animate-spin slower" />
-                )}
                 <span>Next step</span>
+                {resendEmailMutation.isPending && <Spinner />}
               </Button>
             </form>
 
-          <div className="text-center">
-            Go back to {" "}
-            <Link to="/login" className="underline">
-              Login
-            </Link>
-          </div>
-
+            <div className="text-center">
+              Go back to{" "}
+              <Link
+                to={
+                  resendEmailMutation.isPending ? "/reset-password" : "/login"
+                }
+                className={`${resendEmailMutation.isPending ? "cursor-not-allowed" : "hover:text-blue-500"} underline text-blue-600`}
+              >
+                Login
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="hidden bg-muted lg:block">
-          <img src={Logo} alt="Login image" />
+        <div
+          className="flex flex-1 min-h-screen items-center 
+        justify-center border-l border-dashed border-zinc-700"
+        >
+          <img src={Logo} className="w-[60%] h-auto" alt="Company Logo image" />
         </div>
       </div>
     );

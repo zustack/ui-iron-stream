@@ -8,15 +8,11 @@ import {
 } from "@/components/ui/input-otp";
 import { useMutation } from "@tanstack/react-query";
 import { ErrorResponse } from "@/types";
-import {
-  deleteAccountByEmail,
-  resendEmail,
-  verifyAccount,
-} from "@/api/users";
+import { deleteAccountByEmail, resendEmail, verifyAccount } from "@/api/users";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/auth";
-import { Loader } from "lucide-react";
 import Logo from "../../assets/logo.png";
+import Spinner from "../ui/spinner";
 
 export default function EmailVerification({
   email,
@@ -78,58 +74,62 @@ export default function EmailVerification({
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-full max-w-md gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold mb-6">
+            <h3 className="scroll-m-20 text-3xl tracking-tight">
               Verify your email address
-            </h1>
-            <p className="text-balance text-muted-foreground mb-4">
-              Enter the code sent to your email address{" "}
-              <span className="text-zinc-100 font-semibold">{email}</span> .
-              It may be in your spam folder.
+            </h3>
+
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
+              Enter the code sent to your email address {email}. It may be in
+              your spam folder.
             </p>
           </div>
 
           <form className="grid gap-4 justify-center">
-            <div className="mb-4">
-              {verifyEmailMutation.isPending ? (
-                <div className="flex justify-center items-center">
-                  <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
-                </div>
-              ) : (
-                <InputOTP
-                  maxLength={6}
-                  value={emailToken}
-                  onChange={(emailToken) => {
-                    setEmailToken(emailToken);
-                    if (emailToken.length === 6) {
-                      verifyEmailMutation.mutate();
-                    }
-                  }}
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                  </InputOTPGroup>
-                  <InputOTPSeparator />
-                  <InputOTPGroup>
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
-              )}
-            </div>
+            {verifyEmailMutation.isPending ? (
+              <div className="flex justify-center items-center">
+                <Spinner />
+              </div>
+            ) : (
+              <InputOTP
+                maxLength={6}
+                value={emailToken}
+                onChange={(emailToken) => {
+                  setEmailToken(emailToken);
+                  if (emailToken.length === 6) {
+                    verifyEmailMutation.mutate();
+                  }
+                }}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                </InputOTPGroup>
+                <InputOTPSeparator />
+                <InputOTPGroup>
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            )}
           </form>
 
-          <div className="flex justify-center gap-1 text-center">
+          <div className="flex justify-center gap-1 text-center items-center">
             <p>Didn't receive the code? </p>
-
             {resendEmailMutation.isPending ? (
-              <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+              <Spinner />
             ) : (
               <p
-                onClick={() => resendEmailMutation.mutate()}
-                className="underline cursor-pointer"
+                onClick={() => {
+                  if (verifyEmailMutation.isPending) {
+                    return;
+                  }
+                  resendEmailMutation.mutate();
+                }}
+                className={`${verifyEmailMutation.isPending ? 
+                  "cursor-not-allowed" : "cursor-pointer hover:text-blue-500"}
+                underline text-blue-600`}
               >
                 Resend code
               </p>
@@ -137,24 +137,25 @@ export default function EmailVerification({
           </div>
 
           <div className="flex justify-center gap-1 text-center">
-            <p>Discard account and</p>
-
+            <p>Wrong email? </p>
             {deleteAccountByEmailMutation.isPending ? (
-              <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+              <Spinner />
             ) : (
-              <p
-                onClick={() => deleteAccountByEmailMutation.mutate()}
-                className="underline cursor-pointer"
-              >
-              create a new one
-              </p>
+            <p
+              onClick={() => deleteAccountByEmailMutation.mutate()}
+              className={"cursor-pointer hover:text-blue-500 underline text-blue-600"}
+            >
+              Change it
+            </p>
             )}
           </div>
-
         </div>
       </div>
-      <div className="hidden bg-muted lg:block">
-        <img src={Logo} alt="Logo image" />
+      <div
+        className="flex flex-1 min-h-screen items-center 
+        justify-center border-l border-dashed border-zinc-700"
+      >
+        <img src={Logo} className="w-[60%] h-auto" alt="Company Logo image" />
       </div>
     </div>
   );

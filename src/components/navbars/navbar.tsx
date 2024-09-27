@@ -62,9 +62,8 @@ export default function Navbar() {
             onClick={() => {
               handleNavigation("/home");
             }}
-            className="flex gap-2 font-bold text-xl text-foreground"
+            className="flex gap-2 text-xl text-foreground"
           >
-            <Eclipse className="h-6 w-6" />
             <span>Iron</span>
             <span>Stream</span>
           </button>

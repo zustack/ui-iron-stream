@@ -3,6 +3,7 @@ import Logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
 import { useEffect } from "react";
+import { ChevronRight, UserPlus } from "lucide-react";
 
 export default function Landing() {
   const { isAuth } = useAuthStore();
@@ -23,27 +24,33 @@ export default function Landing() {
       >
         <div className="mr-auto place-self-center lg:col-span-7">
           <h1
-            className="
-            max-w-2xl mb-4 text-4xl font-bold tracking-tight 
-                         md:text-5xl xl:text-6xl text-zinc-200"
+            className="max-w-2xl mb-4 text-4xl tracking-tight 
+            md:text-5xl xl:text-6xl text-zinc-200"
           >
-            Iron <span className="text-indigo-400">Stream</span>
+            Iron <span className="text-blue-600">Stream</span>
           </h1>
           <p className="max-w-2xl mb-6 text-xl text-muted-foreground lg:mb-8">
-            Courses aimed at students and professionals to help them understand
-            and apply knowledge.
+            Desktop application that implements highly effective DRM solutions
+            to safeguard multimedia content.
           </p>
           <div className="flex gap-4">
-            <Button onClick={() => navigate("/login")}>
-              Login to your account
+            <Button
+              className="flex gap-2 bg-blue-600 hover:bg-blue-500 text-white"
+              onClick={() => navigate("/login")}
+            >
+              Sign in
+              <ChevronRight className="w-5 h-5" />
             </Button>
-            <Button variant={"outline"} onClick={() => navigate("/signup")}>
-              Create a new account
+            <Button 
+            className="flex gap-2"
+            onClick={() => navigate("/signup")}>
+              Create account
+              <UserPlus className="w-5 h-5" />
             </Button>
           </div>
         </div>
         <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
-          <img src={Logo} alt="" />
+          <img src={Logo} alt="Company Logo image" />
         </div>
       </div>
     </section>

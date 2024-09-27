@@ -44,27 +44,27 @@ export default function Home() {
   };
 
   return (
-    <section className="container mx-auto mt-[10px]">
-      <form className="ml-auto flex-1 sm:flex-initial mb-[10px] mr-4 flex justify-center">
+    <section className="container mx-auto">
+      <form className="ml-auto flex-1 sm:flex-initial my-[20px] mr-4 flex justify-center">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             value={searchInput}
             onChange={handleInputChange}
             type="search"
-            placeholder="Search courses"
+            placeholder="Search"
             className="pl-8 w-[800px]"
           />
         </div>
       </form>
 
       {data?.length === 0 && (
-        <div className="text-center text-zinc-400">No courses found.</div>
+        <div className="text-center text-base">No courses found.</div>
       )}
 
       {isLoading && (
         <div className="h-[100px] flex justify-center items-center">
-          <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+          <Loader className="h-6 w-6 text-base animate-spin slower" />
         </div>
       )}
 
@@ -73,8 +73,10 @@ export default function Home() {
           Error: {error.message}
         </div>
       )}
+
+      <div className="flex flex-col gap-[10px]">
       {data?.map((course: Course) => (
-        <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-1 xl:grid-cols-2 min-h-[379px] border mb-8">
+        <div className="bg-zinc-900 rounded-[0.75rem] grid grid-cols-1 xl:grid-cols-2 min-h-[379px] border">
           <div className="p-1">
             <LoadImage
               cn="rounded-[0.75rem] w-full h-full"
@@ -110,7 +112,7 @@ export default function Home() {
                 <p>
                 {course.rating}
                 </p>
-                <Link to={`/reviews/${course.id}`} className="underline">
+                <Link to={`/reviews/${course.id}`} className="underline text-blue-600">
                   Go to reviews
                 </Link>
               </div>
@@ -123,6 +125,7 @@ export default function Home() {
               {course.is_user_enrolled ? (
                 <>
                   <Button
+                    className="bg-blue-600 hover:bg-blue-500 text-white"
                     onClick={() => {
                       navigate(`/video/${course.id}`);
                     }}
@@ -150,6 +153,7 @@ export default function Home() {
           </div>
         </div>
       ))}
+        </div>
     </section>
   );
 }
