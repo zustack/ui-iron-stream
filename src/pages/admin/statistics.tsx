@@ -1,12 +1,17 @@
 import CoursesStats from "@/components/admin/stats/courses";
 import UsersStats from "@/components/admin/stats/users";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Statistics() {
-
   return (
-    <section className="p-[10px] flex flex-col gap-[10px]">
+    <ScrollArea
+      className="flex flex-col gap-[10px] h-full
+    max-h-[calc(100vh)] w-full p-[10px]"
+    >
+      <div className="flex flex-col gap-[10px]">
       <UsersStats />
       <CoursesStats />
-    </section>
+      </div>
+    </ScrollArea>
   );
 }

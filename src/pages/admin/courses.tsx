@@ -219,19 +219,19 @@ export default function AdminCourses() {
           <TableCaption>
             {data == null && !isFetching && (
               <div className="h-[100px] flex justify-center items-center">
-                No courses found
+                No courses found.
               </div>
             )}
 
             {isFetching && (
               <div className="h-[100px] flex justify-center items-center">
-                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                <Spinner />
               </div>
             )}
 
             {isError && (
               <div className="h-[100px] flex justify-center items-center">
-                <span>An unexpected error occurred: {error.message}</span>
+                <span>An unexpected error occurred.</span>
               </div>
             )}
           </TableCaption>
@@ -302,7 +302,7 @@ export default function AdminCourses() {
                           <>{course.description}</>
                         )}
                       </TooltipTrigger>
-                      <TooltipContent className="w-[400px]">
+                      <TooltipContent className="w-full">
                         <p>{course.description}</p>
                       </TooltipContent>
                     </Tooltip>

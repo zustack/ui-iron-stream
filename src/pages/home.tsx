@@ -4,7 +4,6 @@ import { useAuthStore } from "@/store/auth";
 import { useQuery } from "@tanstack/react-query";
 import {
   ChevronRight,
-  Loader,
   Search,
   Video,
   Lock,
@@ -14,7 +13,6 @@ import { Course } from "@/types";
 import StarIcon from "@mui/icons-material/Star";
 import { Rating } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import LoadImage from "@/components/load-image";
 import Spinner from "@/components/ui/spinner";
@@ -25,7 +23,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { userId } = useAuthStore();
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["home-courses", debouncedSearchTerm],
     queryFn: () => userCourses(debouncedSearchTerm, userId),
   });
@@ -89,13 +87,10 @@ export default function Home() {
               <h1 className="bold max-w-2xl text-4xl font-bold tracking-tight leading-none text-zinc-200 mb-6">
                 {course.title}
               </h1>
-
               <p className="max-w-2xl text-zinc-200 mb-4">{course.author}</p>
-
               <p className="max-w-2xl text-zinc-200 mb-4">
                 {course.description}
               </p>
-
               <div className="flex gap-2 mb-6">
                 <Rating
                   name="text-feedback"

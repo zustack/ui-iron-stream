@@ -8,13 +8,13 @@ import {
   Home as H,
   Handshake,
   ListVideo,
-  Loader,
   LogOut,
   Star,
   User,
 } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import Spinner from "../ui/spinner";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -46,9 +46,7 @@ export default function Sidebar() {
     <div className="hidden bg-muted/40 md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-          <button
-            className="flex bold gap-1 text-2xl text-foreground transition-colors hover:text-white"
-          >
+          <button className="flex bold gap-1 text-2xl text-foreground transition-colors hover:text-white">
             <span>Iron</span>
             <span>Stream</span>
           </button>
@@ -69,9 +67,7 @@ export default function Sidebar() {
               <span className={data?.user_n > 0 ? `text-indigo-400` : ``}>
                 Users
               </span>
-              {isLoading && (
-                <Loader className="ml-auto h-4 w-4 text-zinc-200 animate-spin slower" />
-              )}
+              {isLoading && <Spinner />}
               {data?.user_n > 0 && (
                 <span className="ml-auto text-indigo-400">{data?.user_n}</span>
               )}
@@ -94,9 +90,7 @@ export default function Sidebar() {
               <span className={data?.review_n > 0 ? `text-indigo-400` : ``}>
                 Reviews
               </span>
-              {isLoading && (
-                <Loader className="ml-auto h-4 w-4 text-zinc-200 animate-spin slower" />
-              )}
+              {isLoading && <Spinner />}
               {data?.review_n > 0 && (
                 <span className="ml-auto text-indigo-400">
                   {data?.review_n}
@@ -117,12 +111,9 @@ export default function Sidebar() {
               Privacy Policy
             </Link>
 
-            <Link
-              to="/admin/log"
-              className={getLinkClass("/admin/log")}
-            >
+            <Link to="/admin/log" className={getLinkClass("/admin/log")}>
               <GalleryVerticalEnd className="h-4 w-4" />
-                Logs
+              Logs
             </Link>
 
             <Link
@@ -130,7 +121,7 @@ export default function Sidebar() {
               className={getLinkClass("/admin/statistics")}
             >
               <ChartNoAxesCombined className="h-4 w-4" />
-                Statistics
+              Statistics
             </Link>
           </nav>
         </div>
@@ -143,14 +134,14 @@ export default function Sidebar() {
             }}
             className={getLinkClass("/")}
           >
-            <LogOut className="h-4 w-4"/>
+            <LogOut className="h-4 w-4" />
             Logout
           </button>
           <p
             className="text-sm text-muted-foreground flex items-center 
           gap-3 rounded-lg px-3 py-2"
           >
-            Version 4.2.0
+            Version 0.0.1
           </p>
         </div>
       </div>

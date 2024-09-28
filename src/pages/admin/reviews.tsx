@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState, ChangeEvent } from "react";
-import CreateCourse from "@/components/admin/courses/create-course";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Tooltip,
@@ -32,11 +31,11 @@ import {
 import toast from "react-hot-toast";
 import { ErrorResponse } from "@/types";
 import { adminReviews, updatePublicStatus } from "@/api/reviews";
-
 import StarIcon from "@mui/icons-material/Star";
 import { Rating } from "@mui/material";
 import DeleteReview from "@/components/admin/delete-review";
 import { deleteNotifications } from "@/api/notifications";
+import Spinner from "@/components/ui/spinner";
 
 export default function AdminReviews() {
   const [activeUpdateStatusId, setActiveUpdateStatusId] = useState(0);
@@ -113,7 +112,7 @@ export default function AdminReviews() {
                 value={searchInput}
                 onChange={handleInputChange}
                 type="search"
-                placeholder="Search reviews"
+                placeholder="Search"
                 className="pl-8 w-[450px]"
               />
             </div>
@@ -122,12 +121,12 @@ export default function AdminReviews() {
 
         <div className="ml-auto flex items-center gap-2">
           <p className="text-sm text-muted-foreground">
-          {data != null && !isFetching && (
-            <span>
-              {data?.length}{" "}
-              {data?.length === 1 ? " review found." : " reviews found."}
-            </span>
-          )}
+            {data != null && !isFetching && (
+              <span>
+                {data?.length}{" "}
+                {data?.length === 1 ? " review found." : " reviews found."}
+              </span>
+            )}
           </p>
 
           {isNotification != null && (
@@ -152,68 +151,68 @@ export default function AdminReviews() {
             </Button>
           )}
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <ListFilter className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Filter
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem
-                asChild={false}
-                onSelect={(event) => {
-                  event.preventDefault();
-                }}
-                onClick={() => {
-                  if (active === "true") {
-                    setActive("");
-                    return;
-                  }
-                  setActive("true");
-                }}
-                checked={active === "true"}
-              >
-                Public
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                asChild={false}
-                onSelect={(event) => {
-                  event.preventDefault();
-                }}
-                onClick={() => {
-                  if (active === "false") {
-                    setActive("");
-                    return;
-                  }
-                  setActive("false");
-                }}
-                checked={active === "false"}
-              >
-                Private
-              </DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <CreateCourse />
+          {data != null && !isFetching && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-1">
+                  <ListFilter className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Filter
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  asChild={false}
+                  onSelect={(event) => {
+                    event.preventDefault();
+                  }}
+                  onClick={() => {
+                    if (active === "true") {
+                      setActive("");
+                      return;
+                    }
+                    setActive("true");
+                  }}
+                  checked={active === "true"}
+                >
+                  Public
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  asChild={false}
+                  onSelect={(event) => {
+                    event.preventDefault();
+                  }}
+                  onClick={() => {
+                    if (active === "false") {
+                      setActive("");
+                      return;
+                    }
+                    setActive("false");
+                  }}
+                  checked={active === "false"}
+                >
+                  Private
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
       <ScrollArea className="h-full max-h-[calc(100vh-10px-60px)] w-full p-[10px]">
         <Table>
           <TableCaption>
-
-          {data == null && !isFetching && (
+            {data == null && !isFetching && (
               <div className="h-[100px] flex justify-center items-center">
-                No reviews found
+                No reviews found.
               </div>
             )}
 
             {isFetching && (
               <div className="h-[100px] flex justify-center items-center">
-                <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+                <Spinner />
               </div>
             )}
 

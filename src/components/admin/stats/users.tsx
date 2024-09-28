@@ -13,7 +13,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Calendar as CalendarIcon, Loader } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { useQuery } from "@tanstack/react-query";
 import { getUserStats } from "@/api/stats";
+import Spinner from "@/components/ui/spinner";
 
 export const description = "Users statistics";
 
@@ -170,7 +171,7 @@ export default function UsersStats() {
       <CardContent className="px-2 sm:p-6">
         {isLoading && (
           <div className="h-[100px] flex justify-center items-center">
-            <Loader className="h-6 w-6 text-zinc-200 animate-spin slower" />
+            <Spinner />
           </div>
         )}
 
