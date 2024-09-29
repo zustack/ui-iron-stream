@@ -57,7 +57,7 @@ export const updatePassword = async (password: string) => {
 };
 
 export const deleteAccountByEmail = async (email: string) => {
-  const response = await noAuthAxios.delete(
+  const response = await authAxios.delete(
     `/users/delete/account/by/email/${email}`
   );
   return response.data;

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/input-otp";
 import { useMutation } from "@tanstack/react-query";
 import { ErrorResponse } from "@/types";
-import { deleteAccountByEmail, resendEmail, verifyAccount } from "@/api/users";
+import { resendEmail, verifyAccount } from "@/api/users";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/auth";
 import Logo from "../../assets/logo.png";
@@ -49,18 +49,6 @@ export default function EmailVerification({
     mutationFn: () => resendEmail(email),
     onSuccess: () => {
       toast.success("New code sent to " + email);
-    },
-    onError: (error: ErrorResponse) => {
-      toast.error(
-        error.response?.data?.error || "An unexpected error occurred."
-      );
-    },
-  });
-
-  const deleteAccountByEmailMutation = useMutation({
-    mutationFn: () => deleteAccountByEmail(email),
-    onSuccess: () => {
-      close();
     },
     onError: (error: ErrorResponse) => {
       toast.error(
@@ -138,18 +126,14 @@ export default function EmailVerification({
 
           <div className="flex justify-center gap-1 text-center">
             <p>Wrong email? </p>
-            {deleteAccountByEmailMutation.isPending ? (
-              <Spinner />
-            ) : (
             <p
-              onClick={() => deleteAccountByEmailMutation.mutate()}
+              onClick={() => close()}
                 className={`${verifyEmailMutation.isPending ? 
                   "cursor-not-allowed" : "cursor-pointer hover:text-blue-500"}
                 underline text-blue-600`}
             >
               Change it
             </p>
-            )}
           </div>
         </div>
       </div>

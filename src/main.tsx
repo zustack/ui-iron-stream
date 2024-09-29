@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
 const queryClient = new QueryClient();
-const loadingSpinner = document.getElementById("loading-spinner");
+const loadingSpinner = document.getElementById("spinner-start");
 
 if (loadingSpinner) {
   loadingSpinner.style.display = "none";
