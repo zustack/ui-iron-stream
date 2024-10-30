@@ -48,12 +48,10 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}          
 
         with:
           tagName: ${{ github.ref_name }} 
-          releaseName: 'Help Fadu v__VERSION__' 
+          releaseName: 'Iron Stream v__VERSION__' 
           releaseBody: 'See the assets to download and install this version.'
           releaseDraft: false
           prerelease: false
