@@ -24,7 +24,6 @@ import { adminVideos, updateSReview } from "@/api/videos";
 import CreateVideo from "@/components/admin/videos/create-video";
 import UpdateVideo from "@/components/admin/videos/update-video";
 import DeleteVideo from "@/components/admin/videos/delete-video";
-import { WebviewWindow } from "@tauri-apps/api/window";
 import VideoDialog from "@/components/admin/video-dialog";
 import { Video, ErrorResponse } from "@/types";
 import ImageDialog from "@/components/admin/image-dialog";

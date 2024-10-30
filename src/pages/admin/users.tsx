@@ -81,7 +81,6 @@ export default function AdminUsers() {
   const {
     status,
     data,
-    error,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,

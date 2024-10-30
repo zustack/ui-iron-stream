@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, ChevronsUpDown, Loader, PlusCircle } from "lucide-react";
 import { useState } from "react";
@@ -17,12 +16,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { createPolicy } from "@/api/policy";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";

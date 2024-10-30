@@ -1,11 +1,6 @@
-import {
-  deactivateAllCourses,
-  deactivateCourseForAllUsers,
-  updateActiveStatusAllUser,
-} from "@/api/users";
+import { updateActiveStatusAllUser } from "@/api/users";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -252,7 +247,7 @@ const DeactivateAllCourses = () => {
 const DeactivateIndividualCourses = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [confirmId, setConfirmId] = useState(0);
-  const [title, setTitle] = useState("")
+  const [title, setTitle] = useState("");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["deactivate-individual-courses"],
@@ -261,14 +256,15 @@ const DeactivateIndividualCourses = () => {
   });
 
   const createAdminLogMutation = useMutation({
-    mutationFn: () => createAdminLog(`The course ${title} has deactivated to all users.`, "3"),
+    mutationFn: () =>
+      createAdminLog(`The course ${title} has deactivated to all users.`, "3"),
   });
 
   const deleteUserCourseByCourseIdMutation = useMutation({
     mutationFn: () => deleteUserCourseByCourseId(confirmId),
     onSuccess: () => {
       setConfirmId(0);
-      createAdminLogMutation.mutate()
+      createAdminLogMutation.mutate();
     },
     onError: (error: ErrorResponse) => {
       if (error.response.data.error === "") {
@@ -353,7 +349,7 @@ const DeactivateIndividualCourses = () => {
                                     deleteUserCourseByCourseIdMutation.isPending
                                   }
                                   onClick={() => {
-                                    setTitle(course.title)
+                                    setTitle(course.title);
                                     deleteUserCourseByCourseIdMutation.mutate();
                                   }}
                                   variant="destructive"

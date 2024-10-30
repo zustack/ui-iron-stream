@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorResponse } from "@/types";
@@ -45,9 +45,8 @@ export default function UserApps({ userId, email, name, surname }: Props) {
 
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["user-apps-admin", userId],
-    // is "" because we dont want to search a app here! or do we?
     queryFn: () => getUserApps(userId),
     enabled: isOpen,
   });

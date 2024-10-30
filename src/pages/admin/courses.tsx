@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ListFilter, Loader, Search, VideoIcon } from "lucide-react";
+import { ListFilter, Search, VideoIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -84,7 +84,7 @@ export default function AdminCourses() {
     });
   };
 
-  const { data, isFetching, isError, error } = useQuery({
+  const { data, isFetching, isError } = useQuery({
     queryKey: ["admin-courses", debouncedSearchTerm, active],
     queryFn: () => adminCourses(debouncedSearchTerm, active),
   });
